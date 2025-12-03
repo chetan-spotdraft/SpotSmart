@@ -2654,11 +2654,18 @@
                 clearInterval(progressInterval);
                 console.error('Error:', error);
                 
-                updateLoadingProgress(0, 'Error occurred. Loading fallback results...');
+                // Hide loading screen
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) loadingScreen.classList.remove('active');
                 
+                // Show error message and allow user to retry
+                updateLoadingProgress(0, 'Error occurred');
                 setTimeout(() => {
-                    displayMockResults();
-                }, 1000);
+                    alert('Failed to submit assessment: ' + error.message + '\n\nPlease check your connection and try again.');
+                    // Return to form (show section 8)
+                    const section8 = document.getElementById('section8');
+                    if (section8) section8.classList.add('active');
+                }, 500);
             }
         }
         
@@ -3093,11 +3100,18 @@
                 clearInterval(progressInterval);
                 console.error('Error:', error);
                 
-                updateLoadingProgress(0, 'Error occurred. Loading fallback results...');
+                // Hide loading screen
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) loadingScreen.classList.remove('active');
                 
+                // Show error message and allow user to retry
+                updateLoadingProgress(0, 'Error occurred');
                 setTimeout(() => {
-                    displayMockResults();
-                }, 1000);
+                    alert('Failed to submit assessment: ' + error.message + '\n\nPlease check your connection and try again.');
+                    // Return to form (show section 8)
+                    const section8 = document.getElementById('section8');
+                    if (section8) section8.classList.add('active');
+                }, 500);
             }
         }
         
