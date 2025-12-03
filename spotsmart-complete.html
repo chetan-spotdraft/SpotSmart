@@ -2675,12 +2675,39 @@
             `).join('');
             document.getElementById('scoreBreakdown').innerHTML = breakdownHtml;
             
-            const flagsHtml = data.red_flags.map(flag => `
+            // Map section variable names to human-readable names
+            const sectionNameMap = {
+                'account_stakeholder': 'Account & Stakeholder',
+                'order_form_scope': 'Order Form Scope',
+                'template_readiness': 'Template Readiness',
+                'migration_readiness': 'Migration Readiness',
+                'integration_readiness': 'Integration Readiness',
+                'business_process': 'Business Process',
+                'security_compliance': 'Security & Compliance',
+                'uploads': 'Uploads',
+                'Security & Compliance': 'Security & Compliance',
+                'Template Readiness': 'Template Readiness',
+                'Integration Readiness': 'Integration Readiness',
+                'Migration Readiness': 'Migration Readiness',
+                'Account & Stakeholder': 'Account & Stakeholder',
+                'Order Form Scope': 'Order Form Scope',
+                'Business Process': 'Business Process',
+                'Uploads': 'Uploads'
+            };
+            
+            const getSectionName = (section) => {
+                return sectionNameMap[section] || section.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            };
+            
+            const flagsHtml = data.red_flags.map(flag => {
+                const sectionName = getSectionName(flag.section);
+                return `
                 <div class="red-flag-item ${flag.severity === 'medium' ? 'warning' : ''}">
                     <div class="red-flag-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-                    <div class="red-flag-content"><div class="red-flag-title">${flag.section}: ${flag.issue}</div><div class="red-flag-desc">${flag.impact}</div></div>
+                    <div class="red-flag-content"><div class="red-flag-title">${sectionName}: ${flag.issue}</div><div class="red-flag-desc">${flag.impact}</div></div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
             document.getElementById('redFlagsList').innerHTML = flagsHtml || '<p style="color: var(--gray-500);">No critical red flags detected.</p>';
             
             const renderAction = item => `
