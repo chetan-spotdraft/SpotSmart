@@ -1,0 +1,1228 @@
+const express = require('express');
+const cors = require('cors');
+const multer = require('multer');
+const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
+const fs = require('fs').promises;
+const path = require('path');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+require('dotenv').config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Favicon handler (prevent 404 errors) - must be before static middleware
+app.get('/favicon.ico', (req, res) => {
+    res.status(204).end(); // No Content - prevents 404 error
+});
+
+// Serve static files (HTML, CSS, JS) from the root directory
+app.use(express.static(__dirname));
+
+// Serve the main HTML file at root
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'spotsmart-complete.html'));
+});
+
+// Initialize Gemini AI
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+let genAI = null;
+let geminiModel = null;
+
+// Initialize Gemini AI (async initialization)
+async function initializeGemini() {
+    if (GEMINI_API_KEY) {
+        try {
+            genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+            
+            // Use available models - optimized for accuracy and performance
+            // Try these in order of preference (best accuracy first, then performance)
+            const modelNames = [
+                'gemini-2.5-pro',        // Best accuracy - latest pro model with advanced reasoning
+                'gemini-pro-latest',     // Latest stable pro model - excellent accuracy
+                'gemini-2.5-flash',      // Fast and accurate - good balance
+                'gemini-2.0-flash',      // Alternative flash model
+                'gemini-pro'             // Fallback
+            ];
+            let modelInitialized = false;
+            let lastError = null;
+            
+            for (const modelName of modelNames) {
+                try {
+                    geminiModel = genAI.getGenerativeModel({ model: modelName });
+                    // Test with a simple request (just 1 token to verify it works)
+                    const testResult = await geminiModel.generateContent('Hi');
+                    await testResult.response;
+                    console.log(`✅ Gemini AI initialized successfully (using ${modelName})`);
+                    modelInitialized = true;
+                    break;
+                } catch (modelError) {
+                    lastError = modelError;
+                    // Try next model
+                    continue;
+                }
+            }
+            
+            if (!modelInitialized) {
+                console.warn(`   Tried models: ${modelNames.join(', ')}`);
+                throw new Error(`None of the Gemini models are available. Last error: ${lastError?.message || 'Unknown'}`);
+            }
+        } catch (error) {
+            console.warn('⚠️  Failed to initialize Gemini AI:', error.message);
+            console.warn('   Falling back to pattern matching extraction');
+            geminiModel = null;
+        }
+    } else {
+        console.warn('⚠️  GEMINI_API_KEY not found in environment variables');
+        console.warn('   Using pattern matching extraction (add GEMINI_API_KEY to .env for AI-powered extraction)');
+    }
+}
+
+// Initialize Gemini on startup (don't block server startup)
+initializeGemini().catch(err => {
+    console.error('Error initializing Gemini:', err);
+});
+
+// Middleware
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Configure multer for file uploads
+const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
+
+// ============================================
+// API 1: Parse Order Form
+// ============================================
+app.post('/parse-order-form', upload.single('file'), async (req, res) => {
+    try {
+        // Handle both file upload and base64 content
+        let fileBuffer;
+        let fileName;
+        let fileType;
+
+        if (req.file) {
+            // Direct file upload
+            fileBuffer = req.file.buffer;
+            fileName = req.file.originalname;
+            fileType = req.file.mimetype;
+        } else if (req.body.file) {
+            // Base64 encoded file
+            const fileData = req.body.file;
+            fileName = fileData.name || 'order-form.pdf';
+            fileType = fileData.type || 'application/pdf';
+            fileBuffer = Buffer.from(fileData.content, 'base64');
+        } else {
+            return res.status(400).json({
+                success: false,
+                error: 'No file provided. Please upload a file or provide base64 content.'
+            });
+        }
+
+        // Validate file type
+        const validTypes = [
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword'
+        ];
+
+        if (!validTypes.includes(fileType) && !fileName.match(/\.(pdf|docx|doc)$/i)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid file type. Please upload a PDF or DOCX file.'
+            });
+        }
+
+        // Parse file content
+        let textContent = '';
+        
+        try {
+            if (fileType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
+                // Parse PDF
+                console.log('Parsing PDF file...');
+                const pdfData = await pdfParse(fileBuffer);
+                textContent = pdfData.text;
+                console.log(`Extracted ${textContent.length} characters from PDF`);
+            } else if (fileType.includes('wordprocessingml') || fileName.toLowerCase().endsWith('.docx')) {
+                // Parse DOCX
+                console.log('Parsing DOCX file...');
+                const result = await mammoth.extractRawText({ buffer: fileBuffer });
+                textContent = result.value;
+                console.log(`Extracted ${textContent.length} characters from DOCX`);
+            } else {
+                // Try to parse as DOCX anyway
+                console.log('Attempting to parse as DOCX...');
+                const result = await mammoth.extractRawText({ buffer: fileBuffer });
+                textContent = result.value;
+                console.log(`Extracted ${textContent.length} characters`);
+            }
+            
+            if (!textContent || textContent.trim().length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Could not extract text from the document. The file might be empty, corrupted, or image-based (scanned PDF).'
+                });
+            }
+        } catch (parseError) {
+            console.error('Error parsing file:', parseError);
+            return res.status(400).json({
+                success: false,
+                error: `Failed to parse document: ${parseError.message}. Please ensure it is a valid PDF or DOCX file.`
+            });
+        }
+
+        // Extract data from order form
+        // Use Gemini AI if available, otherwise fall back to pattern matching
+        let extractedData;
+        let confidence;
+        
+        // Ensure Gemini is initialized before using it
+        if (GEMINI_API_KEY && !geminiModel) {
+            console.log('Gemini not initialized yet, initializing now...');
+            await initializeGemini();
+        }
+        
+        if (geminiModel) {
+            try {
+                console.log('Attempting Gemini AI extraction...');
+                extractedData = await extractOrderFormDataWithGemini(textContent, fileBuffer, fileType);
+                confidence = 0.90; // High confidence for AI extraction
+                console.log('✅ Gemini extraction successful');
+            } catch (error) {
+                console.error('Gemini extraction failed, falling back to pattern matching:', error.message);
+                console.error('Error details:', error);
+                extractedData = extractOrderFormData(textContent);
+                confidence = calculateConfidence(extractedData, textContent);
+            }
+        } else {
+            console.log('Using pattern matching extraction (Gemini not available)');
+            extractedData = extractOrderFormData(textContent);
+            confidence = calculateConfidence(extractedData, textContent);
+        }
+        
+        const flags = generateFlags(extractedData, confidence);
+
+        res.json({
+            success: true,
+            extracted_data: extractedData,
+            confidence: confidence,
+            flags: flags
+        });
+
+    } catch (error) {
+        console.error('Error parsing order form:', error);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to parse order form. Please try again or fill in the details manually.'
+        });
+    }
+});
+
+// ============================================
+// API 2: Assess Readiness
+// ============================================
+app.post('/assess', async (req, res) => {
+    try {
+        const { intake_responses } = req.body;
+
+        if (!intake_responses) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing intake_responses in request body'
+            });
+        }
+
+        // Use Gemini to calculate readiness scores and generate all assessment data
+        let readinessScore = null;
+        let redFlags = [];
+        let actionItems = { customer: [], spotdraft: [] };
+        let implementationPlan = null;
+        let aiInsights = null;
+        let geminiRequest = null;
+        let geminiResponse = null;
+        let statusLabel = 'Calculating...';
+        let statusDescription = 'Analyzing your responses...';
+
+        if (!geminiModel) {
+            return res.status(500).json({
+                success: false,
+                error: 'Gemini AI is required for assessment calculation. Please ensure GEMINI_API_KEY is configured.'
+            });
+        }
+
+        try {
+            const assessmentResult = await calculateReadinessWithGemini(intake_responses);
+            readinessScore = assessmentResult.readiness_score;
+            redFlags = assessmentResult.red_flags;
+            actionItems = assessmentResult.action_items;
+            implementationPlan = assessmentResult.implementation_plan;
+            aiInsights = assessmentResult.ai_insights;
+            statusLabel = assessmentResult.status_label;
+            statusDescription = assessmentResult.status_description;
+            geminiRequest = assessmentResult.gemini_request;
+            geminiResponse = assessmentResult.gemini_response;
+            console.log('Gemini assessment completed successfully');
+        } catch (error) {
+            console.error('Error calculating assessment with Gemini:', error);
+            return res.status(500).json({
+                success: false,
+                error: `Failed to calculate assessment: ${error.message}`,
+                gemini_request: geminiRequest || 'Error: Failed to generate prompt',
+                gemini_response: geminiResponse || `Error: ${error.message}`
+            });
+        }
+
+        const responseData = {
+            readiness_score: readinessScore,
+            status_label: statusLabel,
+            status_description: statusDescription,
+            red_flags: redFlags,
+            action_items: actionItems,
+            implementation_plan: implementationPlan,
+            ai_insights: aiInsights,
+            gemini_request: geminiRequest,
+            gemini_response: geminiResponse
+        };
+        
+        console.log('Assessment response prepared:', {
+            overall_score: readinessScore?.overall,
+            red_flags_count: redFlags?.length || 0,
+            has_gemini_request: !!geminiRequest,
+            has_gemini_response: !!geminiResponse,
+            request_length: geminiRequest?.length || 0,
+            response_length: geminiResponse?.length || 0
+        });
+        
+        res.json({
+            success: true,
+            data: responseData
+        });
+
+    } catch (error) {
+        console.error('Error assessing readiness:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to assess readiness. Please try again.'
+        });
+    }
+});
+
+// ============================================
+// Helper Functions: Order Form Parsing
+// ============================================
+
+/**
+ * Extract order form data using Google Gemini AI
+ */
+async function extractOrderFormDataWithGemini(textContent, fileBuffer, fileType) {
+    // Ensure we have a working model - reinitialize if needed with a known working model
+    if (!geminiModel || !genAI) {
+        if (!GEMINI_API_KEY) {
+            throw new Error('Gemini API key not configured');
+        }
+        if (!genAI) {
+            genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+        }
+        // Always use gemini-2.5-flash which we know works
+        geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        console.log('Reinitialized Gemini model with gemini-2.5-flash');
+    }
+
+    const prompt = `You are an expert at extracting structured data from order forms and contracts. 
+Analyze the following document text and extract the following information in JSON format:
+
+{
+    "organisation_name": "extract the company/organization name",
+    "purchased_modules": ["list of modules like Template Setup, Migration, Integrations"],
+    "template_count": number or null,
+    "migration_contract_count": number or null,
+    "integration_systems": ["list of systems like Salesforce, HubSpot, DocuSign, etc."]
+}
+
+Rules:
+- Only extract information that is explicitly stated in the document
+- If information is not found, use null for numbers and empty array for lists
+- For organisation_name, extract the full company name
+- For purchased_modules, look for mentions of: Template Setup, Migration, Integrations, or similar module names
+- For template_count, look for numbers associated with templates
+- For migration_contract_count, look for numbers of contracts to be migrated
+- For integration_systems, identify any third-party systems mentioned (Salesforce, HubSpot, DocuSign, SSO, Jira, Google Forms, Cloud Storage, etc.)
+
+Document text:
+${textContent}
+
+Return ONLY valid JSON, no additional text or explanation.`;
+
+    try {
+        // Ensure we have a valid model - if not, try to get one
+        if (!geminiModel && genAI) {
+            geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        }
+        
+        const result = await geminiModel.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        // Extract JSON from response (handle markdown code blocks if present)
+        let jsonText = text.trim();
+        if (jsonText.startsWith('```json')) {
+            jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        } else if (jsonText.startsWith('```')) {
+            jsonText = jsonText.replace(/```\n?/g, '').trim();
+        }
+        
+        const extractedData = JSON.parse(jsonText);
+        
+        // Validate and normalize the data
+        return {
+            organisation_name: extractedData.organisation_name || '',
+            purchased_modules: Array.isArray(extractedData.purchased_modules) ? extractedData.purchased_modules : [],
+            template_count: extractedData.template_count ? parseInt(extractedData.template_count) : null,
+            migration_contract_count: extractedData.migration_contract_count ? parseInt(extractedData.migration_contract_count) : null,
+            integration_systems: Array.isArray(extractedData.integration_systems) ? extractedData.integration_systems : []
+        };
+    } catch (error) {
+        console.error('Error in Gemini extraction:', error);
+        // If it's a model error, try to reinitialize
+        if (error.message && error.message.includes('not found')) {
+            console.log('Attempting to reinitialize with gemini-2.5-flash...');
+            if (genAI) {
+                try {
+                    geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+                    // Retry once
+                    const result = await geminiModel.generateContent(prompt);
+                    const response = await result.response;
+                    const text = response.text();
+                    let jsonText = text.trim();
+                    if (jsonText.startsWith('```json')) {
+                        jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                    } else if (jsonText.startsWith('```')) {
+                        jsonText = jsonText.replace(/```\n?/g, '').trim();
+                    }
+                    const extractedData = JSON.parse(jsonText);
+                    return {
+                        organisation_name: extractedData.organisation_name || '',
+                        purchased_modules: Array.isArray(extractedData.purchased_modules) ? extractedData.purchased_modules : [],
+                        template_count: extractedData.template_count ? parseInt(extractedData.template_count) : null,
+                        migration_contract_count: extractedData.migration_contract_count ? parseInt(extractedData.migration_contract_count) : null,
+                        integration_systems: Array.isArray(extractedData.integration_systems) ? extractedData.integration_systems : []
+                    };
+                } catch (retryError) {
+                    throw error; // Throw original error
+                }
+            }
+        }
+        throw error;
+    }
+}
+
+function extractOrderFormData(text) {
+    const data = {
+        organisation_name: '',
+        purchased_modules: [],
+        template_count: null,
+        migration_contract_count: null,
+        integration_systems: []
+    };
+
+    // Extract organization name (look for common patterns)
+    const orgPatterns = [
+        /(?:company|organization|organisation|client|customer)[\s:]+([A-Z][A-Za-z\s&]+)/i,
+        /(?:name|entity)[\s:]+([A-Z][A-Za-z\s&]+)/i
+    ];
+    
+    for (const pattern of orgPatterns) {
+        const match = text.match(pattern);
+        if (match && match[1]) {
+            data.organisation_name = match[1].trim();
+            break;
+        }
+    }
+
+    // Extract modules (look for module names)
+    const moduleKeywords = {
+        'Template Setup': ['template', 'template setup', 'template configuration'],
+        'Migration': ['migration', 'data migration', 'contract migration', 'historical'],
+        'Integrations': ['integration', 'integrate', 'api', 'webhook', 'connect']
+    };
+
+    for (const [module, keywords] of Object.entries(moduleKeywords)) {
+        for (const keyword of keywords) {
+            if (text.toLowerCase().includes(keyword.toLowerCase())) {
+                if (!data.purchased_modules.includes(module)) {
+                    data.purchased_modules.push(module);
+                }
+                break;
+            }
+        }
+    }
+
+    // Extract template count
+    const templateMatch = text.match(/(?:template|templates)[\s:]+(?:count|number|quantity|qty)[\s:]*(\d+)/i);
+    if (templateMatch) {
+        data.template_count = parseInt(templateMatch[1]);
+    } else {
+        // Look for standalone numbers near "template"
+        const templateNumMatch = text.match(/(\d+)[\s]*(?:template|templates)/i);
+        if (templateNumMatch) {
+            data.template_count = parseInt(templateNumMatch[1]);
+        }
+    }
+
+    // Extract migration contract count
+    const migrationMatch = text.match(/(?:migration|migrate|contracts?)[\s:]+(?:count|number|quantity|qty|of)[\s:]*(\d+)/i);
+    if (migrationMatch) {
+        data.migration_contract_count = parseInt(migrationMatch[1]);
+    } else {
+        const contractNumMatch = text.match(/(\d+)[\s]*(?:contracts?|documents?)[\s]*(?:to|for)[\s]*(?:migrate|migration)/i);
+        if (contractNumMatch) {
+            data.migration_contract_count = parseInt(contractNumMatch[1]);
+        }
+    }
+
+    // Extract integration systems
+    const integrationSystems = ['Salesforce', 'HubSpot', 'DocuSign', 'SSO', 'Jira', 'Google Forms', 'Cloud Storage'];
+    for (const system of integrationSystems) {
+        if (text.toLowerCase().includes(system.toLowerCase())) {
+            data.integration_systems.push(system);
+        }
+    }
+
+    return data;
+}
+
+function calculateConfidence(extractedData, textContent) {
+    let confidence = 0.5; // Base confidence
+
+    // Increase confidence based on extracted data
+    if (extractedData.organisation_name) confidence += 0.1;
+    if (extractedData.purchased_modules.length > 0) confidence += 0.15;
+    if (extractedData.template_count) confidence += 0.1;
+    if (extractedData.migration_contract_count) confidence += 0.1;
+    if (extractedData.integration_systems.length > 0) confidence += 0.05;
+
+    // Adjust based on text length (more content = potentially more reliable)
+    if (textContent.length > 1000) confidence += 0.05;
+    if (textContent.length < 200) confidence -= 0.1;
+
+    return Math.min(0.98, Math.max(0.3, confidence));
+}
+
+function generateFlags(extractedData, confidence) {
+    const flags = [];
+
+    if (confidence < 0.7) {
+        flags.push({
+            type: 'warning',
+            message: 'Low confidence in extracted data. Please verify the information below.'
+        });
+    }
+
+    if (!extractedData.organisation_name) {
+        flags.push({
+            type: 'info',
+            message: 'Organization name not found. Please enter manually.'
+        });
+    }
+
+    if (extractedData.purchased_modules.length === 0) {
+        flags.push({
+            type: 'warning',
+            message: 'No modules detected. Please select modules manually.'
+        });
+    }
+
+    if (extractedData.template_count === null && extractedData.purchased_modules.includes('Template Setup')) {
+        flags.push({
+            type: 'warning',
+            message: 'Template count not explicitly stated, estimated from context'
+        });
+    }
+
+    return flags;
+}
+
+// ============================================
+// Helper Functions: Readiness Assessment
+// ============================================
+
+function calculateReadinessScore(responses) {
+    const scores = {
+        account_stakeholder: 0,
+        order_form_scope: 0,
+        template_readiness: 0,
+        migration_readiness: 0,
+        integration_readiness: 0,
+        business_process: 0,
+        security_compliance: 0
+    };
+
+    // Section 1: Account & Stakeholder (max 100)
+    const s1 = responses.section_1_account_stakeholder;
+    if (s1.organisation_name) scores.account_stakeholder += 20;
+    if (s1.primary_poc?.name && s1.primary_poc?.email) scores.account_stakeholder += 20;
+    if (s1.legal_poc?.name && s1.legal_poc?.email) scores.account_stakeholder += 15;
+    if (s1.technical_poc?.name && s1.technical_poc?.email) scores.account_stakeholder += 10;
+    if (s1.availability) scores.account_stakeholder += 10;
+    if (s1.communication_channels?.length > 0) scores.account_stakeholder += 10;
+    if (s1.expected_go_live) scores.account_stakeholder += 15;
+
+    // Section 2: Order Form Scope (max 100)
+    const s2 = responses.section_2_order_form_scope;
+    if (s2.order_form_uploaded) scores.order_form_scope += 30;
+    if (s2.purchased_modules?.length > 0) scores.order_form_scope += 30;
+    if (s2.template_count) scores.order_form_scope += 15;
+    if (s2.migration_contract_count) scores.order_form_scope += 15;
+    if (s2.additional_addons) scores.order_form_scope += 10;
+
+    // Section 3: Template Readiness (max 100)
+    const s3 = responses.section_3_template_readiness;
+    if (s3.templates_finalized === 'Yes') scores.template_readiness += 30;
+    else if (s3.templates_finalized === 'In review') scores.template_readiness += 20;
+    if (s3.template_formats?.length > 0) scores.template_readiness += 15;
+    if (s3.conditional_logic && s3.conditional_logic !== 'None') {
+        if (s3.conditional_logic === 'Simple') scores.template_readiness += 10;
+        else if (s3.conditional_logic === 'Moderate') scores.template_readiness += 5;
+    }
+    if (s3.dynamic_rendering_needed === 'Yes') {
+        if (s3.dynamic_rendering_complexity === 'Simple') scores.template_readiness += 10;
+        else if (s3.dynamic_rendering_complexity === 'Moderate') scores.template_readiness += 5;
+    }
+    if (!s3.clause_level_changes) scores.template_readiness += 10;
+    if (s3.approval_matrices_exist) scores.template_readiness += 10;
+    if (s3.template_count) scores.template_readiness += 10;
+
+    // Section 4: Migration Readiness (max 100)
+    const s4 = responses.section_4_migration_readiness;
+    if (s4.contract_count) scores.migration_readiness += 20;
+    if (s4.contract_types) scores.migration_readiness += 15;
+    if (s4.structured_naming === 'Yes - 100%') scores.migration_readiness += 25;
+    else if (s4.structured_naming === 'Partial') scores.migration_readiness += 15;
+    if (s4.existing_metadata === 'Yes - fully') scores.migration_readiness += 20;
+    else if (s4.existing_metadata === 'Yes - partially') scores.migration_readiness += 10;
+    if (s4.excel_trackers) scores.migration_readiness += 10;
+    if (s4.storage_locations?.length > 0) scores.migration_readiness += 10;
+
+    // Section 5: Integration Readiness (max 100)
+    const s5 = responses.section_5_integration_readiness;
+    if (s5.systems_to_integrate?.length > 0) scores.integration_readiness += 25;
+    if (s5.api_webhook_access) scores.integration_readiness += 20;
+    if (s5.admin_access === 'Yes - all') scores.integration_readiness += 20;
+    else if (s5.admin_access === 'Yes - some') scores.integration_readiness += 10;
+    if (s5.decision_maker?.name && s5.decision_maker?.email) scores.integration_readiness += 15;
+    if (s5.expected_outcomes?.length > 0) scores.integration_readiness += 10;
+    if (s5.security_approval === 'No') scores.integration_readiness += 10;
+
+    // Section 6: Business Process (max 100)
+    const s6 = responses.section_6_business_process;
+    if (s6.approval_workflow === 'Yes - documented') scores.business_process += 30;
+    else if (s6.approval_workflow === 'Yes - informal') scores.business_process += 20;
+    if (s6.contracts_per_month) scores.business_process += 15;
+    if (s6.contract_generators?.length > 0) scores.business_process += 15;
+    if (s6.bottlenecks) scores.business_process += 10;
+    if (s6.phase1_must_haves) scores.business_process += 15;
+    if (s6.workflow_details) scores.business_process += 15;
+
+    // Section 7: Security & Compliance (max 100)
+    const s7 = responses.section_7_security_compliance;
+    if (s7.security_review === 'Completed') scores.security_compliance += 30;
+    else if (s7.security_review === 'No') scores.security_compliance += 20;
+    if (s7.infosec_approvals === 'No') scores.security_compliance += 20;
+    if (s7.data_residency === 'No') scores.security_compliance += 20;
+    if (s7.custom_sso === 'No') scores.security_compliance += 15;
+    if (s7.security_reviews_needed?.length > 0 && s7.security_review === 'Yes') {
+        scores.security_compliance -= 10; // Pending reviews reduce score
+    }
+
+    // Calculate overall score (weighted average)
+    const weights = {
+        account_stakeholder: 0.15,
+        order_form_scope: 0.15,
+        template_readiness: 0.20,
+        migration_readiness: 0.15,
+        integration_readiness: 0.15,
+        business_process: 0.10,
+        security_compliance: 0.10
+    };
+
+    let overall = 0;
+    for (const [key, score] of Object.entries(scores)) {
+        overall += score * weights[key];
+    }
+
+    return {
+        overall: Math.round(overall),
+        breakdown: scores
+    };
+}
+
+function identifyRedFlags(responses) {
+    const flags = [];
+
+    // Security blockers
+    const s7 = responses.section_7_security_compliance;
+    if (s7.security_review === 'Yes' && (!s7.security_reviews_needed || s7.security_reviews_needed.length === 0)) {
+        flags.push({
+            section: 'Security & Compliance',
+            issue: 'Security review required but reviews not specified',
+            impact: 'May delay go-live by 2-4 weeks',
+            severity: 'high'
+        });
+    }
+    if (s7.infosec_approvals === 'Yes' && !s7.infosec_details) {
+        flags.push({
+            section: 'Security & Compliance',
+            issue: 'Infosec approvals pending',
+            impact: 'May delay go-live by 1-3 weeks',
+            severity: 'medium'
+        });
+    }
+
+    // Template readiness
+    const s3 = responses.section_3_template_readiness;
+    if (s3.templates_finalized === 'No') {
+        flags.push({
+            section: 'Template Readiness',
+            issue: 'Templates not finalized',
+            impact: 'Will delay template setup phase by 2-4 weeks',
+            severity: 'high'
+        });
+    }
+    if (s3.conditional_logic === 'Complex' || s3.dynamic_rendering_complexity === 'Complex') {
+        flags.push({
+            section: 'Template Readiness',
+            issue: 'Complex conditional logic or dynamic rendering',
+            impact: 'May require additional development time',
+            severity: 'medium'
+        });
+    }
+
+    // Integration blockers
+    const s5 = responses.section_5_integration_readiness;
+    if (s5.systems_to_integrate?.length > 0 && s5.admin_access === 'No') {
+        flags.push({
+            section: 'Integration Readiness',
+            issue: 'No admin access for required integrations',
+            impact: 'Will block integration setup',
+            severity: 'high'
+        });
+    }
+    if (s5.security_approval === 'Yes' && !s5.decision_maker?.email) {
+        flags.push({
+            section: 'Integration Readiness',
+            issue: 'IT approval needed but decision maker not identified',
+            impact: 'May delay integration setup',
+            severity: 'medium'
+        });
+    }
+
+    // Migration readiness
+    const s4 = responses.section_4_migration_readiness;
+    if (s4.structured_naming === 'None') {
+        flags.push({
+            section: 'Migration Readiness',
+            issue: 'Unstructured contract naming',
+            impact: 'Will increase migration time and complexity',
+            severity: 'medium'
+        });
+    }
+    if (s4.existing_metadata === 'No' && s4.contract_count > 1000) {
+        flags.push({
+            section: 'Migration Readiness',
+            issue: 'Large migration volume without existing metadata',
+            impact: 'Will require significant manual work or AI extraction',
+            severity: 'high'
+        });
+    }
+
+    return flags;
+}
+
+function generateActionItems(responses, redFlags) {
+    const customerActions = [];
+    const spotdraftActions = [];
+
+    // Customer actions based on red flags
+    redFlags.forEach((flag, index) => {
+        if (flag.severity === 'high') {
+            customerActions.push({
+                task: `Address: ${flag.issue}`,
+                section: flag.section,
+                priority: 'high',
+                deadline: 'ASAP',
+                owner: 'Customer Team'
+            });
+        }
+    });
+
+    // Template-related actions
+    const s3 = responses.section_3_template_readiness;
+    if (s3.templates_finalized === 'No') {
+        customerActions.push({
+            task: 'Finalize contract templates',
+            section: 'Template Readiness',
+            priority: 'high',
+            deadline: 'Before template setup phase',
+            owner: 'Legal Team'
+        });
+    }
+
+    // Security-related actions
+    const s7 = responses.section_7_security_compliance;
+    if (s7.security_review === 'Yes') {
+        customerActions.push({
+            task: 'Complete security reviews',
+            section: 'Security & Compliance',
+            priority: 'high',
+            deadline: 'Before go-live',
+            owner: 'IT/Security Team'
+        });
+    }
+
+    // SpotDraft actions
+    spotdraftActions.push({
+        task: 'Schedule kickoff meeting',
+        section: 'Project Setup',
+        priority: 'high',
+        deadline: 'Within 1 week',
+        owner: 'Implementation Team'
+    });
+
+    if (s3.templates_finalized === 'Yes') {
+        spotdraftActions.push({
+            task: 'Schedule template review session',
+            section: 'Template Readiness',
+            priority: 'medium',
+            deadline: 'Within 2 weeks',
+            owner: 'Implementation Team'
+        });
+    }
+
+    if (responses.section_5_integration_readiness?.systems_to_integrate?.length > 0) {
+        spotdraftActions.push({
+            task: 'Schedule integration planning session',
+            section: 'Integration Readiness',
+            priority: 'medium',
+            deadline: 'Within 2 weeks',
+            owner: 'Integration Team'
+        });
+    }
+
+    return {
+        customer: customerActions,
+        spotdraft: spotdraftActions
+    };
+}
+
+function createImplementationPlan(responses, readinessScore) {
+    const overallScore = readinessScore.overall;
+    
+    // Estimate timeline based on score and complexity
+    let baseWeeks = 8;
+    
+    if (overallScore < 40) baseWeeks = 20;
+    else if (overallScore < 60) baseWeeks = 16;
+    else if (overallScore < 80) baseWeeks = 12;
+    
+    // Adjust based on modules
+    const s2 = responses.section_2_order_form_scope;
+    if (s2.purchased_modules?.includes('Migration') && s2.migration_contract_count > 1000) {
+        baseWeeks += 4;
+    }
+    if (s2.purchased_modules?.includes('Integrations') && responses.section_5_integration_readiness?.systems_to_integrate?.length > 2) {
+        baseWeeks += 2;
+    }
+
+    const phases = [
+        {
+            phase: 'Phase 1: Setup & Configuration',
+            duration: '4-6 weeks',
+            tasks: [
+                'Account setup and user provisioning',
+                'Template configuration and review',
+                'Initial user training',
+                'Basic workflow setup'
+            ]
+        }
+    ];
+
+    if (s2.purchased_modules?.includes('Migration')) {
+        phases.push({
+            phase: 'Phase 2: Migration',
+            duration: '6-10 weeks',
+            tasks: [
+                'Data extraction and cleaning',
+                'Metadata mapping',
+                'Contract migration',
+                'Quality assurance and validation'
+            ]
+        });
+    }
+
+    if (s2.purchased_modules?.includes('Integrations')) {
+        phases.push({
+            phase: 'Phase 3: Integration Setup',
+            duration: '4-8 weeks',
+            tasks: [
+                'Integration architecture design',
+                'API/webhook configuration',
+                'Data sync setup',
+                'Integration testing'
+            ]
+        });
+    }
+
+    phases.push({
+        phase: 'Phase 4: Go-Live & Support',
+        duration: '2-4 weeks',
+        tasks: [
+            'Final testing',
+            'User acceptance testing',
+            'Go-live support',
+            'Post-launch optimization'
+        ]
+    });
+
+    return {
+        estimated_timeline: `${baseWeeks}-${baseWeeks + 4} weeks`,
+        phases: phases
+    };
+}
+
+/**
+ * Calculate complete readiness assessment using Gemini AI
+ * This replaces all manual calculations with AI-powered analysis
+ */
+async function calculateReadinessWithGemini(intake_responses) {
+    if (!geminiModel) {
+        throw new Error('Gemini model not available');
+    }
+
+    const prompt = `You are an expert implementation consultant for SpotDraft, a contract lifecycle management (CLM) platform. Your task is to analyze a comprehensive implementation readiness assessment and calculate readiness scores, identify risks, and create an implementation plan.
+
+## REQUEST PAYLOAD (Input Data):
+${JSON.stringify(intake_responses, null, 2)}
+
+## CALCULATION INSTRUCTIONS:
+
+### 1. READINESS SCORE CALCULATION
+Calculate readiness scores for 7 sections (each out of 100 points), then calculate an overall weighted score:
+
+**Section 1: Account & Stakeholder (Weight: 15%)**
+- Organization name provided: +20 points
+- Primary POC complete (name, role, email, timezone): +20 points
+- Legal POC complete (name, role, email, timezone): +15 points
+- Technical POC complete (if integrations required): +10 points
+- Availability specified: +10 points
+- Communication channels selected: +10 points
+- Expected go-live date provided: +15 points
+- Max: 100 points
+
+**Section 2: Order Form Scope (Weight: 15%)**
+- Purchased modules identified: +30 points (10 per module: Template Setup, Migration, Integrations)
+- Template count specified (if Template Setup module): +15 points
+- Migration contract count specified (if Migration module): +15 points
+- Migration file formats specified: +10 points
+- Additional add-ons mentioned: +10 points
+- Max: 100 points
+
+**Section 3: Template Readiness (Weight: 20%)**
+- Templates finalized (Yes: +30, In review: +20, No: +0)
+- Template formats specified: +15 points
+- Conditional logic complexity (None: +15, Simple: +10, Moderate: +5, Complex: +0)
+- Dynamic rendering (No: +15, Yes-Simple: +10, Yes-Moderate: +5, Yes-Complex: +0)
+- No clause-level changes needed: +10 points
+- Approval matrices exist: +10 points
+- Template count specified: +10 points
+- Max: 100 points
+
+**Section 4: Migration Readiness (Weight: 15%)**
+- Contract count specified: +20 points
+- Contract types listed: +15 points
+- Structured naming (Yes-100%: +25, Partial: +15, None: +0)
+- Storage location specified: +15 points
+- Contract formats specified: +10 points
+- Existing metadata (Yes-fully: +15, Yes-partially: +10, No: +0)
+- Migration priority specified: +5 points
+- Max: 100 points
+
+**Section 5: Integration Readiness (Weight: 15%)**
+- Systems to integrate specified: +25 points (5 per system)
+- Admin access (Yes-all: +25, Yes-some: +15, No: +0)
+- Security approval status (No: +20, Not sure: +10, Yes: +5)
+- API/Webhook access available: +15 points
+- Decision maker identified: +10 points
+- Integration outcomes specified: +5 points
+- Max: 100 points
+
+**Section 6: Business Process (Weight: 10%)**
+- Approval workflow (Yes-documented: +30, Yes-informal: +20, No: +0)
+- Contracts per month specified: +15 points
+- Contract generators identified: +15 points
+- Bottlenecks described: +15 points
+- Phase 1 must-haves specified: +15 points
+- Workflow details provided (if workflow exists): +10 points
+- Max: 100 points
+
+**Section 7: Security & Compliance (Weight: 10%)**
+- Security review (Completed: +30, No: +20, Yes: +10)
+- Infosec approvals (No: +20, Not sure: +10, Yes: +5)
+- Data residency (No: +20, Not sure: +10, Yes: +5)
+- Custom SSO (No: +15, Yes: +10)
+- Security reviews specified (if review needed): +10 points
+- Max: 100 points
+
+**Overall Score Calculation:**
+Multiply each section score by its weight, then sum:
+Overall = (Section1 × 0.15) + (Section2 × 0.15) + (Section3 × 0.20) + (Section4 × 0.15) + (Section5 × 0.15) + (Section6 × 0.10) + (Section7 × 0.10)
+Round to nearest integer.
+
+### 2. STATUS LABEL & DESCRIPTION
+Based on overall score:
+- 80-100: "Ready to Proceed" - "Your organization is well-prepared for implementation. Minor items may need attention, but you're ready to move forward."
+- 60-79: "Ready with Minor Blockers" - "Your organization is well-prepared for implementation. A few items need attention before go-live."
+- 40-59: "Needs Preparation" - "Some preparation is needed before implementation can begin. Address the identified blockers first."
+- 0-39: "Significant Preparation Required" - "Significant preparation is required before implementation. Please address the critical blockers identified."
+
+### 3. RED FLAGS IDENTIFICATION
+Identify critical issues that could block or delay implementation. For each red flag, provide:
+- section: Which section it relates to
+- issue: Brief description of the problem
+- impact: How this affects the timeline/implementation
+- severity: "high", "medium", or "low"
+
+Examples:
+- Security review pending but not specified
+- Templates not finalized
+- No admin access for required integrations
+- Large migration volume with no structured naming
+- Missing critical POC information
+
+### 4. ACTION ITEMS
+Create actionable tasks for both customer and SpotDraft teams. For each item:
+- task: Specific action to take
+- section: Related section
+- priority: "high", "medium", or "low"
+- deadline: Suggested date (YYYY-MM-DD format, 1-4 weeks from today)
+- owner: Who should handle it
+
+### 5. IMPLEMENTATION PLAN
+Create a phased implementation plan with:
+- recommended_go_live: Target date (YYYY-MM-DD, typically 8-12 weeks from today)
+- timeline_adjusted: true/false based on blockers
+- adjustment_reason: Why timeline was adjusted (if applicable)
+- phases: Array of implementation phases, each with:
+  - phase: Phase number (1, 2, 3, etc.)
+  - name: Phase name
+  - duration: Time estimate (e.g., "Week 1-2")
+  - activities: Array of specific activities
+  - dependencies: What must be completed first
+  - status: "Ready", "Partially ready", "Blocked", or "Scheduled"
+
+### 6. AI INSIGHTS
+Provide strategic insights:
+- key_strengths: 2-3 main strengths
+- critical_concerns: 2-3 main concerns
+- recommendations: 2-3 priority recommendations
+- risk_assessment: Brief risk assessment (1-2 sentences)
+- timeline_confidence: "high", "medium", or "low"
+
+## RESPONSE PAYLOAD (Required JSON Format):
+Return ONLY valid JSON in this exact structure (no markdown, no explanations):
+
+{
+    "readiness_score": {
+        "overall": <integer 0-100>,
+        "breakdown": {
+            "account_stakeholder": <integer 0-100>,
+            "order_form_scope": <integer 0-100>,
+            "template_readiness": <integer 0-100>,
+            "migration_readiness": <integer 0-100>,
+            "integration_readiness": <integer 0-100>,
+            "business_process": <integer 0-100>,
+            "security_compliance": <integer 0-100>
+        }
+    },
+    "status_label": "<string>",
+    "status_description": "<string>",
+    "red_flags": [
+        {
+            "section": "<string>",
+            "issue": "<string>",
+            "impact": "<string>",
+            "severity": "<high|medium|low>"
+        }
+    ],
+    "action_items": {
+        "customer": [
+            {
+                "task": "<string>",
+                "section": "<string>",
+                "priority": "<high|medium|low>",
+                "deadline": "<YYYY-MM-DD>",
+                "owner": "<string>"
+            }
+        ],
+        "spotdraft": [
+            {
+                "task": "<string>",
+                "section": "<string>",
+                "priority": "<high|medium|low>",
+                "deadline": "<YYYY-MM-DD>",
+                "owner": "<string>"
+            }
+        ]
+    },
+    "implementation_plan": {
+        "recommended_go_live": "<YYYY-MM-DD>",
+        "timeline_adjusted": <boolean>,
+        "adjustment_reason": "<string or null>",
+        "phases": [
+            {
+                "phase": <integer>,
+                "name": "<string>",
+                "duration": "<string>",
+                "activities": ["<string>"],
+                "dependencies": "<string or null>",
+                "status": "<Ready|Partially ready|Blocked|Scheduled>"
+            }
+        ]
+    },
+    "ai_insights": {
+        "key_strengths": ["<string>"],
+        "critical_concerns": ["<string>"],
+        "recommendations": ["<string>"],
+        "risk_assessment": "<string>",
+        "timeline_confidence": "<high|medium|low>"
+    }
+}
+
+IMPORTANT: Return ONLY the JSON object, no additional text, no markdown code blocks, no explanations.`;
+
+    try {
+        console.log('Sending assessment request to Gemini...');
+        console.log(`Full prompt length: ${prompt.length} characters`);
+        console.log(`Full intake data: ${JSON.stringify(intake_responses, null, 2).length} characters`);
+        
+        // No timeout limits on Render - use full prompt for maximum accuracy
+        // The model will process the complete data without truncation
+        const result = await geminiModel.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        // Extract JSON from response
+        let jsonText = text.trim();
+        if (jsonText.startsWith('```json')) {
+            jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        } else if (jsonText.startsWith('```')) {
+            jsonText = jsonText.replace(/```\n?/g, '').trim();
+        }
+        
+        const assessmentData = JSON.parse(jsonText);
+        
+        // Validate required fields
+        if (!assessmentData.readiness_score || !assessmentData.readiness_score.overall) {
+            throw new Error('Invalid response: missing readiness_score');
+        }
+        
+        return {
+            readiness_score: assessmentData.readiness_score,
+            status_label: assessmentData.status_label,
+            status_description: assessmentData.status_description,
+            red_flags: assessmentData.red_flags || [],
+            action_items: assessmentData.action_items || { customer: [], spotdraft: [] },
+            implementation_plan: assessmentData.implementation_plan,
+            ai_insights: assessmentData.ai_insights,
+            gemini_request: prompt,
+            gemini_response: text
+        };
+    } catch (error) {
+        console.error('Error calculating assessment with Gemini:', error);
+        throw new Error(`Gemini assessment failed: ${error.message}`);
+    }
+}
+
+/**
+ * Generate AI-powered insights for the assessment
+ */
+async function generateAIInsights(responses, readinessScore, redFlags) {
+    if (!geminiModel) {
+        return {
+            insights: null,
+            gemini_request: null,
+            gemini_response: null
+        };
+    }
+
+    const prompt = `You are an expert implementation consultant analyzing a SpotDraft implementation readiness assessment.
+
+Assessment Summary:
+- Overall Readiness Score: ${readinessScore.overall}/100
+- Section Scores: ${JSON.stringify(readinessScore.breakdown)}
+- Red Flags: ${redFlags.length} identified
+
+Key Information:
+${JSON.stringify(responses, null, 2)}
+
+Provide concise, actionable insights in JSON format:
+{
+    "key_strengths": ["list 2-3 main strengths"],
+    "critical_concerns": ["list 2-3 main concerns"],
+    "recommendations": ["list 2-3 priority recommendations"],
+    "risk_assessment": "brief risk assessment (1-2 sentences)",
+    "timeline_confidence": "high/medium/low based on readiness"
+}
+
+Be specific and actionable. Focus on what will help ensure successful implementation.`;
+
+    try {
+        const result = await geminiModel.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        // Extract JSON from response
+        let jsonText = text.trim();
+        if (jsonText.startsWith('```json')) {
+            jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        } else if (jsonText.startsWith('```')) {
+            jsonText = jsonText.replace(/```\n?/g, '').trim();
+        }
+        
+        return {
+            insights: JSON.parse(jsonText),
+            gemini_request: prompt,
+            gemini_response: text
+        };
+    } catch (error) {
+        console.error('Error generating AI insights:', error);
+        return {
+            insights: null,
+            gemini_request: prompt,
+            gemini_response: `Error: ${error.message}`
+        };
+    }
+}
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        gemini_available: !!geminiModel
+    });
+});
+
+// Start server
+app.listen(PORT, () => {
+    console.log(`SpotSmart API server running on port ${PORT}`);
+    console.log(`Health check: http://localhost:${PORT}/health`);
+    console.log(`Parse Order Form: POST http://localhost:${PORT}/parse-order-form`);
+    console.log(`Assess Readiness: POST http://localhost:${PORT}/assess`);
+});
+
+module.exports = app;
+

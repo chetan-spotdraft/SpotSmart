@@ -1,0 +1,22 @@
+# Render Blueprint for SpotSmart Assessment App
+# This file allows one-click deployment to Render
+
+services:
+  # Web Service - Backend API + Frontend
+  - type: web
+    name: spotsmart-assessment
+    env: node
+    plan: free  # Change to 'starter' or 'standard' for production
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000  # Render sets PORT automatically, but this is a fallback
+      - key: GEMINI_API_KEY
+        sync: false  # Set this in Render dashboard after deployment
+    healthCheckPath: /health
+    # Auto-deploy from main branch
+    autoDeploy: true
+

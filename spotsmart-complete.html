@@ -1,0 +1,3084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpotSmart | Implementation Readiness Assessment</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============================================
+           CSS VARIABLES & RESET
+           ============================================ */
+        :root {
+            /* SpotDraft Brand Colors */
+            --primary: #0B1E62;
+            --primary-light: #1a3a8f;
+            --primary-dark: #071440;
+            --secondary: #923313;
+            --secondary-light: #b84a1f;
+            --secondary-dark: #6d260e;
+            
+            /* Neutrals */
+            --white: #FFFFFF;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+            
+            /* Status Colors */
+            --success: #059669;
+            --success-light: #D1FAE5;
+            --warning: #D97706;
+            --warning-light: #FEF3C7;
+            --error: #DC2626;
+            --error-light: #FEE2E2;
+            --info: #2563EB;
+            --info-light: #DBEAFE;
+            
+            /* Spacing */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            --space-3xl: 4rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-full: 9999px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-base: 200ms ease;
+            --transition-slow: 300ms ease;
+        }
+        
+        /* Reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 50%, var(--gray-100) 100%);
+            color: var(--gray-800);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        /* ============================================
+           LAYOUT
+           ============================================ */
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header */
+        .app-header {
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            padding: var(--space-md) var(--space-xl);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 var(--space-xl);
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-xs);
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: var(--radius-full);
+            transition: width var(--transition-slow);
+            width: 0%;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: var(--space-2xl) var(--space-3xl);
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        /* ============================================
+           WELCOME SCREEN
+           ============================================ */
+        .welcome-screen {
+            text-align: center;
+            padding: var(--space-3xl) var(--space-xl);
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--space-xl);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .welcome-icon svg {
+            width: 40px;
+            height: 40px;
+            color: var(--white);
+        }
+        
+        .welcome-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: var(--space-md);
+        }
+        
+        .welcome-subtitle {
+            font-size: 1.125rem;
+            color: var(--gray-600);
+            max-width: 800px;
+            margin: 0 auto var(--space-2xl);
+        }
+        
+        .welcome-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-2xl);
+            text-align: left;
+        }
+        
+        .feature-card {
+            background: var(--white);
+            padding: var(--space-lg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+            transition: all var(--transition-base);
+        }
+        
+        .feature-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gray-100);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-md);
+            color: var(--primary);
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .feature-desc {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+        
+        /* ============================================
+           FORM SECTIONS
+           ============================================ */
+        .form-section {
+            display: none;
+            animation: fadeInUp 0.4s ease-out;
+        }
+        
+        .form-section.active {
+            display: block;
+        }
+        
+        .section-header {
+            margin-bottom: var(--space-xl);
+        }
+        
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            background: var(--primary);
+            color: var(--white);
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-md);
+        }
+        
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .section-description {
+            color: var(--gray-600);
+            font-size: 1rem;
+        }
+        
+        /* Form Card */
+        .form-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--gray-200);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        /* Form Groups */
+        .form-group {
+            margin-bottom: var(--space-lg);
+        }
+        
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: var(--space-sm);
+            font-size: 0.875rem;
+        }
+        
+        .form-label .required {
+            color: var(--error);
+            margin-left: 2px;
+        }
+        
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: var(--space-xs);
+        }
+        
+        /* Input Fields */
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: var(--space-md);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--gray-800);
+            background: var(--white);
+            transition: all var(--transition-fast);
+        }
+        
+        .form-input:hover,
+        .form-select:hover,
+        .form-textarea:hover {
+            border-color: var(--gray-400);
+        }
+        
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(11, 30, 98, 0.1);
+        }
+        
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: var(--gray-400);
+        }
+        
+        .form-input.error,
+        .form-select.error,
+        .form-textarea.error {
+            border-color: var(--error);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        /* Input Groups */
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+        }
+        
+        /* Two Column Layout for Form Fields */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-lg);
+        }
+        
+        .form-grid .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        /* POC Card */
+        .poc-card {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .poc-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        .poc-cards-grid .poc-card {
+            margin-bottom: 0;
+        }
+        
+        .poc-card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .poc-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+        }
+        
+        .poc-title {
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        .poc-subtitle {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        
+        /* Toggle Switch */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        .toggle {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: var(--gray-300);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+        
+        .toggle.active {
+            background: var(--primary);
+        }
+        
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: var(--white);
+            border-radius: 50%;
+            box-shadow: var(--shadow-sm);
+            transition: transform var(--transition-fast);
+        }
+        
+        .toggle.active .toggle-knob {
+            transform: translateX(24px);
+        }
+        
+        .toggle-label {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+        
+        /* Multi-select Chips */
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+        }
+        
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--gray-100);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            user-select: none;
+        }
+        
+        .chip:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+        
+        .chip.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: var(--white);
+        }
+        
+        .chip-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: var(--space-xs);
+        }
+        
+        /* Date Picker */
+        .form-input[type="date"] {
+            cursor: pointer;
+        }
+        
+        /* ============================================
+           BUTTONS
+           ============================================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space-md) var(--space-xl);
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: var(--white);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+        }
+        
+        .btn-lg {
+            padding: var(--space-lg) var(--space-2xl);
+            font-size: 1.125rem;
+        }
+        
+        .btn-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Button Group */
+        .btn-group {
+            display: flex;
+            gap: var(--space-md);
+            margin-top: var(--space-xl);
+            padding-top: var(--space-xl);
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .btn-group .btn-secondary {
+            flex: 0 0 auto;
+        }
+        
+        .btn-group .btn-primary {
+            flex: 1;
+        }
+        
+        /* ============================================
+           CONDITIONAL SECTIONS
+           ============================================ */
+        .conditional-section {
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .conditional-section.visible {
+            display: block;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* ============================================
+           FILE UPLOAD
+           ============================================ */
+        .file-upload-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            background: var(--gray-50);
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: var(--white);
+        }
+        
+        .file-upload-area.drag-over {
+            border-color: var(--primary);
+            background: rgba(11, 30, 98, 0.05);
+        }
+        
+        .file-upload-area.has-file {
+            border-style: solid;
+            border-color: var(--success);
+            background: var(--success-light);
+        }
+        
+        .file-upload-icon {
+            color: var(--gray-400);
+            margin-bottom: var(--space-md);
+        }
+        
+        .file-upload-text {
+            color: var(--gray-600);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .file-upload-primary {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .file-upload-hint {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        
+        .file-upload-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-md);
+            background: var(--success-light);
+            border: 1px solid var(--success);
+            border-radius: var(--radius-md);
+            margin-top: var(--space-md);
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            color: var(--success);
+            font-weight: 500;
+        }
+        
+        .file-remove-btn {
+            background: none;
+            border: none;
+            color: var(--gray-500);
+            cursor: pointer;
+            padding: var(--space-xs);
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+        }
+        
+        .file-remove-btn:hover {
+            color: var(--error);
+            background: var(--error-light);
+        }
+        
+        .parsing-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--info-light);
+            border: 1px solid var(--info);
+            border-radius: var(--radius-md);
+            margin-top: var(--space-md);
+            color: var(--info);
+            font-size: 0.875rem;
+        }
+        
+        .parsing-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--info-light);
+            border-top-color: var(--info);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* ============================================
+           PREFILL NOTIFICATIONS
+           ============================================ */
+        .prefill-notification {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-md);
+            margin-top: var(--space-md);
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .prefill-notification.success {
+            background: var(--success-light);
+            border: 1px solid var(--success);
+        }
+        
+        .prefill-notification.error {
+            background: var(--error-light);
+            border: 1px solid var(--error);
+        }
+        
+        .prefill-notification-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .prefill-notification.success .prefill-notification-icon {
+            color: var(--success);
+        }
+        
+        .prefill-notification.error .prefill-notification-icon {
+            color: var(--error);
+        }
+        
+        .prefill-notification-content {
+            flex: 1;
+        }
+        
+        .prefill-notification-title {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .prefill-notification-desc {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+        
+        .prefill-notification-desc small {
+            color: var(--gray-500);
+            font-style: italic;
+        }
+        
+        .prefill-notification-close {
+            flex-shrink: 0;
+            background: none;
+            border: none;
+            color: var(--gray-400);
+            cursor: pointer;
+            padding: var(--space-xs);
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+        }
+        
+        .prefill-notification-close:hover {
+            color: var(--gray-600);
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        /* ============================================
+           LOADING SCREEN
+           ============================================ */
+        .loading-screen { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.98); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
+        .loading-screen.active { display: flex; }
+        .loading-spinner { width: 60px; height: 60px; border: 4px solid var(--gray-200); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: var(--space-xl); }
+        .loading-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 600; color: var(--gray-800); margin-bottom: var(--space-sm); }
+        .loading-subtitle { color: var(--gray-500); text-align: center; max-width: 400px; margin-bottom: var(--space-xl); }
+        .loading-progress-container { width: 100%; max-width: 400px; margin-top: var(--space-lg); }
+        .loading-progress-bar { width: 100%; height: 8px; background: var(--gray-200); border-radius: var(--radius-full); overflow: hidden; position: relative; }
+        .loading-progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%); border-radius: var(--radius-full); transition: width 0.3s ease-out; position: relative; }
+        .loading-progress-fill::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent); animation: shimmer 2s infinite; }
+        .loading-progress-text { text-align: center; color: var(--gray-600); font-size: 0.875rem; margin-top: var(--space-sm); }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        
+        /* ============================================
+           RESULTS SCREEN
+           ============================================ */
+        .results-screen { display: none; animation: fadeInUp 0.6s ease-out; }
+        .results-screen.active { display: block; }
+        .score-card { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); border-radius: var(--radius-xl); padding: var(--space-2xl); color: var(--white); text-align: center; margin-bottom: var(--space-xl); }
+        .score-label { font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; margin-bottom: var(--space-md); }
+        .score-value { font-family: 'Space Grotesk', sans-serif; font-size: 5rem; font-weight: 700; line-height: 1; margin-bottom: var(--space-md); }
+        .score-status { font-size: 1.25rem; font-weight: 600; margin-bottom: var(--space-sm); }
+        .score-description { opacity: 0.8; max-width: 500px; margin: 0 auto; }
+        .score-breakdown { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-md); margin-top: var(--space-xl); }
+        .score-breakdown-item { background: rgba(255, 255, 255, 0.1); border-radius: var(--radius-md); padding: var(--space-md); }
+        .score-breakdown-label { font-size: 0.75rem; opacity: 0.8; margin-bottom: var(--space-xs); }
+        .score-breakdown-value { font-size: 1.5rem; font-weight: 700; }
+        .score-breakdown-bar { height: 4px; background: rgba(255, 255, 255, 0.2); border-radius: var(--radius-full); margin-top: var(--space-sm); overflow: hidden; }
+        .score-breakdown-fill { height: 100%; background: var(--white); border-radius: var(--radius-full); }
+        .results-section { background: var(--white); border-radius: var(--radius-xl); border: 1px solid var(--gray-200); padding: var(--space-xl); margin-bottom: var(--space-xl); }
+        .results-section-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.25rem; font-weight: 600; color: var(--gray-900); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .red-flag-item { display: flex; gap: var(--space-md); padding: var(--space-md); background: var(--error-light); border-left: 4px solid var(--error); border-radius: var(--radius-md); margin-bottom: var(--space-md); }
+        .red-flag-item.warning { background: var(--warning-light); border-left-color: var(--warning); }
+        .red-flag-icon { flex-shrink: 0; width: 24px; height: 24px; color: var(--error); }
+        .red-flag-item.warning .red-flag-icon { color: var(--warning); }
+        .red-flag-content { flex: 1; }
+        .red-flag-title { font-weight: 600; color: var(--gray-800); margin-bottom: var(--space-xs); }
+        .red-flag-desc { font-size: 0.875rem; color: var(--gray-600); }
+        .action-tabs { display: flex; gap: var(--space-sm); margin-bottom: var(--space-lg); border-bottom: 1px solid var(--gray-200); }
+        .action-tab { padding: var(--space-md) var(--space-lg); border: none; background: none; font-family: inherit; font-size: 0.875rem; font-weight: 600; color: var(--gray-500); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+        .action-tab:hover { color: var(--gray-700); }
+        .action-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .action-tab-content { display: none; }
+        .action-tab-content.active { display: block; }
+        .action-item { display: flex; gap: var(--space-md); padding: var(--space-md); background: var(--gray-50); border-radius: var(--radius-md); margin-bottom: var(--space-sm); }
+        .action-item-priority { flex-shrink: 0; width: 8px; border-radius: var(--radius-full); }
+        .action-item-priority.high { background: var(--error); }
+        .action-item-priority.medium { background: var(--warning); }
+        .action-item-priority.low { background: var(--success); }
+        .action-item-content { flex: 1; }
+        .action-item-task { font-weight: 500; color: var(--gray-800); margin-bottom: var(--space-xs); }
+        .action-item-meta { font-size: 0.75rem; color: var(--gray-500); display: flex; gap: var(--space-md); flex-wrap: wrap; }
+        .timeline-phase { border: 1px solid var(--gray-200); border-radius: var(--radius-lg); margin-bottom: var(--space-md); overflow: hidden; }
+        .timeline-phase-header { display: flex; align-items: center; justify-content: space-between; padding: var(--space-md) var(--space-lg); background: var(--gray-50); }
+        .timeline-phase-title { font-weight: 600; color: var(--gray-800); }
+        .timeline-phase-duration { font-size: 0.875rem; color: var(--gray-500); }
+        .timeline-phase-status { font-size: 0.75rem; padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-full); }
+        .timeline-phase-status.ready { background: var(--success-light); color: var(--success); }
+        .timeline-phase-status.blocked { background: var(--error-light); color: var(--error); }
+        .timeline-phase-status.partial { background: var(--warning-light); color: var(--warning); }
+        .timeline-phase-content { padding: var(--space-lg); border-top: 1px solid var(--gray-200); }
+        .timeline-activity { display: flex; align-items: flex-start; gap: var(--space-sm); padding: var(--space-sm) 0; font-size: 0.875rem; color: var(--gray-700); }
+        .timeline-activity::before { content: '•'; color: var(--primary); font-weight: bold; }
+        
+        /* ============================================
+           MODULE CARDS
+           ============================================ */
+        .module-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-md);
+        }
+        
+        .module-card {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            padding: var(--space-lg);
+            background: var(--white);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            position: relative;
+        }
+        
+        .module-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .module-card.selected {
+            border-color: var(--primary);
+            background: rgba(11, 30, 98, 0.03);
+        }
+        
+        .module-card-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gray-100);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-600);
+            flex-shrink: 0;
+            transition: all var(--transition-base);
+        }
+        
+        .module-card.selected .module-card-icon {
+            background: var(--primary);
+            color: var(--white);
+        }
+        
+        .module-card-content {
+            flex: 1;
+        }
+        
+        .module-card-title {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .module-card-desc {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+        
+        .module-card-check {
+            position: absolute;
+            top: var(--space-md);
+            right: var(--space-md);
+            width: 24px;
+            height: 24px;
+            background: var(--gray-200);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: transparent;
+            transition: all var(--transition-base);
+        }
+        
+        .module-card.selected .module-card-check {
+            background: var(--primary);
+            color: var(--white);
+        }
+        
+        /* ============================================
+           INTEGRATION CHIPS
+           ============================================ */
+        .integration-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-md);
+        }
+        
+        .integration-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-lg);
+            background: var(--white);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+        
+        .integration-chip:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .integration-chip.selected {
+            border-color: var(--primary);
+            background: rgba(11, 30, 98, 0.03);
+            color: var(--primary);
+        }
+        
+        .integration-logo {
+            width: 32px;
+            height: 32px;
+            color: var(--gray-500);
+            transition: color var(--transition-base);
+        }
+        
+        .integration-chip.selected .integration-logo {
+            color: var(--primary);
+        }
+        
+        /* ============================================
+           ERROR MESSAGES
+           ============================================ */
+        .error-message {
+            display: none;
+            color: var(--error);
+            font-size: 0.75rem;
+            margin-top: var(--space-xs);
+        }
+        
+        .error-message.visible {
+            display: block;
+        }
+        
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1024px) {
+            .main-content {
+                padding: var(--space-xl) var(--space-lg);
+            }
+            
+            .poc-cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: var(--space-md);
+            }
+            
+            .progress-container {
+                margin: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            .main-content {
+                padding: var(--space-lg) var(--space-md);
+            }
+            
+            .welcome-title {
+                font-size: 1.75rem;
+            }
+            
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                flex-direction: column-reverse;
+            }
+            
+            .btn-group .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <svg class="logo-icon" width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M25.582 14.3336H20.9869L25.717 2.6109C25.8375 2.28891 25.6287 2.00158 25.344 2L15.9932 2.0021C15.8839 2.0021 15.7777 2.03204 15.6977 2.09823C15.6977 2.09823 12.2934 5.03351 11.2349 5.95906C11.1046 6.07304 11.041 6.176 10.9763 6.34199C10.433 7.73346 6.03596 18.5911 6.03596 18.5911C5.89537 18.9813 6.19706 19.1836 6.42282 19.1841H12.3837C12.3837 19.1841 8.98357 27.7457 8.98254 27.7504L8.31657 29.4182C8.15547 29.8221 8.62749 30.1788 8.95689 29.902C8.95689 29.902 25.3527 15.5155 25.8463 15.0937C26.1136 14.8652 26.0366 14.3336 25.5815 14.3336H25.582ZM18.3559 12.6837L17.7489 14.1871C17.7135 14.2759 17.6289 14.3336 17.5355 14.3336L11.2067 14.3279C11.1159 14.3279 11.0538 14.2338 11.0877 14.1472L11.6921 12.6501C11.7275 12.5608 11.8121 12.5025 11.906 12.5025H18.2374C18.3287 12.5025 18.3908 12.5971 18.3559 12.6837ZM20.1465 8.25717L19.5406 9.75948C19.5052 9.84825 19.4205 9.90604 19.3271 9.90604L12.9968 9.90341C12.906 9.90341 12.8439 9.80938 12.8778 9.72271L13.4812 8.22355C13.5166 8.13425 13.6012 8.07595 13.6951 8.07595H20.0275C20.1188 8.07595 20.1809 8.1705 20.146 8.25717H20.1465Z" fill="#0B1E62"/>
+                    </svg>
+                    <div class="logo-text">SpotSmart</div>
+                </div>
+                
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-info">
+                        <span id="progressText">Section 1 of 8</span>
+                        <span id="progressPercent">12%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Welcome Screen -->
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                </div>
+                <h1 class="welcome-title">Implementation Readiness Assessment</h1>
+                <p class="welcome-subtitle">
+                    Let's ensure your SpotDraft implementation is set up for success. 
+                    This assessment will help us understand your requirements and create a tailored implementation plan.
+                </p>
+                
+                <div class="welcome-features">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 11l3 3L22 4"/>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                            </svg>
+                        </div>
+                        <div class="feature-title">Readiness Score</div>
+                        <div class="feature-desc">Get an instant assessment of your implementation readiness</div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                            </svg>
+                        </div>
+                        <div class="feature-title">Action Items</div>
+                        <div class="feature-desc">Clear next steps for both your team and SpotDraft</div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                        </div>
+                        <div class="feature-title">Custom Plan</div>
+                        <div class="feature-desc">Auto-generated implementation timeline based on your needs</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: var(--space-md); flex-wrap: wrap; justify-content: center;">
+                    <button class="btn btn-primary btn-lg" onclick="startAssessment()">
+                        Start Assessment
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-secondary btn-lg" onclick="populateAndSubmitSampleData()" style="background: var(--success); border-color: var(--success); color: white;">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                        Fill with Sample Data & View Results (Testing)
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Section 1: Account & Stakeholder Identity -->
+            <div class="form-section" id="section1">
+                <div class="section-header">
+                    <div class="section-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        Section 1 of 8
+                    </div>
+                    <h2 class="section-title">Account & Stakeholder Identity</h2>
+                    <p class="section-description">Let's start by understanding who will be involved in this implementation.</p>
+                </div>
+                
+                <div class="form-card">
+                    <!-- Organisation Name -->
+                    <div class="form-group" style="margin-bottom: var(--space-xl);">
+                        <label class="form-label">
+                            Organisation Name <span class="required">*</span>
+                        </label>
+                        <input type="text" class="form-input" id="orgName" placeholder="Enter your organisation name" required>
+                        <div class="error-message" id="orgNameError">Please enter your organisation name</div>
+                    </div>
+                    
+                    <!-- POC Cards Grid -->
+                    <div class="poc-cards-grid">
+                        <!-- Primary POC -->
+                        <div class="poc-card">
+                            <div class="poc-card-header">
+                                <div class="poc-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="poc-title">Primary Point of Contact</div>
+                                    <div class="poc-subtitle">Main person we'll coordinate with</div>
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="form-group">
+                                    <label class="form-label">Name <span class="required">*</span></label>
+                                    <input type="text" class="form-input" id="primaryPocName" placeholder="Full name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Role <span class="required">*</span></label>
+                                    <input type="text" class="form-input" id="primaryPocRole" placeholder="e.g., Legal Ops Manager" required>
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="form-group">
+                                    <label class="form-label">Email <span class="required">*</span></label>
+                                    <input type="email" class="form-input" id="primaryPocEmail" placeholder="email@company.com" required onblur="validateEmailField('primaryPocEmail')">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Timezone <span class="required">*</span></label>
+                                    <select class="form-select" id="primaryPocTimezone" required>
+                                        <option value="">Select timezone</option>
+                                        <option value="APAC">APAC</option>
+                                        <option value="US">US</option>
+                                        <option value="EMEA">EMEA</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Legal POC -->
+                        <div class="poc-card">
+                            <div class="poc-card-header">
+                                <div class="poc-icon" style="background: var(--secondary);">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14 2 14 8 20 8"/>
+                                        <line x1="16" y1="13" x2="8" y2="13"/>
+                                        <line x1="16" y1="17" x2="8" y2="17"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="poc-title">Legal Point of Contact</div>
+                                    <div class="poc-subtitle">For template and contract conversations</div>
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="form-group">
+                                    <label class="form-label">Name <span class="required">*</span></label>
+                                    <input type="text" class="form-input" id="legalPocName" placeholder="Full name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Role <span class="required">*</span></label>
+                                    <input type="text" class="form-input" id="legalPocRole" placeholder="e.g., Legal Counsel" required>
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="form-group">
+                                    <label class="form-label">Email <span class="required">*</span></label>
+                                    <input type="email" class="form-input" id="legalPocEmail" placeholder="email@company.com" required onblur="validateEmailField('legalPocEmail')">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Timezone <span class="required">*</span></label>
+                                    <select class="form-select" id="legalPocTimezone" required>
+                                        <option value="">Select timezone</option>
+                                        <option value="APAC">APAC</option>
+                                        <option value="US">US</option>
+                                        <option value="EMEA">EMEA</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Integrations Required Toggle -->
+                    <div class="form-group" style="margin-top: var(--space-lg);">
+                        <label class="form-label">Will you require integrations with external systems?</label>
+                        <div class="toggle-group">
+                            <div class="toggle" id="integrationsToggle" onclick="toggleIntegrations()">
+                                <div class="toggle-knob"></div>
+                            </div>
+                            <span class="toggle-label" id="integrationsToggleLabel">No</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Technical POC (Conditional) -->
+                    <div class="conditional-section" id="technicalPocSection">
+                        <div class="poc-card">
+                            <div class="poc-card-header">
+                                <div class="poc-icon" style="background: var(--info);">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                        <line x1="8" y1="21" x2="16" y2="21"/>
+                                        <line x1="12" y1="17" x2="12" y2="21"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="poc-title">Technical / IT Point of Contact</div>
+                                    <div class="poc-subtitle">For integration setup and configuration</div>
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="form-group">
+                                    <label class="form-label">Name <span class="required">*</span></label>
+                                    <input type="text" class="form-input" id="technicalPocName" placeholder="Full name">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email <span class="required">*</span></label>
+                                    <input type="email" class="form-input" id="technicalPocEmail" placeholder="email@company.com" onblur="validateEmailField('technicalPocEmail')">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Timezone <span class="required">*</span></label>
+                                <select class="form-select" id="technicalPocTimezone">
+                                    <option value="">Select timezone</option>
+                                    <option value="APAC">APAC</option>
+                                    <option value="US">US</option>
+                                    <option value="EMEA">EMEA</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bottom Fields Grid -->
+                    <div class="form-grid" style="margin-top: var(--space-lg);">
+                        <!-- Availability -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                Availability for weekly checkpoints <span class="required">*</span>
+                            </label>
+                            <input type="text" class="form-input" id="availability" placeholder="e.g., Tuesdays and Thursdays, 2-4 PM EST" required>
+                            <div class="form-hint">Please include days, times, and timezone</div>
+                        </div>
+                        
+                        <!-- Expected Go-Live -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                Expected launch timeline <span class="required">*</span>
+                            </label>
+                            <input type="date" class="form-input" id="expectedGoLive" required>
+                            <div class="form-hint">Your target go-live date</div>
+                        </div>
+                        
+                        <!-- Communication Channels -->
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                Preferred communication channels <span class="required">*</span>
+                            </label>
+                            <div class="chip-group" id="communicationChannels">
+                                <div class="chip" data-value="Slack" onclick="toggleChip(this)">
+                                    <svg class="chip-icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/>
+                                    </svg>
+                                    Slack
+                                </div>
+                                <div class="chip" data-value="MS Teams" onclick="toggleChip(this)">
+                                    <svg class="chip-icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M20.625 8.073c.574 0 1.125.228 1.53.633.407.406.634.958.633 1.532v4.462a2.165 2.165 0 0 1-2.163 2.163h-1.238v3.114a3.321 3.321 0 0 1-3.318 3.318H9.645a3.321 3.321 0 0 1-3.318-3.318v-6.23H4.325a3.623 3.623 0 0 1-3.62-3.62V6.308a3.623 3.623 0 0 1 3.62-3.62h7.748a3.623 3.623 0 0 1 3.62 3.62v1.765h4.932zm-5.332 2.165v3.639h3.394V10.238h-3.394zm0-3.93v3.13h3.792a.765.765 0 0 0-.26-.58.766.766 0 0 0-.537-.215h-2.995v-2.335zm-1.6-3.62H4.325a2.222 2.222 0 0 0-2.22 2.22v3.82a2.222 2.222 0 0 0 2.22 2.22h2.002V6.308c0-.893.355-1.75.986-2.382a3.366 3.366 0 0 1 2.382-.986h4.998v-.453zM16.07 20.295V9.685a1.92 1.92 0 0 0-1.92-1.92H9.645a1.92 1.92 0 0 0-1.918 1.92v10.61c0 1.06.86 1.918 1.918 1.918h4.507a1.92 1.92 0 0 0 1.918-1.918z"/>
+                                    </svg>
+                                    MS Teams
+                                </div>
+                                <div class="chip" data-value="Email" onclick="toggleChip(this)">
+                                    <svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                        <polyline points="22,6 12,13 2,6"/>
+                                    </svg>
+                                    Email
+                                </div>
+                                <div class="chip" data-value="Video Meetings" onclick="toggleChip(this)">
+                                    <svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="23 7 16 12 23 17 23 7"/>
+                                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                                    </svg>
+                                    Video Meetings
+                                </div>
+                            </div>
+                            <div class="error-message" id="communicationError">Please select at least one communication channel</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="goToWelcome()">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12"/>
+                                <polyline points="12 19 5 12 12 5"/>
+                            </svg>
+                            Back
+                        </button>
+                        <button class="btn btn-primary" onclick="nextSection(1)">
+                            Continue to Order Form
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section 2: Order Form Scope Validation -->
+            <div class="form-section" id="section2">
+                <div class="section-header">
+                    <div class="section-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                        Section 2 of 8
+                    </div>
+                    <h2 class="section-title">Order Form Scope Validation</h2>
+                    <p class="section-description">Confirm the modules you've purchased and provide details about your implementation scope.</p>
+                </div>
+                
+                <div class="form-card">
+                    <!-- Purchased Modules -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Purchased Modules <span class="required">*</span>
+                        </label>
+                        <div class="form-hint" style="margin-bottom: var(--space-md);">Select all modules included in your purchase</div>
+                        <div class="module-cards" id="purchasedModules">
+                            <div class="module-card" data-value="Template Setup" onclick="toggleModule(this)">
+                                <div class="module-card-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14 2 14 8 20 8"/>
+                                        <line x1="16" y1="13" x2="8" y2="13"/>
+                                        <line x1="16" y1="17" x2="8" y2="17"/>
+                                        <polyline points="10 9 9 9 8 9"/>
+                                    </svg>
+                                </div>
+                                <div class="module-card-content">
+                                    <div class="module-card-title">Template Setup</div>
+                                    <div class="module-card-desc">Contract template creation and configuration</div>
+                                </div>
+                                <div class="module-card-check">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            <div class="module-card" data-value="Migration" onclick="toggleModule(this)">
+                                <div class="module-card-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9m-9 9a9 9 0 0 1 9-9"/>
+                                    </svg>
+                                </div>
+                                <div class="module-card-content">
+                                    <div class="module-card-title">Migration</div>
+                                    <div class="module-card-desc">Historical contracts migration and metadata extraction</div>
+                                </div>
+                                <div class="module-card-check">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            <div class="module-card" data-value="Integrations" onclick="toggleModule(this)">
+                                <div class="module-card-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="2" width="8" height="8" rx="1"/>
+                                        <rect x="14" y="2" width="8" height="8" rx="1"/>
+                                        <rect x="2" y="14" width="8" height="8" rx="1"/>
+                                        <rect x="14" y="14" width="8" height="8" rx="1"/>
+                                        <path d="M10 6h4"/>
+                                        <path d="M6 10v4"/>
+                                        <path d="M18 10v4"/>
+                                        <path d="M10 18h4"/>
+                                    </svg>
+                                </div>
+                                <div class="module-card-content">
+                                    <div class="module-card-title">Integrations</div>
+                                    <div class="module-card-desc">Connect with your existing business systems</div>
+                                </div>
+                                <div class="module-card-check">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="error-message" id="modulesError">Please select at least one module</div>
+                    </div>
+                    
+                    <!-- Template Count (Conditional) -->
+                    <div class="conditional-section" id="templateCountSection">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Number of templates needed <span class="required">*</span>
+                            </label>
+                            <input type="number" class="form-input" id="templateCount" placeholder="e.g., 5" min="1">
+                            <div class="form-hint">How many contract templates do you need configured?</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Migration Details (Conditional) -->
+                    <div class="conditional-section" id="migrationDetailsSection">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Number of contracts to migrate <span class="required">*</span>
+                                </label>
+                                <input type="number" class="form-input" id="migrationContractCount" placeholder="e.g., 2500" min="1">
+                                <div class="form-hint">Approximate count of historical contracts</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    File formats of contracts <span class="required">*</span>
+                                </label>
+                                <div class="chip-group" id="migrationFileFormats">
+                                    <div class="chip" data-value="PDF" onclick="toggleChip(this)">PDF</div>
+                                    <div class="chip" data-value="DOCX" onclick="toggleChip(this)">DOCX</div>
+                                    <div class="chip" data-value="Scanned images" onclick="toggleChip(this)">Scanned images</div>
+                                    <div class="chip" data-value="Other" onclick="toggleChip(this)">Other</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Add-ons -->
+                    <div class="form-group" style="margin-top: var(--space-lg);">
+                        <label class="form-label">
+                            Any additional add-ons or requirements?
+                        </label>
+                        <textarea class="form-textarea" id="additionalAddons" placeholder="Describe any additional requirements or add-ons..."></textarea>
+                        <div class="form-hint">Optional - Let us know if there's anything else we should be aware of</div>
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="prevSection(2)">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12"/>
+                                <polyline points="12 19 5 12 12 5"/>
+                            </svg>
+                            Back
+                        </button>
+                        <button class="btn btn-primary" onclick="nextSection(2)">
+                            Continue to Template Readiness
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Placeholder for other sections -->
+            <!-- ============================================
+                 SECTION 3: Template Readiness
+                 ============================================ -->
+            <div class="form-section" id="section3">
+                <div class="section-header">
+                    <div class="section-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>Section 3 of 8</div>
+                    <h2 class="section-title">Template Readiness & Complexity Scanner</h2>
+                    <p class="section-description">Help us understand the complexity of your templates for accurate planning.</p>
+                </div>
+                <div class="form-card">
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">How many templates require setup? <span class="required">*</span></label><input type="number" class="form-input" id="s3TemplateCount" placeholder="e.g., 5" min="1"></div>
+                        <div class="form-group"><label class="form-label">Do you already have finalized templates? <span class="required">*</span></label><select class="form-select" id="s3TemplatesFinalized"><option value="">Select status</option><option value="Yes">Yes - Ready to use</option><option value="No">No - Need to create</option><option value="In review">In review</option></select></div>
+                        <div class="form-group"><label class="form-label">Template formats <span class="required">*</span></label><div class="chip-group" id="s3TemplateFormats"><div class="chip" data-value="Word" onclick="toggleChip(this)">Word</div><div class="chip" data-value="PDF" onclick="toggleChip(this)">PDF</div><div class="chip" data-value="Google Docs" onclick="toggleChip(this)">Google Docs</div></div></div>
+                        <div class="form-group"><label class="form-label">Clause-level changes needed?</label><div class="toggle-group"><div class="toggle" id="s3ClauseChanges" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                        <div class="form-group"><label class="form-label">Do you need dynamic rendering of contract language/content? <span class="required">*</span></label><select class="form-select" id="s3DynamicRendering" onchange="toggleSection('s3DynamicRenderingComplexitySection')"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                        <div class="conditional-section" id="s3DynamicRenderingComplexitySection"><div class="form-group"><label class="form-label">What is the complexity of dynamic rendering? <span class="required">*</span></label><select class="form-select" id="s3DynamicRenderingComplexity"><option value="">Select</option><option value="Simple">Simple</option><option value="Moderate">Moderate</option><option value="Complex">Complex</option></select></div></div>
+                        <div class="form-group"><label class="form-label">Conditional logic complexity <span class="required">*</span></label><select class="form-select" id="s3ConditionalLogic"><option value="">Select</option><option value="None">None</option><option value="Simple">Simple</option><option value="Moderate">Moderate</option><option value="Complex">Complex</option></select></div>
+                        <div class="form-group"><label class="form-label">Language variations?</label><div class="toggle-group"><div class="toggle" id="s3LanguageVariations" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                        <div class="form-group"><label class="form-label">Calculations in templates?</label><div class="toggle-group"><div class="toggle" id="s3Calculations" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                        <div class="form-group"><label class="form-label">Existing approval matrices?</label><div class="toggle-group"><div class="toggle" id="s3ApprovalMatrices" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                    </div>
+                    <div class="btn-group"><button class="btn btn-secondary" onclick="prevSection(3)"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back</button><button class="btn btn-primary" onclick="nextSection(3)">Continue to Migration<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button></div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: Migration Readiness -->
+            <div class="form-section" id="section4">
+                <div class="section-header">
+                    <div class="section-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Section 4 of 8</div>
+                    <h2 class="section-title">Migration Readiness Scanner</h2>
+                    <p class="section-description">Assess the complexity of migrating your historical contracts.</p>
+                </div>
+                <div class="form-card">
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Contracts for migration <span class="required">*</span></label><input type="number" class="form-input" id="s4ContractCount" placeholder="e.g., 2500" min="1"></div>
+                        <div class="form-group"><label class="form-label">Contract types <span class="required">*</span></label><input type="text" class="form-input" id="s4ContractTypes" placeholder="e.g., NDA, MSA, SOW"><div class="form-hint">Add your contract types separated by ","</div></div>
+                        <div class="form-group"><label class="form-label">Metadata fields <span class="required">*</span></label><div class="form-hint" style="margin-bottom: var(--space-sm);">Here is what we offer as standard <a href="#" target="_blank" style="color: var(--primary); text-decoration: underline;">(view standard metadata fields)</a></div><div class="toggle-group" style="margin-top: var(--space-sm);"><label class="form-label" style="margin: 0;">Do you need customised metadata fields on top of standard provided by SpotDraft?</label><div class="toggle" id="s4MetadataFieldsCustomised" onclick="toggleGeneric(this); toggleSection('s4CustomMetadataSection')"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                        <div class="form-group"><label class="form-label">Storage location <span class="required">*</span></label><div class="chip-group" id="s4StorageLocation"><div class="chip" data-value="Google Drive" onclick="toggleChip(this)">Google Drive</div><div class="chip" data-value="SharePoint" onclick="toggleChip(this)">SharePoint</div><div class="chip" data-value="Dropbox" onclick="toggleChip(this)">Dropbox</div><div class="chip" data-value="Box" onclick="toggleChip(this)">Box</div><div class="chip" data-value="Local" onclick="toggleChip(this)">Local</div></div></div>
+                        <div class="form-group"><label class="form-label">Structured naming? <span class="required">*</span></label><div class="form-hint" style="margin-bottom: var(--space-sm);">Data for migration available in a structured and clean folders?</div><select class="form-select" id="s4NamingConvention"><option value="">Select</option><option value="Yes - 100%">Yes - 100% of data is clean and structured</option><option value="Partial">Partial</option><option value="None">None - it's random mess</option></select></div>
+                        <div class="form-group"><label class="form-label">Contract formats <span class="required">*</span></label><div class="chip-group" id="s4ContractFormats"><div class="chip" data-value="PDF" onclick="toggleChip(this)">PDF</div><div class="chip" data-value="Word" onclick="toggleChip(this)">Word</div><div class="chip" data-value="Scanned" onclick="toggleChip(this)">Scanned</div></div></div>
+                        <div class="form-group"><label class="form-label">Existing metadata? <span class="required">*</span></label><div class="form-hint" style="margin-bottom: var(--space-sm);">Do you have existing metadata for your contracts? This includes information like contract type, parties, dates, values, etc. that is already captured in your current system.</div><select class="form-select" id="s4ExistingMetadata"><option value="">Select</option><option value="Yes - fully">Yes - fully captured and structured</option><option value="Yes - partially">Yes - partially captured, some gaps exist</option><option value="No">No - no existing metadata available</option></select></div>
+                        <div class="form-group"><label class="form-label">Migration priority <span class="required">*</span></label><select class="form-select" id="s4MigrationPriority"><option value="">Select</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select></div>
+                    </div>
+                    <div class="form-group"><label class="form-label">Excel trackers available?</label><div class="toggle-group"><div class="toggle" id="s4ExcelTrackers" onclick="toggleGeneric(this); toggleSection('s4ExcelUploadSection')"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                    <div class="conditional-section" id="s4ExcelUploadSection"><div class="form-group"><label class="form-label">Upload tracker(s)</label><input type="file" class="form-input" id="s4ExcelFiles" accept=".xlsx,.csv" multiple></div></div>
+                    <div class="conditional-section" id="s4CustomMetadataSection"><div class="form-group"><label class="form-label">Custom metadata fields</label><textarea class="form-textarea" id="s4CustomMetadata" placeholder="Describe custom fields..."></textarea></div></div>
+                    <div class="btn-group"><button class="btn btn-secondary" onclick="prevSection(4)"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back</button><button class="btn btn-primary" onclick="nextSection(4)">Continue to Integrations<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button></div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: Integration Readiness -->
+            <div class="form-section" id="section5">
+                <div class="section-header">
+                    <div class="section-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="8" height="8"/><rect x="14" y="2" width="8" height="8"/></svg>Section 5 of 8</div>
+                    <h2 class="section-title">Integration Readiness Scanner</h2>
+                    <p class="section-description">Identify IT preparedness and integration blockers.</p>
+                </div>
+                <div class="form-card">
+                    <div class="form-group"><label class="form-label">Systems to integrate <span class="required">*</span></label>
+                        <div class="integration-grid" id="s5IntegrationSystems">
+                            <div class="integration-chip" data-value="Salesforce" onclick="toggleIntegrationChip(this)"><svg class="integration-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg>Salesforce</div>
+                            <div class="integration-chip" data-value="HubSpot" onclick="toggleIntegrationChip(this)"><svg class="integration-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg>HubSpot</div>
+                            <div class="integration-chip" data-value="Cloud Storage" onclick="toggleIntegrationChip(this)"><svg class="integration-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>Cloud Storage</div>
+                            <div class="integration-chip" data-value="DocuSign" onclick="toggleIntegrationChip(this)"><svg class="integration-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5z"/></svg>DocuSign</div>
+                            <div class="integration-chip" data-value="SSO" onclick="toggleIntegrationChip(this)"><svg class="integration-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/></svg>SSO</div>
+                            <div class="integration-chip" data-value="Jira" onclick="toggleIntegrationChip(this)"><svg class="integration-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Jira</div>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Custom integration?</label><div class="toggle-group"><div class="toggle" id="s5CustomIntegration" onclick="toggleGeneric(this); toggleSection('s5CustomIntegrationSection')"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                        <div class="form-group"><label class="form-label">API/Webhook access?</label><div class="toggle-group"><div class="toggle" id="s5ApiAccess" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                        <div class="form-group"><label class="form-label">Admin access? <span class="required">*</span></label><select class="form-select" id="s5AdminAccess"><option value="">Select</option><option value="Yes - all">Yes - all</option><option value="Yes - some">Yes - some</option><option value="No">No</option></select></div>
+                        <div class="form-group"><label class="form-label">IT approval needed? <span class="required">*</span></label><select class="form-select" id="s5SecurityApproval"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option><option value="Not sure">Not sure</option></select></div>
+                    </div>
+                    <div class="conditional-section" id="s5CustomIntegrationSection"><div class="form-group"><label class="form-label">Describe custom integration requirements</label><textarea class="form-textarea" id="s5CustomIntegrationDetails" placeholder="Describe your custom integration requirements..."></textarea></div></div>
+                    <div class="poc-card" style="margin-top: var(--space-lg);"><div class="poc-card-header"><div class="poc-icon" style="background: var(--info);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="poc-title">Integration Decision Maker</div><div class="poc-subtitle">For integration decisions</div></div></div><div class="input-group"><div class="form-group"><label class="form-label">Name <span class="required">*</span></label><input type="text" class="form-input" id="s5DecisionMakerName" placeholder="Name"></div><div class="form-group"><label class="form-label">Role <span class="required">*</span></label><input type="text" class="form-input" id="s5DecisionMakerRole" placeholder="Role"></div><div class="form-group"><label class="form-label">Email <span class="required">*</span></label><input type="email" class="form-input" id="s5DecisionMakerEmail" placeholder="Email" onblur="validateEmailField('s5DecisionMakerEmail')"></div></div></div>
+                    <div class="form-group" style="margin-top: var(--space-lg);"><label class="form-label">Expected outcomes <span class="required">*</span></label><div class="chip-group" id="s5IntegrationOutcomes"><div class="chip" data-value="Contract sync" onclick="toggleChip(this)">Contract sync</div><div class="chip" data-value="Deal sync" onclick="toggleChip(this)">Deal sync</div><div class="chip" data-value="Auto-fill" onclick="toggleChip(this)">Auto-fill</div><div class="chip" data-value="Automation" onclick="toggleChip(this)">Automation</div></div></div>
+                    <div class="btn-group"><button class="btn btn-secondary" onclick="prevSection(5)"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back</button><button class="btn btn-primary" onclick="nextSection(5)">Continue to Business Process<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button></div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: Business Process -->
+            <div class="form-section" id="section6">
+                <div class="section-header">
+                    <div class="section-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Section 6 of 8</div>
+                    <h2 class="section-title">Business Process Readiness</h2>
+                    <p class="section-description">Understand your current processes and expectations.</p>
+                </div>
+                <div class="form-card">
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Approval workflow? <span class="required">*</span></label><div class="form-hint" style="margin-bottom: var(--space-sm);">Do you have an existing approval workflow for contracts? This refers to the process of getting contracts reviewed and approved by different stakeholders (e.g., Legal, Finance, Management) before execution.</div><select class="form-select" id="s6ApprovalWorkflow" onchange="toggleSection('s6WorkflowDetailsSection')"><option value="">Select</option><option value="Yes - documented">Yes - documented (formal process with clear steps and stakeholders)</option><option value="Yes - informal">Yes - informal (process exists but not formally documented)</option><option value="No">No (no approval workflow currently in place)</option></select></div>
+                        <div class="form-group"><label class="form-label">Contracts/month <span class="required">*</span></label><input type="number" class="form-input" id="s6ContractsPerMonth" placeholder="e.g., 150" min="1"></div>
+                        <div class="form-group full-width"><label class="form-label">Who generates contracts? <span class="required">*</span></label><div class="chip-group" id="s6ContractGenerators"><div class="chip" data-value="Sales" onclick="toggleChip(this)">Sales</div><div class="chip" data-value="Legal" onclick="toggleChip(this)">Legal</div><div class="chip" data-value="Operations" onclick="toggleChip(this)">Operations</div><div class="chip" data-value="Mixed" onclick="toggleChip(this)">Mixed</div></div></div>
+                    </div>
+                    <div class="conditional-section" id="s6WorkflowDetailsSection"><div class="form-group"><label class="form-label">Describe workflow</label><textarea class="form-textarea" id="s6WorkflowDetails" placeholder="e.g., Legal > Manager > Finance"></textarea></div></div>
+                    <div class="form-group"><label class="form-label">Current bottlenecks <span class="required">*</span></label><textarea class="form-textarea" id="s6Bottlenecks" placeholder="Describe pain points..."></textarea></div>
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Phase 1 must-haves <span class="required">*</span></label><textarea class="form-textarea" id="s6Phase1MustHaves" placeholder="Essential for go-live..."></textarea></div>
+                        <div class="form-group"><label class="form-label">Phase 2 nice-to-haves</label><textarea class="form-textarea" id="s6Phase2NiceToHaves" placeholder="Future phases..."></textarea></div>
+                    </div>
+                    <div class="btn-group"><button class="btn btn-secondary" onclick="prevSection(6)"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back</button><button class="btn btn-primary" onclick="nextSection(6)">Continue to Security<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button></div>
+                </div>
+            </div>
+
+            <!-- SECTION 7: Security & Compliance -->
+            <div class="form-section" id="section7">
+                <div class="section-header">
+                    <div class="section-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Section 7 of 8</div>
+                    <h2 class="section-title">Security, Compliance & IT</h2>
+                    <p class="section-description">Identify security requirements and blockers.</p>
+                </div>
+                <div class="form-card">
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Security review needed? <span class="required">*</span></label><select class="form-select" id="s7SecurityReview" onchange="handleSecurityReviewChange()"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option><option value="Completed">Already completed</option></select></div>
+                        <div class="form-group"><label class="form-label">Infosec approvals pending? <span class="required">*</span></label><select class="form-select" id="s7InfosecApprovals" onchange="toggleSection('s7InfosecSection')"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option><option value="Not sure">Not sure</option></select></div>
+                        <div class="form-group"><label class="form-label">Data residency requirements? <span class="required">*</span></label><select class="form-select" id="s7DataResidency" onchange="toggleSection('s7DataResidencySection')"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option><option value="Not sure">Not sure</option></select></div>
+                        <div class="form-group"><label class="form-label">Custom SSO? <span class="required">*</span></label><select class="form-select" id="s7CustomSSO" onchange="toggleSection('s7SSOSection')"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                    </div>
+                    <div class="conditional-section" id="s7SecurityReviewSection"><div class="form-group"><label class="form-label">Reviews needed</label><div class="chip-group" id="s7SecurityReviews"><div class="chip" data-value="DPA" onclick="toggleChip(this)">DPA</div><div class="chip" data-value="SOC-2" onclick="toggleChip(this)">SOC-2</div><div class="chip" data-value="Security" onclick="toggleChip(this)">Security Review</div><div class="chip" data-value="Other" onclick="toggleChip(this)">Other</div></div></div></div>
+                    <div class="conditional-section" id="s7InfosecSection"><div class="form-group"><label class="form-label">Pending approvals</label><textarea class="form-textarea" id="s7InfosecDetails" placeholder="Details..."></textarea></div></div>
+                    <div class="conditional-section" id="s7DataResidencySection"><div class="form-group"><label class="form-label">Data residency</label><input type="text" class="form-input" id="s7DataResidencyDetails" placeholder="e.g., EU-only, US"></div></div>
+                    <div class="conditional-section" id="s7SSOSection"><div class="form-group"><label class="form-label">SSO provider</label><input type="text" class="form-input" id="s7SSODetails" placeholder="e.g., Okta, Azure AD"></div></div>
+                    <div class="btn-group"><button class="btn btn-secondary" onclick="prevSection(7)"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back</button><button class="btn btn-primary" onclick="nextSection(7)">Continue to Uploads<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button></div>
+                </div>
+            </div>
+
+            <!-- SECTION 8: Upload Center -->
+            <div class="form-section" id="section8">
+                <div class="section-header">
+                    <div class="section-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Section 8 of 8</div>
+                    <h2 class="section-title">Upload Center</h2>
+                    <p class="section-description">Upload documents upfront to unblock delivery.</p>
+                </div>
+                <div class="form-card">
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Templates</label><input type="file" class="form-input" id="s8Templates" accept=".docx,.pdf" multiple><div class="form-hint">Contract templates</div></div>
+                        <div class="form-group"><label class="form-label">Clause libraries</label><input type="file" class="form-input" id="s8ClauseLibraries" accept=".docx,.xlsx,.pdf" multiple></div>
+                        <div class="form-group"><label class="form-label">Approval matrices</label><input type="file" class="form-input" id="s8ApprovalMatrices" accept=".xlsx,.pdf" multiple></div>
+                        <div class="form-group"><label class="form-label">Metadata sheets</label><input type="file" class="form-input" id="s8MetadataSheets" accept=".xlsx,.csv" multiple></div>
+                        <div class="form-group"><label class="form-label">Sample contracts</label><input type="file" class="form-input" id="s8SampleContracts" accept=".pdf,.docx" multiple></div>
+                        <div class="form-group"><label class="form-label">Integration docs</label><input type="file" class="form-input" id="s8IntegrationDocs" accept=".pdf,.docx" multiple></div>
+                        <div class="form-group"><label class="form-label">Brand guidelines</label><input type="file" class="form-input" id="s8BrandGuidelines" accept=".pdf,.zip" multiple></div>
+                    </div>
+                    <div class="btn-group"><button class="btn btn-secondary" onclick="prevSection(8)"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back</button><button class="btn btn-primary" onclick="submitAssessment()">Submit Assessment<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button></div>
+                </div>
+            </div>
+
+            <!-- LOADING SCREEN -->
+            <div class="loading-screen" id="loadingScreen">
+                <div class="loading-spinner"></div>
+                <div class="loading-title">Analyzing Your Responses</div>
+                <div class="loading-subtitle">Generating readiness assessment and implementation plan with AI. This may take 1-2 minutes.</div>
+                <div class="loading-progress-container">
+                    <div class="loading-progress-bar">
+                        <div class="loading-progress-fill" id="loadingProgressFill" style="width: 0%;"></div>
+                    </div>
+                    <div class="loading-progress-text" id="loadingProgressText">Initializing AI...</div>
+                </div>
+            </div>
+
+            <!-- RESULTS SCREEN -->
+            <div class="results-screen" id="resultsScreen">
+                <div class="score-card">
+                    <div class="score-label">Readiness Score</div>
+                    <div class="score-value" id="overallScore">--</div>
+                    <div class="score-status" id="scoreStatus">Calculating...</div>
+                    <div class="score-description" id="scoreDescription"></div>
+                    <div class="score-breakdown" id="scoreBreakdown"></div>
+                </div>
+                <div class="results-section"><h3 class="results-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Red Flags & Risks</h3><div id="redFlagsList"></div></div>
+                <div class="results-section"><h3 class="results-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Action Items</h3><div class="action-tabs"><button class="action-tab active" onclick="switchActionTab('customer')">Your Team</button><button class="action-tab" onclick="switchActionTab('spotdraft')">SpotDraft Team</button></div><div class="action-tab-content active" id="customerActions"></div><div class="action-tab-content" id="spotdraftActions"></div></div>
+                <div class="results-section"><h3 class="results-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Implementation Plan</h3><div id="timelineSummary" style="margin-bottom: var(--space-lg); padding: var(--space-md); background: var(--info-light); border-radius: var(--radius-md);"></div><div id="implementationPhases"></div></div>
+                <div class="results-section" id="geminiDebugSection" style="display: none;"><h3 class="results-section-title" onclick="toggleGeminiDebug()" style="cursor: pointer;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Gemini AI Request/Response (Testing) <span id="geminiToggleIcon" style="float: right; font-size: 14px;">▼</span></h3><div id="geminiDebugContent" style="display: none;"><div style="margin-bottom: var(--space-lg);"><h4 style="margin-bottom: var(--space-sm); color: var(--text);">Request (Prompt sent to Gemini):</h4><pre id="geminiRequest" style="background: var(--bg-secondary); padding: var(--space-md); border-radius: var(--radius-md); overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; font-size: 12px; line-height: 1.5;"></pre></div><div><h4 style="margin-bottom: var(--space-sm); color: var(--text);">Response (from Gemini):</h4><pre id="geminiResponse" style="background: var(--bg-secondary); padding: var(--space-md); border-radius: var(--radius-md); overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; font-size: 12px; line-height: 1.5;"></pre></div></div></div>
+                <div class="btn-group" style="border-top: none;"><button class="btn btn-secondary" onclick="location.reload()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/></svg>New Assessment</button><button class="btn btn-primary" onclick="window.print()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print Report</button></div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // ============================================
+        // API CONFIGURATION
+        // ============================================
+        // API Configuration - automatically detects environment
+        const API_CONFIG = {
+            // Detect environment and set appropriate base URL
+            BASE_URL: (() => {
+                const hostname = window.location.hostname;
+                // Local development
+                if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                    return 'http://localhost:3000';
+                }
+                // Production (Render, Vercel, etc.) - use same origin
+                return ''; // Use relative path (same origin)
+            })(),
+            ENDPOINTS: {
+                ASSESS: '/assess'
+            }
+        };
+        
+        // ============================================
+        // API PAYLOAD EXAMPLES
+        // ============================================
+        /*
+        Response Payload:
+        {
+            "success": true,
+            "extracted_data": {
+                "organisation_name": "Acme Corporation",
+                "purchased_modules": ["Template Setup", "Migration", "Integrations"],
+                "template_count": 5,
+                "migration_contract_count": 2500,
+                "integration_systems": ["Salesforce", "HubSpot"]
+            },
+            "confidence": 0.95,
+            "flags": [
+                {
+                    "type": "warning",
+                    "message": "Template count not explicitly stated, estimated from context"
+                }
+            ]
+        }
+        
+        API 2: Submit Assessment
+        Endpoint: POST /assess
+        
+        Request Payload:
+        {
+            "intake_responses": {
+                "section_1_account_stakeholder": {
+                    "organisation_name": "Acme Corporation",
+                    "primary_poc": {
+                        "name": "John Doe",
+                        "role": "Legal Ops Manager",
+                        "email": "john.doe@acme.com",
+                        "timezone": "US"
+                    },
+                    "legal_poc": {
+                        "name": "Jane Smith",
+                        "role": "Legal Counsel",
+                        "email": "jane.smith@acme.com",
+                        "timezone": "US"
+                    },
+                    "integrations_required": true,
+                    "technical_poc": {
+                        "name": "Bob Johnson",
+                        "email": "bob.johnson@acme.com",
+                        "timezone": "US"
+                    },
+                    "availability": "Tuesdays and Thursdays, 2-4 PM EST",
+                    "communication_channels": ["Slack", "Email"],
+                    "expected_go_live": "2024-06-01"
+                },
+                "section_2_order_form_scope": {
+                    "purchased_modules": ["Template Setup", "Migration"],
+                    "template_count": 5,
+                    "migration_contract_count": 2500,
+                    "migration_file_formats": ["PDF", "DOCX"],
+                    "integrations": [],
+                    "additional_addons": ""
+                },
+                "section_3_template_readiness": {
+                    "template_count": 5,
+                    "templates_finalized": "Yes",
+                    "template_formats": ["Word"],
+                    "clause_level_changes": false,
+                    "conditional_logic": "Moderate",
+                    "dynamic_rendering_needed": true,
+                    "dynamic_rendering_complexity": "Simple",
+                    "language_variations": false,
+                    "calculations_involved": false,
+                    "approval_matrices_exist": true
+                },
+                "section_4_migration_readiness": {
+                    "contract_count": 2500,
+                    "contract_types": "NDA, MSA, SOW",
+                    "metadata_fields_standard": true,
+                    "metadata_fields_customised": false,
+                    "custom_metadata": "",
+                    "storage_locations": ["Google Drive"],
+                    "structured_naming": "Yes - 100%",
+                    "contract_formats": ["PDF"],
+                    "existing_metadata": "Yes - fully",
+                    "excel_trackers": true,
+                    "migration_priority": "High"
+                },
+                "section_5_integration_readiness": {
+                    "systems_to_integrate": ["Salesforce"],
+                    "custom_integration": false,
+                    "custom_integration_details": "",
+                    "api_webhook_access": true,
+                    "admin_access": "Yes - all",
+                    "security_approval": "Yes",
+                    "decision_maker": {
+                        "name": "Alice Brown",
+                        "role": "IT Director",
+                        "email": "alice.brown@acme.com"
+                    },
+                    "expected_outcomes": ["Contract sync", "Auto-fill"]
+                },
+                "section_6_business_process": {
+                    "approval_workflow": "Yes - documented",
+                    "workflow_details": "Legal > Manager > Finance",
+                    "contracts_per_month": 150,
+                    "contract_generators": ["Sales", "Legal"],
+                    "bottlenecks": "Manual review process takes too long",
+                    "phase1_must_haves": "Template automation, basic approval workflow",
+                    "phase2_nice_to_haves": "Advanced analytics, custom reporting"
+                },
+                "section_7_security_compliance": {
+                    "security_review": "Yes",
+                    "security_reviews_needed": ["DPA", "SOC-2"],
+                    "infosec_approvals": "Yes",
+                    "infosec_details": "Pending SOC-2 review",
+                    "data_residency": "No",
+                    "data_residency_details": "",
+                    "custom_sso": "Yes",
+                    "sso_details": "Okta"
+                },
+                "section_8_uploads": {
+                    "templates": ["template1.docx", "template2.docx"],
+                    "clause_libraries": ["clauses.xlsx"],
+                    "approval_matrices": ["approval-matrix.xlsx"],
+                    "metadata_sheets": ["metadata.csv"],
+                    "sample_contracts": ["sample1.pdf"],
+                    "integration_docs": ["integration-spec.pdf"],
+                    "brand_guidelines": ["brand-guidelines.pdf"]
+                }
+            }
+        }
+        
+        Response Payload:
+        {
+            "success": true,
+            "data": {
+                "readiness_score": {
+                    "overall": 78,
+                    "breakdown": {
+                        "account_stakeholder": 90,
+                        "order_form_scope": 85,
+                        "template_readiness": 75,
+                        "migration_readiness": 70,
+                        "integration_readiness": 80,
+                        "business_process": 75,
+                        "security_compliance": 65
+                    }
+                },
+                "status_label": "Ready with Minor Blockers",
+                "status_description": "Your organization is well-prepared for implementation. A few items need attention before go-live.",
+                "red_flags": [
+                    {
+                        "section": "Security & Compliance",
+                        "issue": "Security review pending",
+                        "impact": "May delay go-live by 2-3 weeks",
+                        "severity": "medium"
+                    }
+                ],
+                "action_items": {
+                    "customer": [
+                        {
+                            "task": "Complete SOC-2 security review",
+                            "section": "Security & Compliance",
+                            "priority": "high",
+                            "deadline": "2024-05-15",
+                            "owner": "IT Team"
+                        }
+                    ],
+                    "spotdraft": [
+                        {
+                            "task": "Schedule template review session",
+                            "section": "Template Readiness",
+                            "priority": "medium",
+                            "deadline": "2024-04-20",
+                            "owner": "Implementation Team"
+                        }
+                    ]
+                },
+                "implementation_plan": {
+                    "estimated_timeline": "12-16 weeks",
+                    "phases": [
+                        {
+                            "phase": "Phase 1: Setup & Configuration",
+                            "duration": "4-6 weeks",
+                            "tasks": ["Account setup", "Template configuration", "User training"]
+                        }
+                    ]
+                }
+            }
+        }
+        */
+        
+        // ============================================
+        // STATE MANAGEMENT
+        // ============================================
+        const formData = {
+            section1: {
+                orgName: '',
+                primaryPoc: { name: '', role: '', email: '', timezone: '' },
+                legalPoc: { name: '', role: '', email: '', timezone: '' },
+                integrationsRequired: false,
+                technicalPoc: { name: '', email: '', timezone: '' },
+                availability: '',
+                communicationChannels: [],
+                expectedGoLive: ''
+            },
+            section2: {
+                purchasedModules: [],
+                templateCount: null,
+                migrationContractCount: null,
+                migrationFileFormats: [],
+                integrations: [],
+                additionalAddons: ''
+            }
+        };
+        
+        let currentSection = 0;
+        const totalSections = 8;
+        
+        // ============================================
+        // NAVIGATION
+        // ============================================
+        function startAssessment() {
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const section1 = document.getElementById('section1');
+            const progressContainer = document.getElementById('progressContainer');
+            if (welcomeScreen) welcomeScreen.style.display = 'none';
+            if (section1) section1.classList.add('active');
+            if (progressContainer) progressContainer.style.display = 'block';
+            currentSection = 1;
+            updateProgress();
+        }
+        
+        function goToWelcome() {
+            document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const progressContainer = document.getElementById('progressContainer');
+            if (welcomeScreen) welcomeScreen.style.display = 'block';
+            if (progressContainer) progressContainer.style.display = 'none';
+            currentSection = 0;
+        }
+        
+        function nextSection(current) {
+            if (!validateSection(current)) return;
+            
+            saveSection(current);
+            
+            const currentSectionEl = document.getElementById(`section${current}`);
+            const nextSectionEl = document.getElementById(`section${current + 1}`);
+            if (currentSectionEl) currentSectionEl.classList.remove('active');
+            if (nextSectionEl) nextSectionEl.classList.add('active');
+            currentSection = current + 1;
+            updateProgress();
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function prevSection(current) {
+            const currentSectionEl = document.getElementById(`section${current}`);
+            const prevSectionEl = document.getElementById(`section${current - 1}`);
+            if (currentSectionEl) currentSectionEl.classList.remove('active');
+            if (prevSectionEl) prevSectionEl.classList.add('active');
+            currentSection = current - 1;
+            updateProgress();
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function updateProgress() {
+            const percent = Math.round((currentSection / totalSections) * 100);
+            document.getElementById('progressFill').style.width = `${percent}%`;
+            document.getElementById('progressText').textContent = `Section ${currentSection} of ${totalSections}`;
+            document.getElementById('progressPercent').textContent = `${percent}%`;
+        }
+        
+        // ============================================
+        // VALIDATION
+        // ============================================
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function validateEmailField(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (!field) return true;
+            
+            const email = field.value.trim();
+            if (!email) {
+                field.classList.add('error');
+                return false;
+            }
+            
+            if (!validateEmail(email)) {
+                field.classList.add('error');
+                // Show error message
+                let errorMsg = field.parentElement.querySelector('.email-error');
+                if (!errorMsg) {
+                    errorMsg = document.createElement('div');
+                    errorMsg.className = 'error-message email-error';
+                    errorMsg.textContent = 'Please enter a valid email address';
+                    field.parentElement.appendChild(errorMsg);
+                }
+                errorMsg.classList.add('visible');
+                return false;
+            } else {
+                field.classList.remove('error');
+                const errorMsg = field.parentElement.querySelector('.email-error');
+                if (errorMsg) {
+                    errorMsg.classList.remove('visible');
+                }
+                return true;
+            }
+        }
+        
+        function validateSection(section) {
+            let isValid = true;
+            
+            if (section === 1) {
+                // Organisation Name
+                const orgName = document.getElementById('orgName');
+                const orgNameError = document.getElementById('orgNameError');
+                if (!orgName) {
+                    isValid = false;
+                } else if (!orgName.value.trim()) {
+                    orgName.classList.add('error');
+                    if (orgNameError) orgNameError.classList.add('visible');
+                    isValid = false;
+                } else {
+                    orgName.classList.remove('error');
+                    if (orgNameError) orgNameError.classList.remove('visible');
+                }
+                
+                // Primary POC
+                const primaryFields = ['primaryPocName', 'primaryPocRole', 'primaryPocTimezone'];
+                primaryFields.forEach(id => {
+                    const field = document.getElementById(id);
+                    if (!field.value.trim()) {
+                        field.classList.add('error');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('error');
+                    }
+                });
+                
+                // Primary POC Email with validation
+                if (!validateEmailField('primaryPocEmail')) {
+                    isValid = false;
+                }
+                
+                // Legal POC
+                const legalFields = ['legalPocName', 'legalPocRole', 'legalPocTimezone'];
+                legalFields.forEach(id => {
+                    const field = document.getElementById(id);
+                    if (!field || !field.value.trim()) {
+                        if (field) field.classList.add('error');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('error');
+                    }
+                });
+                
+                // Legal POC Email with validation
+                if (!validateEmailField('legalPocEmail')) {
+                    isValid = false;
+                }
+                
+                // Technical POC (if integrations required)
+                if (formData.section1.integrationsRequired) {
+                    const techFields = ['technicalPocName', 'technicalPocTimezone'];
+                    techFields.forEach(id => {
+                        const field = document.getElementById(id);
+                        if (!field.value.trim()) {
+                            field.classList.add('error');
+                            isValid = false;
+                        } else {
+                            field.classList.remove('error');
+                        }
+                    });
+                    
+                    // Technical POC Email with validation
+                    if (!validateEmailField('technicalPocEmail')) {
+                        isValid = false;
+                    }
+                }
+                
+                // Availability
+                const availability = document.getElementById('availability');
+                if (!availability.value.trim()) {
+                    availability.classList.add('error');
+                    isValid = false;
+                } else {
+                    availability.classList.remove('error');
+                }
+                
+                // Communication Channels
+                const selectedChannels = document.querySelectorAll('#communicationChannels .chip.selected');
+                const communicationError = document.getElementById('communicationError');
+                if (selectedChannels.length === 0) {
+                    if (communicationError) communicationError.classList.add('visible');
+                    isValid = false;
+                } else {
+                    if (communicationError) communicationError.classList.remove('visible');
+                }
+                
+                // Expected Go-Live
+                const goLive = document.getElementById('expectedGoLive');
+                if (!goLive.value) {
+                    goLive.classList.add('error');
+                    isValid = false;
+                } else {
+                    goLive.classList.remove('error');
+                }
+            }
+            
+            if (section === 2) {
+                // Purchased Modules
+                const selectedModules = document.querySelectorAll('#purchasedModules .module-card.selected');
+                const modulesError = document.getElementById('modulesError');
+                if (selectedModules.length === 0) {
+                    if (modulesError) modulesError.classList.add('visible');
+                    isValid = false;
+                } else {
+                    if (modulesError) modulesError.classList.remove('visible');
+                }
+                
+                // Template Count (if Template Setup selected)
+                const hasTemplateSetup = formData.section2.purchasedModules.includes('Template Setup');
+                if (hasTemplateSetup) {
+                    const templateCount = document.getElementById('templateCount');
+                    if (!templateCount) {
+                        isValid = false;
+                    } else if (!templateCount.value || parseInt(templateCount.value) < 1) {
+                        templateCount.classList.add('error');
+                        isValid = false;
+                    } else {
+                        templateCount.classList.remove('error');
+                    }
+                }
+                
+                // Migration Details (if Migration selected)
+                const hasMigration = formData.section2.purchasedModules.includes('Migration');
+                if (hasMigration) {
+                    const migrationCount = document.getElementById('migrationContractCount');
+                    if (!migrationCount) {
+                        isValid = false;
+                    } else if (!migrationCount.value || parseInt(migrationCount.value) < 1) {
+                        migrationCount.classList.add('error');
+                        isValid = false;
+                    } else {
+                        migrationCount.classList.remove('error');
+                    }
+                    
+                    const selectedFormats = document.querySelectorAll('#migrationFileFormats .chip.selected');
+                    if (selectedFormats.length === 0) {
+                        isValid = false;
+                    }
+                }
+                
+            }
+            
+            return isValid;
+        }
+        
+        // ============================================
+        // SAVE DATA
+        // ============================================
+        function saveSection(section) {
+            if (section === 1) {
+                formData.section1 = {
+                    orgName: document.getElementById('orgName').value,
+                    primaryPoc: {
+                        name: document.getElementById('primaryPocName').value,
+                        role: document.getElementById('primaryPocRole').value,
+                        email: document.getElementById('primaryPocEmail').value,
+                        timezone: document.getElementById('primaryPocTimezone').value
+                    },
+                    legalPoc: {
+                        name: document.getElementById('legalPocName').value,
+                        role: document.getElementById('legalPocRole').value,
+                        email: document.getElementById('legalPocEmail').value,
+                        timezone: document.getElementById('legalPocTimezone').value
+                    },
+                    integrationsRequired: formData.section1.integrationsRequired,
+                    technicalPoc: formData.section1.integrationsRequired ? {
+                        name: document.getElementById('technicalPocName').value,
+                        email: document.getElementById('technicalPocEmail').value,
+                        timezone: document.getElementById('technicalPocTimezone').value
+                    } : null,
+                    availability: document.getElementById('availability').value,
+                    communicationChannels: getSelectedChips('communicationChannels'),
+                    expectedGoLive: document.getElementById('expectedGoLive').value
+                };
+                
+                console.log('Section 1 saved:', formData.section1);
+            }
+            
+            if (section === 2) {
+                formData.section2 = {
+                    purchasedModules: getSelectedModules(),
+                    templateCount: (() => {
+                        const el = document.getElementById('templateCount');
+                        return el && el.value ? parseInt(el.value) : null;
+                    })(),
+                    migrationContractCount: (() => {
+                        const el = document.getElementById('migrationContractCount');
+                        return el && el.value ? parseInt(el.value) : null;
+                    })(),
+                    migrationFileFormats: getSelectedChips('migrationFileFormats'),
+                    integrations: getSelectedIntegrations(),
+                    additionalAddons: document.getElementById('additionalAddons').value
+                };
+                
+                console.log('Section 2 saved:', formData.section2);
+            }
+        }
+        
+        // ============================================
+        // TOGGLE FUNCTIONS
+        // ============================================
+        function toggleIntegrations() {
+            const toggle = document.getElementById('integrationsToggle');
+            const label = document.getElementById('integrationsToggleLabel');
+            const section = document.getElementById('technicalPocSection');
+            
+            toggle.classList.toggle('active');
+            formData.section1.integrationsRequired = toggle.classList.contains('active');
+            label.textContent = formData.section1.integrationsRequired ? 'Yes' : 'No';
+            
+            if (formData.section1.integrationsRequired) {
+                section.classList.add('visible');
+            } else {
+                section.classList.remove('visible');
+            }
+        }
+        
+        function toggleChip(chip) {
+            chip.classList.toggle('selected');
+        }
+        
+        function getSelectedChips(containerId) {
+            const chips = document.querySelectorAll(`#${containerId} .chip.selected`);
+            return Array.from(chips).map(chip => chip.dataset.value);
+        }
+        
+        // ============================================
+        // MODULE CARDS
+        // ============================================
+        function toggleModule(card) {
+            card.classList.toggle('selected');
+            updateModuleConditionalSections();
+            
+            // Update formData
+            formData.section2.purchasedModules = getSelectedModules();
+        }
+        
+        function getSelectedModules() {
+            const cards = document.querySelectorAll('#purchasedModules .module-card.selected');
+            return Array.from(cards).map(card => card.dataset.value);
+        }
+        
+        function updateModuleConditionalSections() {
+            const selectedModules = getSelectedModules();
+            
+            // Template Count Section
+            const templateSection = document.getElementById('templateCountSection');
+            if (templateSection) {
+                if (selectedModules.includes('Template Setup')) {
+                    templateSection.classList.add('visible');
+                } else {
+                    templateSection.classList.remove('visible');
+                }
+            }
+            
+            // Migration Details Section
+            const migrationSection = document.getElementById('migrationDetailsSection');
+            if (migrationSection) {
+                if (selectedModules.includes('Migration')) {
+                    migrationSection.classList.add('visible');
+                } else {
+                    migrationSection.classList.remove('visible');
+                }
+            }
+            
+            // Integration Systems Section (removed - now in Section 5)
+            // No longer needed in Section 2
+        }
+        
+        // ============================================
+        // INTEGRATION CHIPS
+        // ============================================
+        function toggleIntegrationChip(chip) {
+            chip.classList.toggle('selected');
+        }
+        
+        function getSelectedIntegrations() {
+            // Integration systems moved to Section 5 - this function kept for backward compatibility
+            // Returns empty array since integrations are no longer in Section 2
+            return [];
+        }
+        
+        // ============================================
+        // API CONFIGURATION
+        // ============================================
+        const API_BASE_URL = 'http://localhost:3000'; // Update this to your server URL
+        
+        // ============================================
+        // ============================================
+        // GENERIC TOGGLE
+        // ============================================
+        function toggleGeneric(element) {
+            if (!element) return;
+            element.classList.toggle('active');
+            const label = element.nextElementSibling;
+            if (label && label.classList.contains('toggle-label')) {
+                label.textContent = element.classList.contains('active') ? 'Yes' : 'No';
+            }
+        }
+        
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const isCurrentlyVisible = section.classList.contains('visible');
+                section.classList.toggle('visible');
+            }
+        }
+        
+        function handleSecurityReviewChange() {
+            const select = document.getElementById('s7SecurityReview');
+            const section = document.getElementById('s7SecurityReviewSection');
+            if (select && section) {
+                if (select.value === 'Yes') {
+                    section.classList.add('visible');
+                } else {
+                    section.classList.remove('visible');
+                    // Clear selected chips when hiding
+                    document.querySelectorAll('#s7SecurityReviews .chip.selected').forEach(chip => {
+                        chip.classList.remove('selected');
+                    });
+                }
+            }
+        }
+        
+        
+        // ============================================
+        // DATA COLLECTION
+        // ============================================
+        function getValue(id) {
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        }
+        
+        function getNumericValue(id) {
+            const val = getValue(id);
+            return val ? parseInt(val) : null;
+        }
+        
+        function isToggleActive(id) {
+            const el = document.getElementById(id);
+            return el ? el.classList.contains('active') : false;
+        }
+        
+        function getSelectedIntegrationsFromSection(containerId) {
+            const chips = document.querySelectorAll(`#${containerId} .integration-chip.selected`);
+            return Array.from(chips).map(chip => chip.dataset.value);
+        }
+        
+        function getFileList(id) {
+            const el = document.getElementById(id);
+            return el && el.files ? Array.from(el.files).map(f => f.name) : [];
+        }
+        
+        function collectAllFormData() {
+            return {
+                section_1_account_stakeholder: {
+                    organisation_name: getValue('orgName'),
+                    primary_poc: { name: getValue('primaryPocName'), role: getValue('primaryPocRole'), email: getValue('primaryPocEmail'), timezone: getValue('primaryPocTimezone') },
+                    legal_poc: { name: getValue('legalPocName'), role: getValue('legalPocRole'), email: getValue('legalPocEmail'), timezone: getValue('legalPocTimezone') },
+                    integrations_required: isToggleActive('integrationsToggle'),
+                    technical_poc: isToggleActive('integrationsToggle') ? { name: getValue('technicalPocName'), email: getValue('technicalPocEmail'), timezone: getValue('technicalPocTimezone') } : null,
+                    availability: getValue('availability'),
+                    communication_channels: getSelectedChips('communicationChannels'),
+                    expected_go_live: getValue('expectedGoLive')
+                },
+                section_2_order_form_scope: {
+                    purchased_modules: getSelectedModules(),
+                    template_count: getNumericValue('templateCount'),
+                    migration_contract_count: getNumericValue('migrationContractCount'),
+                    migration_file_formats: getSelectedChips('migrationFileFormats'),
+                    integrations: getSelectedIntegrations(),
+                    additional_addons: getValue('additionalAddons')
+                },
+                section_3_template_readiness: {
+                    template_count: getNumericValue('s3TemplateCount'),
+                    templates_finalized: getValue('s3TemplatesFinalized'),
+                    template_formats: getSelectedChips('s3TemplateFormats'),
+                    clause_level_changes: isToggleActive('s3ClauseChanges'),
+                    dynamic_rendering_needed: getValue('s3DynamicRendering'),
+                    dynamic_rendering_complexity: getValue('s3DynamicRenderingComplexity'),
+                    conditional_logic: getValue('s3ConditionalLogic'),
+                    language_variations: isToggleActive('s3LanguageVariations'),
+                    calculations_involved: isToggleActive('s3Calculations'),
+                    approval_matrices_exist: isToggleActive('s3ApprovalMatrices')
+                },
+                section_4_migration_readiness: {
+                    contract_count: getNumericValue('s4ContractCount'),
+                    contract_types: getValue('s4ContractTypes'),
+                    metadata_fields_standard: true,
+                    metadata_fields_customised: isToggleActive('s4MetadataFieldsCustomised'),
+                    custom_metadata: getValue('s4CustomMetadata'),
+                    storage_locations: getSelectedChips('s4StorageLocation'),
+                    structured_naming: getValue('s4NamingConvention'),
+                    contract_formats: getSelectedChips('s4ContractFormats'),
+                    existing_metadata: getValue('s4ExistingMetadata'),
+                    excel_trackers: isToggleActive('s4ExcelTrackers'),
+                    migration_priority: getValue('s4MigrationPriority')
+                },
+                section_5_integration_readiness: {
+                    systems_to_integrate: getSelectedIntegrationsFromSection('s5IntegrationSystems'),
+                    custom_integration: isToggleActive('s5CustomIntegration'),
+                    custom_integration_details: getValue('s5CustomIntegrationDetails'),
+                    api_webhook_access: isToggleActive('s5ApiAccess'),
+                    admin_access: getValue('s5AdminAccess'),
+                    security_approval: getValue('s5SecurityApproval'),
+                    decision_maker: { name: getValue('s5DecisionMakerName'), role: getValue('s5DecisionMakerRole'), email: getValue('s5DecisionMakerEmail') },
+                    expected_outcomes: getSelectedChips('s5IntegrationOutcomes')
+                },
+                section_6_business_process: {
+                    approval_workflow: getValue('s6ApprovalWorkflow'),
+                    workflow_details: getValue('s6WorkflowDetails'),
+                    contracts_per_month: getNumericValue('s6ContractsPerMonth'),
+                    contract_generators: getSelectedChips('s6ContractGenerators'),
+                    bottlenecks: getValue('s6Bottlenecks'),
+                    phase1_must_haves: getValue('s6Phase1MustHaves'),
+                    phase2_nice_to_haves: getValue('s6Phase2NiceToHaves')
+                },
+                section_7_security_compliance: {
+                    security_review: getValue('s7SecurityReview'),
+                    security_reviews_needed: getSelectedChips('s7SecurityReviews'),
+                    infosec_approvals: getValue('s7InfosecApprovals'),
+                    infosec_details: getValue('s7InfosecDetails'),
+                    data_residency: getValue('s7DataResidency'),
+                    data_residency_details: getValue('s7DataResidencyDetails'),
+                    custom_sso: getValue('s7CustomSSO'),
+                    sso_details: getValue('s7SSODetails')
+                },
+                section_8_uploads: {
+                    templates: getFileList('s8Templates'),
+                    clause_libraries: getFileList('s8ClauseLibraries'),
+                    approval_matrices: getFileList('s8ApprovalMatrices'),
+                    metadata_sheets: getFileList('s8MetadataSheets'),
+                    sample_contracts: getFileList('s8SampleContracts'),
+                    integration_docs: getFileList('s8IntegrationDocs'),
+                    brand_guidelines: getFileList('s8BrandGuidelines')
+                }
+            };
+        }
+        
+        // ============================================
+        // SUBMIT ASSESSMENT
+        // ============================================
+        // Progress bar animation function
+        function updateLoadingProgress(percentage, text) {
+            const progressFill = document.getElementById('loadingProgressFill');
+            const progressText = document.getElementById('loadingProgressText');
+            if (progressFill) {
+                progressFill.style.width = percentage + '%';
+            }
+            if (progressText) {
+                progressText.textContent = text;
+            }
+        }
+        
+        // Simulate progress while waiting for AI
+        function startProgressAnimation() {
+            // Evenly distribute progress from 10% to 95% across 8 stages
+            const stages = [
+                { progress: 10, text: 'Preparing assessment data...' },
+                { progress: 25, text: 'Sending request to AI...' },
+                { progress: 40, text: 'AI is analyzing your responses...' },
+                { progress: 55, text: 'Calculating readiness scores...' },
+                { progress: 70, text: 'Identifying red flags and risks...' },
+                { progress: 82, text: 'Generating action items...' },
+                { progress: 90, text: 'Creating implementation plan...' },
+                { progress: 95, text: 'Finalizing assessment...' }
+            ];
+            
+            let currentStage = 0;
+            const totalStages = stages.length;
+            // Each stage gets more time (4 seconds each = ~32 seconds total for all stages)
+            // This ensures we spend adequate time on each stage before reaching "Finalizing"
+            const intervalTime = 4000;
+            
+            const interval = setInterval(() => {
+                if (currentStage < totalStages) {
+                    updateLoadingProgress(stages[currentStage].progress, stages[currentStage].text);
+                    currentStage++;
+                } else {
+                    // Once all stages are shown, keep at 95% until response arrives
+                    // Don't update again, just maintain at 95%
+                }
+            }, intervalTime);
+            
+            return interval;
+        }
+        
+        async function submitAssessment() {
+            const section8 = document.getElementById('section8');
+            const progressContainer = document.getElementById('progressContainer');
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (section8) section8.classList.remove('active');
+            if (progressContainer) progressContainer.style.display = 'none';
+            if (loadingScreen) loadingScreen.classList.add('active');
+            
+            // Reset and start progress animation
+            updateLoadingProgress(0, 'Initializing...');
+            const progressInterval = startProgressAnimation();
+            
+            try {
+                const allData = collectAllFormData();
+                console.log('Submitting:', allData);
+                
+                const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ASSESS}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ intake_responses: allData })
+                });
+                
+                // Update progress to 98% when response arrives
+                clearInterval(progressInterval);
+                updateLoadingProgress(98, 'Processing AI response...');
+                
+                // Check for timeout or other errors
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(errorText);
+                    } catch (e) {
+                        errorData = { error: errorText || `Server error: ${response.status}` };
+                    }
+                    throw new Error(errorData.error || `Server error: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    // Complete the progress bar
+                    updateLoadingProgress(100, 'Assessment complete!');
+                    setTimeout(() => {
+                        displayResults(result.data);
+                    }, 300);
+                } else {
+                    throw new Error(result.error || 'Assessment failed');
+                }
+            } catch (error) {
+                clearInterval(progressInterval);
+                console.error('Error:', error);
+                
+                updateLoadingProgress(0, 'Error occurred. Loading fallback results...');
+                
+                setTimeout(() => {
+                    displayMockResults();
+                }, 1000);
+            }
+        }
+        
+        // ============================================
+        // DISPLAY RESULTS
+        // ============================================
+        function displayResults(data) {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const resultsScreen = document.getElementById('resultsScreen');
+            if (loadingScreen) loadingScreen.classList.remove('active');
+            if (resultsScreen) resultsScreen.classList.add('active');
+            
+            document.getElementById('overallScore').textContent = data.readiness_score.overall;
+            document.getElementById('scoreStatus').textContent = data.status_label;
+            document.getElementById('scoreDescription').textContent = data.status_description;
+            
+            const breakdownHtml = Object.entries(data.readiness_score.breakdown).map(([key, value]) => `
+                <div class="score-breakdown-item">
+                    <div class="score-breakdown-label">${key.replace(/_/g, ' ')}</div>
+                    <div class="score-breakdown-value">${value}%</div>
+                    <div class="score-breakdown-bar"><div class="score-breakdown-fill" style="width: ${value}%"></div></div>
+                </div>
+            `).join('');
+            document.getElementById('scoreBreakdown').innerHTML = breakdownHtml;
+            
+            const flagsHtml = data.red_flags.map(flag => `
+                <div class="red-flag-item ${flag.severity === 'medium' ? 'warning' : ''}">
+                    <div class="red-flag-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+                    <div class="red-flag-content"><div class="red-flag-title">${flag.section}: ${flag.issue}</div><div class="red-flag-desc">${flag.impact}</div></div>
+                </div>
+            `).join('');
+            document.getElementById('redFlagsList').innerHTML = flagsHtml || '<p style="color: var(--gray-500);">No critical red flags detected.</p>';
+            
+            const renderAction = item => `
+                <div class="action-item">
+                    <div class="action-item-priority ${item.priority}"></div>
+                    <div class="action-item-content"><div class="action-item-task">${item.task}</div><div class="action-item-meta"><span>📁 ${item.section}</span><span>📅 ${item.deadline || 'TBD'}</span><span>👤 ${item.owner || 'TBD'}</span></div></div>
+                </div>`;
+            document.getElementById('customerActions').innerHTML = data.action_items.customer.map(renderAction).join('');
+            document.getElementById('spotdraftActions').innerHTML = data.action_items.spotdraft.map(renderAction).join('');
+            
+            document.getElementById('timelineSummary').innerHTML = `<strong>Recommended Go-Live:</strong> ${data.implementation_plan.recommended_go_live}${data.implementation_plan.timeline_adjusted ? `<br><small style="color: var(--warning);">Adjusted: ${data.implementation_plan.adjustment_reason}</small>` : ''}`;
+            
+            const phasesHtml = data.implementation_plan.phases.map(phase => {
+                const status = phase.status || 'Unknown';
+                const statusLower = status.toLowerCase();
+                const statusClass = statusLower.includes('ready') ? 'ready' : statusLower.includes('block') ? 'blocked' : 'partial';
+                return `
+                <div class="timeline-phase">
+                    <div class="timeline-phase-header"><div><div class="timeline-phase-title">Phase ${phase.phase || 'N/A'}: ${phase.name || 'Unnamed'}</div><div class="timeline-phase-duration">${phase.duration || 'TBD'}</div></div><span class="timeline-phase-status ${statusClass}">${status}</span></div>
+                    <div class="timeline-phase-content">${(phase.activities || []).map(a => `<div class="timeline-activity">${a}</div>`).join('')}${phase.dependencies ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-500);"><strong>Dependencies:</strong> ${phase.dependencies}</div>` : ''}</div>
+                </div>
+            `;
+            }).join('');
+            document.getElementById('implementationPhases').innerHTML = phasesHtml;
+            
+            // Display Gemini request/response if available
+            console.log('Full data object keys:', Object.keys(data));
+            console.log('Gemini data check:', {
+                has_gemini_request: 'gemini_request' in data,
+                has_gemini_response: 'gemini_response' in data,
+                gemini_request_value: data.gemini_request ? data.gemini_request.substring(0, 100) + '...' : data.gemini_request,
+                gemini_response_value: data.gemini_response ? data.gemini_response.substring(0, 100) + '...' : data.gemini_response
+            });
+            
+            const geminiSection = document.getElementById('geminiDebugSection');
+            const geminiRequestEl = document.getElementById('geminiRequest');
+            const geminiResponseEl = document.getElementById('geminiResponse');
+            
+            // Show section if gemini_request or gemini_response keys exist in data (even if null/empty)
+            if ('gemini_request' in data || 'gemini_response' in data) {
+                console.log('Showing Gemini section');
+                if (geminiSection) {
+                    geminiSection.style.display = 'block';
+                }
+                if (geminiRequestEl) {
+                    geminiRequestEl.textContent = data.gemini_request || 'No request data available (Gemini may not have been called)';
+                }
+                if (geminiResponseEl) {
+                    geminiResponseEl.textContent = data.gemini_response || 'No response data available (Gemini may not have been called)';
+                }
+            } else {
+                console.log('Hiding Gemini section - keys not present in data');
+                if (geminiSection) geminiSection.style.display = 'none';
+            }
+        }
+        
+        function toggleGeminiDebug() {
+            const content = document.getElementById('geminiDebugContent');
+            const icon = document.getElementById('geminiToggleIcon');
+            if (content && icon) {
+                const isVisible = content.style.display !== 'none';
+                content.style.display = isVisible ? 'none' : 'block';
+                icon.textContent = isVisible ? '▶' : '▼';
+            }
+        }
+        
+        function switchActionTab(tab) {
+            document.querySelectorAll('.action-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.action-tab-content').forEach(c => c.classList.remove('active'));
+            if (event && event.target) event.target.classList.add('active');
+            const tabContent = document.getElementById(`${tab}Actions`);
+            if (tabContent) tabContent.classList.add('active');
+        }
+        
+        function displayMockResults() {
+            displayResults({
+                readiness_score: { overall: 67, breakdown: { account: 90, order_form: 85, templates: 70, migration: 45, integration: 60, business: 75, security: 50, uploads: 55 }},
+                status_label: "Medium Readiness",
+                status_description: "Guided onboarding - some dependencies to resolve before kickoff",
+                red_flags: [
+                    { section: "Migration", severity: "high", issue: "Large volume with no structured naming", impact: "Could cause 3-4 week delay" },
+                    { section: "Security", severity: "high", issue: "Security review pending", impact: "Kickoff may be delayed" },
+                    { section: "Integration", severity: "medium", issue: "Admin access not confirmed", impact: "Integration setup may be blocked" }
+                ],
+                action_items: {
+                    customer: [
+                        { task: "Organize contracts with naming convention", section: "Migration", priority: "high", deadline: "2025-01-15", owner: "Legal Team" },
+                        { task: "Complete security review", section: "Security", priority: "high", deadline: "2025-01-20", owner: "IT Team" },
+                        { task: "Confirm admin access to systems", section: "Integration", priority: "medium", deadline: "2025-01-12", owner: "IT Director" }
+                    ],
+                    spotdraft: [
+                        { task: "Schedule kickoff call", section: "General", priority: "high", deadline: "2025-01-10", owner: "Implementation Team" },
+                        { task: "Share SOC-2 documentation", section: "Security", priority: "high", deadline: "2025-01-08", owner: "Implementation Team" },
+                        { task: "Begin template build", section: "Templates", priority: "medium", deadline: "2025-01-15", owner: "Legal Ops" }
+                    ]
+                },
+                implementation_plan: {
+                    recommended_go_live: "2025-03-15",
+                    timeline_adjusted: true,
+                    adjustment_reason: "Security reviews and migration complexity require additional 2 weeks",
+                    phases: [
+                        { phase: 1, name: "Foundation Setup", duration: "Week 1-2", activities: ["Security clearance", "Workspace config", "User setup"], dependencies: "Security review completion", status: "Blocked" },
+                        { phase: 2, name: "Template Build", duration: "Week 2-4", activities: ["Template creation", "Approval workflow setup"], dependencies: "Finalized templates", status: "Partially ready" },
+                        { phase: 3, name: "Integration", duration: "Week 3-5", activities: ["CRM integration", "SSO setup"], dependencies: "Admin access", status: "Ready" },
+                        { phase: 4, name: "Migration", duration: "Week 4-7", activities: ["Contract organization", "Metadata extraction", "Batch migration"], dependencies: "Structured files", status: "Blocked" },
+                        { phase: 5, name: "UAT & Training", duration: "Week 7-8", activities: ["User testing", "Training sessions"], dependencies: "All setup complete", status: "Scheduled" }
+                    ]
+                }
+            });
+        }
+        
+        // ============================================
+        // SAMPLE DATA POPULATION (FOR TESTING)
+        // ============================================
+        function populateSampleData() {
+            // Helper functions
+            function setValue(id, value) {
+                const el = document.getElementById(id);
+                if (el) el.value = value;
+            }
+            
+            function setToggle(id, active) {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (active) {
+                        el.classList.add('active');
+                        const label = el.nextElementSibling;
+                        if (label && label.classList.contains('toggle-label')) {
+                            label.textContent = 'Yes';
+                        }
+                    } else {
+                        el.classList.remove('active');
+                        const label = el.nextElementSibling;
+                        if (label && label.classList.contains('toggle-label')) {
+                            label.textContent = 'No';
+                        }
+                    }
+                }
+            }
+            
+            function selectChip(containerId, values) {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.querySelectorAll('.chip').forEach(chip => {
+                        chip.classList.remove('selected');
+                        if (values.includes(chip.dataset.value)) {
+                            chip.classList.add('selected');
+                        }
+                    });
+                }
+            }
+            
+            function selectModule(moduleName) {
+                const card = document.querySelector(`#purchasedModules .module-card[data-value="${moduleName}"]`);
+                if (card) {
+                    card.classList.add('selected');
+                }
+            }
+            
+            function showSection(sectionId) {
+                const section = document.getElementById(sectionId);
+                if (section) section.classList.add('visible');
+            }
+            
+            // Calculate future date (3 months from now)
+            const futureDate = new Date();
+            futureDate.setMonth(futureDate.getMonth() + 3);
+            const goLiveDate = futureDate.toISOString().split('T')[0];
+            
+            // ===== SECTION 1: Account & Stakeholder Identity =====
+            setValue('orgName', 'TechCorp Solutions Inc.');
+            setValue('primaryPocName', 'Sarah Johnson');
+            setValue('primaryPocRole', 'Legal Operations Manager');
+            setValue('primaryPocEmail', 'sarah.johnson@techcorp.com');
+            setValue('primaryPocTimezone', 'US');
+            setValue('legalPocName', 'Michael Chen');
+            setValue('legalPocRole', 'Senior Legal Counsel');
+            setValue('legalPocEmail', 'michael.chen@techcorp.com');
+            setValue('legalPocTimezone', 'US');
+            setToggle('integrationsToggle', true);
+            showSection('technicalPocSection');
+            setValue('technicalPocName', 'David Rodriguez');
+            setValue('technicalPocEmail', 'david.rodriguez@techcorp.com');
+            setValue('technicalPocTimezone', 'US');
+            setValue('availability', 'Tuesdays and Thursdays, 2-4 PM EST');
+            setValue('expectedGoLive', goLiveDate);
+            selectChip('communicationChannels', ['Slack', 'Email', 'Video Meetings']);
+            
+            // ===== SECTION 2: Order Form Scope Validation =====
+            selectModule('Template Setup');
+            selectModule('Migration');
+            selectModule('Integrations');
+            showSection('templateCountSection');
+            setValue('templateCount', '8');
+            showSection('migrationDetailsSection');
+            setValue('migrationContractCount', '3200');
+            selectChip('migrationFileFormats', ['PDF', 'DOCX']);
+            setValue('additionalAddons', 'Additional training sessions for 20+ users and priority support during first 3 months');
+            
+            // ===== SECTION 3: Template Readiness =====
+            setValue('s3TemplateCount', '8');
+            setValue('s3TemplatesFinalized', 'In review');
+            selectChip('s3TemplateFormats', ['Word', 'Google Docs']);
+            setToggle('s3ClauseChanges', true);
+            setValue('s3DynamicRendering', 'Yes');
+            showSection('s3DynamicRenderingComplexitySection');
+            setValue('s3DynamicRenderingComplexity', 'Moderate');
+            setValue('s3ConditionalLogic', 'Moderate');
+            setToggle('s3LanguageVariations', true);
+            setToggle('s3Calculations', false);
+            setToggle('s3ApprovalMatrices', true);
+            
+            // ===== SECTION 4: Migration Readiness =====
+            setValue('s4ContractCount', '3200');
+            setValue('s4ContractTypes', 'NDA, MSA, SOW, Service Agreement, License Agreement');
+            setToggle('s4MetadataFieldsCustomised', true);
+            showSection('s4CustomMetadataSection');
+            setValue('s4CustomMetadata', 'Custom fields: Department, Cost Center, Business Unit, Region');
+            selectChip('s4StorageLocation', ['Google Drive', 'SharePoint']);
+            setValue('s4NamingConvention', 'Partial');
+            selectChip('s4ContractFormats', ['PDF', 'Word']);
+            setValue('s4ExistingMetadata', 'Yes - partially');
+            setValue('s4MigrationPriority', 'High');
+            setToggle('s4ExcelTrackers', true);
+            showSection('s4ExcelUploadSection');
+            
+            // ===== SECTION 5: Integration Requirements =====
+            // Select integration systems
+            const systemsToSelect = ['Salesforce', 'DocuSign', 'SSO'];
+            const integrationSystems = document.querySelectorAll('#s5IntegrationSystems .integration-chip');
+            integrationSystems.forEach(chip => {
+                const chipValue = chip.dataset.value;
+                if (systemsToSelect.includes(chipValue)) {
+                    chip.classList.add('selected');
+                }
+            });
+            setToggle('s5CustomIntegration', true);
+            showSection('s5CustomIntegrationSection');
+            setValue('s5CustomIntegrationDetails', 'Need custom webhook integration with internal CRM system for real-time contract status updates');
+            setToggle('s5ApiAccess', true);
+            setValue('s5AdminAccess', 'Yes - all');
+            setValue('s5SecurityApproval', 'Yes');
+            setValue('s5DecisionMakerName', 'Jennifer Martinez');
+            setValue('s5DecisionMakerRole', 'VP of IT');
+            setValue('s5DecisionMakerEmail', 'jennifer.martinez@techcorp.com');
+            setValue('s5DecisionMakerTimezone', 'US');
+            selectChip('s5IntegrationOutcomes', ['Contract sync', 'Auto-fill', 'Automation']);
+            
+            // ===== SECTION 6: Workflow & Process =====
+            setValue('s6ApprovalWorkflow', 'Yes - documented');
+            showSection('s6WorkflowDetailsSection');
+            setValue('s6WorkflowDetails', 'Legal Review → Finance Approval → Manager Sign-off → Executive Approval (for contracts > $100k)');
+            setValue('s6ContractsPerMonth', '180');
+            selectChip('s6ContractGenerators', ['Sales', 'Legal', 'Operations']);
+            setValue('s6Bottlenecks', 'Manual routing causes delays, lack of visibility into approval status, contracts stuck in legal review for weeks');
+            setValue('s6Phase1MustHaves', 'Template setup for 5 core contract types, basic approval workflow, integration with Salesforce, e-signature integration');
+            setValue('s6Phase2NiceToHaves', 'Advanced reporting, custom metadata fields, automated reminders, contract analytics dashboard');
+            
+            // ===== SECTION 7: Security & Compliance =====
+            setValue('s7SecurityReview', 'Yes');
+            showSection('s7SecurityReviewSection');
+            selectChip('s7SecurityReviews', ['DPA', 'SOC-2', 'Security Review']);
+            setValue('s7InfosecApprovals', 'Yes');
+            showSection('s7InfosecSection');
+            setValue('s7InfosecDetails', 'Pending approval from InfoSec team for data handling procedures and access controls');
+            setValue('s7DataResidency', 'Yes');
+            showSection('s7DataResidencySection');
+            setValue('s7DataResidencyDetails', 'EU data must remain in EU region, US data in US region');
+            setValue('s7CustomSSO', 'Yes');
+            showSection('s7SSOSection');
+            setValue('s7SSODetails', 'Okta with SAML 2.0');
+            
+            // Update formData
+            formData.section1 = {
+                orgName: 'TechCorp Solutions Inc.',
+                primaryPoc: {
+                    name: 'Sarah Johnson',
+                    role: 'Legal Operations Manager',
+                    email: 'sarah.johnson@techcorp.com',
+                    timezone: 'US'
+                },
+                legalPoc: {
+                    name: 'Michael Chen',
+                    role: 'Senior Legal Counsel',
+                    email: 'michael.chen@techcorp.com',
+                    timezone: 'US'
+                },
+                integrationsRequired: true,
+                technicalPoc: {
+                    name: 'David Rodriguez',
+                    email: 'david.rodriguez@techcorp.com',
+                    timezone: 'US'
+                },
+                availability: 'Tuesdays and Thursdays, 2-4 PM EST',
+                communicationChannels: ['Slack', 'Email', 'Video Meetings'],
+                expectedGoLive: goLiveDate
+            };
+            
+            formData.section2 = {
+                purchasedModules: ['Template Setup', 'Migration', 'Integrations'],
+                templateCount: 8,
+                migrationContractCount: 3200,
+                migrationFileFormats: ['PDF', 'DOCX'],
+                integrations: [],
+                additionalAddons: 'Additional training sessions for 20+ users and priority support during first 3 months'
+            };
+            
+            // Trigger any necessary updates
+            updateModuleConditionalSections();
+            
+            console.log('✅ Sample data populated successfully!');
+        }
+        
+        // Function to populate sample data and submit directly to results
+        async function populateAndSubmitSampleData() {
+            // Populate the data
+            populateSampleData();
+            
+            // Wait a moment for DOM updates
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Submit the assessment
+            const section8 = document.getElementById('section8');
+            const progressContainer = document.getElementById('progressContainer');
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (section8) section8.classList.remove('active');
+            if (progressContainer) progressContainer.style.display = 'none';
+            if (loadingScreen) loadingScreen.classList.add('active');
+            
+            // Reset and start progress animation
+            updateLoadingProgress(0, 'Initializing...');
+            const progressInterval = startProgressAnimation();
+            
+            try {
+                const allData = collectAllFormData();
+                console.log('Submitting sample data:', allData);
+                
+                const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ASSESS}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ intake_responses: allData })
+                });
+                
+                // Update progress to 98% when response arrives
+                clearInterval(progressInterval);
+                updateLoadingProgress(98, 'Processing AI response...');
+                
+                // Check for timeout or other errors
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(errorText);
+                    } catch (e) {
+                        errorData = { error: errorText || `Server error: ${response.status}` };
+                    }
+                    throw new Error(errorData.error || `Server error: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    // Complete the progress bar
+                    updateLoadingProgress(100, 'Assessment complete!');
+                    setTimeout(() => {
+                        displayResults(result.data);
+                    }, 300);
+                } else {
+                    throw new Error(result.error || 'Assessment failed');
+                }
+            } catch (error) {
+                clearInterval(progressInterval);
+                console.error('Error:', error);
+                
+                updateLoadingProgress(0, 'Error occurred. Loading fallback results...');
+                
+                setTimeout(() => {
+                    displayMockResults();
+                }, 1000);
+            }
+        }
+        
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set minimum date for go-live to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('expectedGoLive').setAttribute('min', today);
+        });
+    </script>
+</body>
+</html>
