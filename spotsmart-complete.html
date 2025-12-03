@@ -2801,43 +2801,6 @@
             if (tabContent) tabContent.classList.add('active');
         }
         
-        function displayMockResults() {
-            displayResults({
-                readiness_score: { overall: 67, breakdown: { account: 90, order_form: 85, templates: 70, migration: 45, integration: 60, business: 75, security: 50, uploads: 55 }},
-                status_label: "Medium Readiness",
-                status_description: "Guided onboarding - some dependencies to resolve before kickoff",
-                red_flags: [
-                    { section: "Migration", severity: "high", issue: "Large volume with no structured naming", impact: "Could cause 3-4 week delay" },
-                    { section: "Security", severity: "high", issue: "Security review pending", impact: "Kickoff may be delayed" },
-                    { section: "Integration", severity: "medium", issue: "Admin access not confirmed", impact: "Integration setup may be blocked" }
-                ],
-                action_items: {
-                    customer: [
-                        { task: "Organize contracts with naming convention", section: "Migration", priority: "high", deadline: "2025-01-15", owner: "Legal Team" },
-                        { task: "Complete security review", section: "Security", priority: "high", deadline: "2025-01-20", owner: "IT Team" },
-                        { task: "Confirm admin access to systems", section: "Integration", priority: "medium", deadline: "2025-01-12", owner: "IT Director" }
-                    ],
-                    spotdraft: [
-                        { task: "Schedule kickoff call", section: "General", priority: "high", deadline: "2025-01-10", owner: "Implementation Team" },
-                        { task: "Share SOC-2 documentation", section: "Security", priority: "high", deadline: "2025-01-08", owner: "Implementation Team" },
-                        { task: "Begin template build", section: "Templates", priority: "medium", deadline: "2025-01-15", owner: "Legal Ops" }
-                    ]
-                },
-                implementation_plan: {
-                    recommended_go_live: "2025-03-15",
-                    timeline_adjusted: true,
-                    adjustment_reason: "Security reviews and migration complexity require additional 2 weeks",
-                    phases: [
-                        { phase: 1, name: "Foundation Setup", duration: "Week 1-2", activities: ["Security clearance", "Workspace config", "User setup"], dependencies: "Security review completion", status: "Blocked" },
-                        { phase: 2, name: "Template Build", duration: "Week 2-4", activities: ["Template creation", "Approval workflow setup"], dependencies: "Finalized templates", status: "Partially ready" },
-                        { phase: 3, name: "Integration", duration: "Week 3-5", activities: ["CRM integration", "SSO setup"], dependencies: "Admin access", status: "Ready" },
-                        { phase: 4, name: "Migration", duration: "Week 4-7", activities: ["Contract organization", "Metadata extraction", "Batch migration"], dependencies: "Structured files", status: "Blocked" },
-                        { phase: 5, name: "UAT & Training", duration: "Week 7-8", activities: ["User testing", "Training sessions"], dependencies: "All setup complete", status: "Scheduled" }
-                    ]
-                }
-            });
-        }
-        
         // ============================================
         // SAMPLE DATA POPULATION (FOR TESTING)
         // ============================================
