@@ -47,9 +47,20 @@ async function initializeGemini() {
             let modelInitialized = false;
             let lastError = null;
             
+            // Optimized generation config for production accuracy
+            const generationConfig = {
+                temperature: 0.3,  // Lower temperature for consistent, accurate results
+                topP: 0.95,        // Focus on high-probability tokens
+                topK: 40           // Consider top 40 tokens for better accuracy
+            };
+            
             for (const modelName of modelNames) {
                 try {
-                    geminiModel = genAI.getGenerativeModel({ model: modelName });
+                    // Initialize with optimized config for maximum accuracy
+                    geminiModel = genAI.getGenerativeModel({ 
+                        model: modelName,
+                        generationConfig: generationConfig
+                    });
                     // Test with a simple request (just 1 token to verify it works)
                     const testResult = await geminiModel.generateContent('Hi');
                     await testResult.response;
@@ -142,22 +153,16 @@ app.post('/parse-order-form', upload.single('file'), async (req, res) => {
         try {
             if (fileType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
                 // Parse PDF
-                console.log('Parsing PDF file...');
                 const pdfData = await pdfParse(fileBuffer);
                 textContent = pdfData.text;
-                console.log(`Extracted ${textContent.length} characters from PDF`);
             } else if (fileType.includes('wordprocessingml') || fileName.toLowerCase().endsWith('.docx')) {
                 // Parse DOCX
-                console.log('Parsing DOCX file...');
                 const result = await mammoth.extractRawText({ buffer: fileBuffer });
                 textContent = result.value;
-                console.log(`Extracted ${textContent.length} characters from DOCX`);
             } else {
                 // Try to parse as DOCX anyway
-                console.log('Attempting to parse as DOCX...');
                 const result = await mammoth.extractRawText({ buffer: fileBuffer });
                 textContent = result.value;
-                console.log(`Extracted ${textContent.length} characters`);
             }
             
             if (!textContent || textContent.trim().length === 0) {
@@ -181,16 +186,13 @@ app.post('/parse-order-form', upload.single('file'), async (req, res) => {
         
         // Ensure Gemini is initialized before using it
         if (GEMINI_API_KEY && !geminiModel) {
-            console.log('Gemini not initialized yet, initializing now...');
             await initializeGemini();
         }
         
         if (geminiModel) {
             try {
-                console.log('Attempting Gemini AI extraction...');
                 extractedData = await extractOrderFormDataWithGemini(textContent, fileBuffer, fileType);
                 confidence = 0.90; // High confidence for AI extraction
-                console.log('✅ Gemini extraction successful');
             } catch (error) {
                 console.error('Gemini extraction failed, falling back to pattern matching:', error.message);
                 console.error('Error details:', error);
@@ -198,7 +200,6 @@ app.post('/parse-order-form', upload.single('file'), async (req, res) => {
                 confidence = calculateConfidence(extractedData, textContent);
             }
         } else {
-            console.log('Using pattern matching extraction (Gemini not available)');
             extractedData = extractOrderFormData(textContent);
             confidence = calculateConfidence(extractedData, textContent);
         }
@@ -265,7 +266,6 @@ app.post('/assess', async (req, res) => {
             statusDescription = assessmentResult.status_description;
             geminiRequest = assessmentResult.gemini_request;
             geminiResponse = assessmentResult.gemini_response;
-            console.log('Gemini assessment completed successfully');
         } catch (error) {
             console.error('Error calculating assessment with Gemini:', error);
             return res.status(500).json({
@@ -288,14 +288,7 @@ app.post('/assess', async (req, res) => {
             gemini_response: geminiResponse
         };
         
-        console.log('Assessment response prepared:', {
-            overall_score: readinessScore?.overall,
-            red_flags_count: redFlags?.length || 0,
-            has_gemini_request: !!geminiRequest,
-            has_gemini_response: !!geminiResponse,
-            request_length: geminiRequest?.length || 0,
-            response_length: geminiResponse?.length || 0
-        });
+        // Assessment response prepared with readinessScore, red flags, action items, implementation plan, and AI insights
         
         res.json({
             success: true,
@@ -329,7 +322,6 @@ async function extractOrderFormDataWithGemini(textContent, fileBuffer, fileType)
         }
         // Always use gemini-2.5-flash which we know works
         geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-        console.log('Reinitialized Gemini model with gemini-2.5-flash');
     }
 
     const prompt = `You are an expert at extracting structured data from order forms and contracts. 
@@ -389,7 +381,6 @@ Return ONLY valid JSON, no additional text or explanation.`;
         console.error('Error in Gemini extraction:', error);
         // If it's a model error, try to reinitialize
         if (error.message && error.message.includes('not found')) {
-            console.log('Attempting to reinitialize with gemini-2.5-flash...');
             if (genAI) {
                 try {
                     geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
@@ -1104,12 +1095,9 @@ Return ONLY valid JSON in this exact structure (no markdown, no explanations):
 IMPORTANT: Return ONLY the JSON object, no additional text, no markdown code blocks, no explanations.`;
 
     try {
-        console.log('Sending assessment request to Gemini...');
-        console.log(`Full prompt length: ${prompt.length} characters`);
-        console.log(`Full intake data: ${JSON.stringify(intake_responses, null, 2).length} characters`);
-        
-        // No timeout limits on Render - use full prompt for maximum accuracy
-        // The model will process the complete data without truncation
+        // Production: Use full prompt for maximum accuracy (no truncation, no timeout limits)
+        // Process complete data with best available model for optimal results
+        // Model is already initialized with optimized generation config (temperature: 0.3, topP: 0.95, topK: 40)
         const result = await geminiModel.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
