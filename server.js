@@ -1497,17 +1497,99 @@ Create actionable tasks for both customer and SpotDraft teams based on the score
 - owner: Who should handle it ("Customer" or "SpotDraft")
 
 ### 3. IMPLEMENTATION PLAN
-Create a phased implementation plan with:
-- recommended_go_live: Target date (YYYY-MM-DD, typically 8-12 weeks from ${assessmentDate})
-- timeline_adjusted: true/false based on blockers and low scores
-- adjustment_reason: Why timeline was adjusted (if applicable, null if not adjusted)
-- phases: Array of implementation phases, each with:
-  - phase: Phase number (1, 2, 3, etc.)
-  - name: Phase name (e.g., "Discovery & Setup", "Template Configuration", "Integration Setup", "Testing & Go-Live")
-  - duration: Time estimate (e.g., "Week 1-2")
-  - activities: Array of specific activities for this phase
-  - dependencies: What must be completed first (null if no dependencies)
-  - status: "Ready" (if section scores are high), "Partially ready" (if scores are medium), "Blocked" (if scores are low or blockers exist), or "Scheduled"
+Create a comprehensive, score-driven phased implementation plan. Use the section scores to determine readiness, timeline, and phase structure.
+
+**Base Timeline Calculation:**
+- Start with 8-12 weeks from ${assessmentDate} as baseline
+- Adjust based on section scores:
+  - If overall score ≥ 85: 8-10 weeks (optimistic timeline)
+  - If overall score 70-84: 10-12 weeks (standard timeline)
+  - If overall score 50-69: 12-16 weeks (extended timeline for preparation)
+  - If overall score < 50: 16-20 weeks (significant preparation needed)
+
+**Timeline Adjustments:**
+- Add 2-4 weeks if Section 3 (Template Readiness) score < 60
+- Add 2-3 weeks if Section 4 (Migration Readiness) score < 60
+- Add 3-5 weeks if Section 5 (Integration Readiness) score < 60
+- Add 1-2 weeks if Section 7 (Security & Compliance) score < 50
+- Add 1 week for each high-severity red flag
+
+**Phase Structure (Create 4-6 phases):**
+1. **Phase 1: Discovery & Setup** (Week 1-2)
+   - Kickoff meetings, stakeholder alignment
+   - System access and permissions setup
+   - Project plan finalization
+   - Status: Based on Section 1 score (Account & Stakeholders)
+     - Score ≥ 80: "Ready"
+     - Score 60-79: "Partially ready"
+     - Score < 60: "Blocked"
+
+2. **Phase 2: Template Configuration** (Week 2-5)
+   - Template design and configuration
+   - Conditional logic setup
+   - Approval matrix configuration
+   - Status: Based on Section 3 score (Template Readiness)
+     - Score ≥ 80: "Ready"
+     - Score 60-79: "Partially ready" (may need template finalization first)
+     - Score < 60: "Blocked" (templates need to be finalized)
+
+3. **Phase 3: Integration Setup** (Week 3-6, parallel with Phase 2 if possible)
+   - System integrations configuration
+   - API/webhook setup
+   - Security approvals
+   - Status: Based on Section 5 score (Integration Readiness)
+     - Score ≥ 80: "Ready"
+     - Score 60-79: "Partially ready" (may need security approvals)
+     - Score < 60: "Blocked" (technical access or approvals missing)
+
+4. **Phase 4: Migration Preparation** (Week 4-7)
+   - Data mapping and validation
+   - Migration scripts/tools setup
+   - Test migration runs
+   - Status: Based on Section 4 score (Migration Readiness)
+     - Score ≥ 80: "Ready"
+     - Score 60-79: "Partially ready" (may need data cleanup)
+     - Score < 60: "Blocked" (data structure issues)
+
+5. **Phase 5: Testing & Training** (Week 7-10)
+   - User acceptance testing
+   - Training sessions
+   - Process documentation
+   - Status: Based on Section 6 score (Business Process)
+     - Score ≥ 80: "Ready"
+     - Score 60-79: "Partially ready"
+     - Score < 60: "Blocked" (workflow not defined)
+
+6. **Phase 6: Go-Live & Support** (Week 10-12)
+   - Production deployment
+   - Go-live support
+   - Post-launch optimization
+   - Status: "Scheduled" (depends on all previous phases)
+
+**For each phase, provide:**
+- phase: Phase number (1, 2, 3, etc.)
+- name: Descriptive phase name
+- duration: Specific week range (e.g., "Week 1-2", "Week 3-5")
+- activities: Array of 5-8 specific, actionable activities for this phase
+- dependencies: What must be completed first (null if no dependencies, or list specific phases/activities)
+- status: "Ready", "Partially ready", "Blocked", or "Scheduled" (based on relevant section scores and red flags)
+
+**Implementation Plan JSON Structure:**
+{
+  "recommended_go_live": "<YYYY-MM-DD>",
+  "timeline_adjusted": <boolean>,
+  "adjustment_reason": "<string or null>",
+  "phases": [
+    {
+      "phase": <integer>,
+      "name": "<string>",
+      "duration": "<string>",
+      "activities": ["<string>", ...],
+      "dependencies": "<string or null>",
+      "status": "<Ready|Partially ready|Blocked|Scheduled>"
+    }
+  ]
+}
 
 ### 4. AI INSIGHTS
 Provide strategic insights based on the scores and input data:
