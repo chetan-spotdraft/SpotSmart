@@ -1367,13 +1367,22 @@
                             <div class="form-hint">Please include days, times, and timezone</div>
                         </div>
                         
-                        <!-- Expected Go-Live -->
+                        <!-- Desired Implementation Start Date -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                Desired implementation start date <span class="required">*</span>
+                            </label>
+                            <input type="date" class="form-input" id="implementationStartDate" required>
+                            <div class="form-hint">When would you like to start the implementation?</div>
+                        </div>
+                        
+                        <!-- Expected Go-Live (Calculated) -->
                         <div class="form-group">
                             <label class="form-label">
                                 Expected launch timeline <span class="required">*</span>
                             </label>
-                            <input type="date" class="form-input" id="expectedGoLive" required>
-                            <div class="form-hint">Your target go-live date</div>
+                            <input type="date" class="form-input" id="expectedGoLive" required readonly>
+                            <div class="form-hint">Calculated go-live date (typically 8-12 weeks from start date)</div>
                         </div>
                         
                         <!-- Communication Channels -->
@@ -1522,42 +1531,6 @@
                         <div class="error-message" id="modulesError">Please select at least one module</div>
                     </div>
                     
-                    <!-- Template Count (Conditional) -->
-                    <div class="conditional-section" id="templateCountSection">
-                        <div class="form-group">
-                            <label class="form-label">
-                                Number of templates needed <span class="required">*</span>
-                            </label>
-                            <input type="number" class="form-input" id="templateCount" placeholder="e.g., 5" min="1">
-                            <div class="form-hint">How many contract templates do you need configured?</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Migration Details (Conditional) -->
-                    <div class="conditional-section" id="migrationDetailsSection">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    Number of contracts to migrate <span class="required">*</span>
-                                </label>
-                                <input type="number" class="form-input" id="migrationContractCount" placeholder="e.g., 2500" min="1">
-                                <div class="form-hint">Approximate count of historical contracts</div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">
-                                    File formats of contracts <span class="required">*</span>
-                                </label>
-                                <div class="chip-group" id="migrationFileFormats">
-                                    <div class="chip" data-value="PDF" onclick="toggleChip(this)">PDF</div>
-                                    <div class="chip" data-value="DOCX" onclick="toggleChip(this)">DOCX</div>
-                                    <div class="chip" data-value="Scanned images" onclick="toggleChip(this)">Scanned images</div>
-                                    <div class="chip" data-value="Other" onclick="toggleChip(this)">Other</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
                     <!-- Additional Add-ons -->
                     <div class="form-group" style="margin-top: var(--space-lg);">
                         <label class="form-label">
@@ -1600,15 +1573,19 @@
                 <div class="form-card">
                     <div class="form-grid">
                         <div class="form-group"><label class="form-label">How many templates require setup? <span class="required">*</span></label><input type="number" class="form-input" id="s3TemplateCount" placeholder="e.g., 5" min="1"></div>
-                        <div class="form-group"><label class="form-label">Do you already have finalized templates? <span class="required">*</span></label><select class="form-select" id="s3TemplatesFinalized"><option value="">Select status</option><option value="Yes">Yes - Ready to use</option><option value="No">No - Need to create</option><option value="In review">In review</option></select></div>
+                        <div class="form-group"><label class="form-label">How many templates are finalised? <span class="required">*</span></label><input type="number" class="form-input" id="s3TemplatesFinalized" placeholder="e.g., 3" min="0"></div>
+                        <div class="form-group"><label class="form-label">How many of the templates are supposed to be integrated/created from integrated? <span class="required">*</span></label><input type="number" class="form-input" id="s3IntegratedTemplates" placeholder="e.g., 2" min="0"></div>
                         <div class="form-group"><label class="form-label">Template formats <span class="required">*</span></label><div class="chip-group" id="s3TemplateFormats"><div class="chip" data-value="Word" onclick="toggleChip(this)">Word</div><div class="chip" data-value="PDF" onclick="toggleChip(this)">PDF</div><div class="chip" data-value="Google Docs" onclick="toggleChip(this)">Google Docs</div></div></div>
-                        <div class="form-group"><label class="form-label">Clause-level changes needed?</label><div class="toggle-group"><div class="toggle" id="s3ClauseChanges" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
                         <div class="form-group"><label class="form-label">Do you need dynamic rendering of contract language/content? <span class="required">*</span></label><select class="form-select" id="s3DynamicRendering" onchange="toggleSection('s3DynamicRenderingComplexitySection')"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
                         <div class="conditional-section" id="s3DynamicRenderingComplexitySection"><div class="form-group"><label class="form-label">What is the complexity of dynamic rendering? <span class="required">*</span></label><select class="form-select" id="s3DynamicRenderingComplexity"><option value="">Select</option><option value="Simple">Simple</option><option value="Moderate">Moderate</option><option value="Complex">Complex</option></select></div></div>
                         <div class="form-group"><label class="form-label">Conditional logic complexity <span class="required">*</span></label><select class="form-select" id="s3ConditionalLogic"><option value="">Select</option><option value="None">None</option><option value="Simple">Simple</option><option value="Moderate">Moderate</option><option value="Complex">Complex</option></select></div>
-                        <div class="form-group"><label class="form-label">Language variations?</label><div class="toggle-group"><div class="toggle" id="s3LanguageVariations" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
-                        <div class="form-group"><label class="form-label">Calculations in templates?</label><div class="toggle-group"><div class="toggle" id="s3Calculations" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
-                        <div class="form-group"><label class="form-label">Existing approval matrices?</label><div class="toggle-group"><div class="toggle" id="s3ApprovalMatrices" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                        <div class="form-group"><label class="form-label">Are there any merged templates that you want to build?</label><div class="form-hint" style="margin-bottom: var(--space-sm);">Unilateral and Mutual NDA can be merged into a single customer.</div><div class="toggle-group"><div class="toggle" id="s3MergedTemplates" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                    </div>
+                    <div class="form-grid" style="margin-top: var(--space-md);">
+                        <div class="form-group"><label class="form-label">Clause-level changes needed?</label><div class="toggle-group" style="justify-content: flex-start;"><div class="toggle" id="s3ClauseChanges" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                        <div class="form-group"><label class="form-label">Language variations?</label><div class="toggle-group" style="justify-content: flex-start;"><div class="toggle" id="s3LanguageVariations" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                        <div class="form-group"><label class="form-label">Calculations in templates?</label><div class="toggle-group" style="justify-content: flex-start;"><div class="toggle" id="s3Calculations" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                        <div class="form-group"><label class="form-label">Existing approval matrices?</label><div class="toggle-group" style="justify-content: flex-start;"><div class="toggle" id="s3ApprovalMatrices" onclick="toggleGeneric(this)"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
                     </div>
                     <div class="btn-group"><button class="btn btn-secondary" onclick="prevSection(3)"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back</button><button class="btn btn-primary" onclick="nextSection(3)">Continue to Migration<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button></div>
                 </div>
@@ -1625,22 +1602,21 @@
                     <div class="form-grid">
                         <div class="form-group"><label class="form-label">Contracts for migration <span class="required">*</span></label><input type="number" class="form-input" id="s4ContractCount" placeholder="e.g., 2500" min="1"></div>
                         <div class="form-group"><label class="form-label">Contract types <span class="required">*</span></label><input type="text" class="form-input" id="s4ContractTypes" placeholder="e.g., NDA, MSA, SOW"><div class="form-hint">Add your contract types separated by ","</div></div>
-                        <div class="form-group"><label class="form-label">Metadata fields <span class="required">*</span></label><div class="form-hint" style="margin-bottom: var(--space-sm);">Here is what we offer as standard <a href="#" target="_blank" style="color: var(--primary); text-decoration: underline;">(view standard metadata fields)</a></div><div class="toggle-group" style="margin-top: var(--space-sm);"><label class="form-label" style="margin: 0;">Do you need customised metadata fields on top of standard provided by SpotDraft?</label><div class="toggle" id="s4MetadataFieldsCustomised" onclick="toggleGeneric(this); toggleSection('s4CustomMetadataSection')"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                        <div class="form-group"><label class="form-label">Metadata fields <span class="required">*</span></label><div class="form-hint" style="margin-bottom: var(--space-sm);">Here is what we offer as standard <a href="https://docs.google.com/document/d/1QBB6IgfQxKCEkyjfYITrixCuxjtnFQtIxxnO8XUjR_g/edit?pli=1&tab=t.0" target="_blank" style="color: var(--primary); text-decoration: underline;">(view standard metadata fields)</a></div><div class="toggle-group" style="margin-top: var(--space-sm);"><label class="form-label" style="margin: 0;">Do you need customised metadata fields on top of standard provided by SpotDraft?</label><div class="toggle" id="s4MetadataFieldsCustomised" onclick="toggleGeneric(this); toggleSection('s4CustomMetadataSection')"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div><div class="conditional-section" id="s4CustomMetadataSection" style="margin-top: var(--space-md);"><div class="form-group"><label class="form-label">Custom metadata fields</label><div class="form-hint" style="margin-bottom: var(--space-sm);">You can have a maximum of 10 custom metadata fields.</div><textarea class="form-textarea" id="s4CustomMetadata" placeholder="Add the metadata field title along with the approach."></textarea></div></div></div>
                         <div class="form-group"><label class="form-label">Storage location <span class="required">*</span></label><div class="chip-group" id="s4StorageLocation"><div class="chip" data-value="Google Drive" onclick="toggleChip(this)">Google Drive</div><div class="chip" data-value="SharePoint" onclick="toggleChip(this)">SharePoint</div><div class="chip" data-value="Dropbox" onclick="toggleChip(this)">Dropbox</div><div class="chip" data-value="Box" onclick="toggleChip(this)">Box</div><div class="chip" data-value="Local" onclick="toggleChip(this)">Local</div></div></div>
                         <div class="form-group"><label class="form-label">Structured naming? <span class="required">*</span></label><div class="form-hint" style="margin-bottom: var(--space-sm);">Data for migration available in a structured and clean folders?</div><select class="form-select" id="s4NamingConvention"><option value="">Select</option><option value="Yes - 100%">Yes - 100% of data is clean and structured</option><option value="Partial">Partial</option><option value="None">None - it's random mess</option></select></div>
                         <div class="form-group"><label class="form-label">Contract formats <span class="required">*</span></label><div class="chip-group" id="s4ContractFormats"><div class="chip" data-value="PDF" onclick="toggleChip(this)">PDF</div><div class="chip" data-value="Word" onclick="toggleChip(this)">Word</div><div class="chip" data-value="Scanned" onclick="toggleChip(this)">Scanned</div></div></div>
                         <div class="form-group"><label class="form-label">Existing metadata? <span class="required">*</span></label><div class="form-hint" style="margin-bottom: var(--space-sm);">Do you have existing metadata for your contracts? This includes information like contract type, parties, dates, values, etc. that is already captured in your current system.</div><select class="form-select" id="s4ExistingMetadata"><option value="">Select</option><option value="Yes - fully">Yes - fully captured and structured</option><option value="Yes - partially">Yes - partially captured, some gaps exist</option><option value="No">No - no existing metadata available</option></select></div>
                         <div class="form-group"><label class="form-label">Migration priority <span class="required">*</span></label><select class="form-select" id="s4MigrationPriority"><option value="">Select</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select></div>
                     </div>
-                    <div class="form-group"><label class="form-label">Excel trackers available?</label><div class="toggle-group"><div class="toggle" id="s4ExcelTrackers" onclick="toggleGeneric(this); toggleSection('s4ExcelUploadSection')"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
+                    <div class="form-group" style="margin-top: var(--space-md);"><label class="form-label">Excel trackers</label><div class="form-hint" style="margin-bottom: var(--space-sm);">Here is our standard format - will you be able to share your metadata in the below format <a href="https://docs.google.com/spreadsheets/d/1ONP7GkyTVqPgQV2T1GZgfbEC1yDrNOVTZTNUFcrx75U/edit?gid=695040956#gid=695040956" target="_blank" style="color: var(--primary); text-decoration: underline;">(view format)</a></div><div class="toggle-group"><div class="toggle" id="s4ExcelTrackers" onclick="toggleGeneric(this); toggleSection('s4ExcelUploadSection')"><div class="toggle-knob"></div></div><span class="toggle-label">No</span></div></div>
                     <div class="conditional-section" id="s4ExcelUploadSection"><div class="form-group"><label class="form-label">Upload tracker(s)</label><input type="file" class="form-input" id="s4ExcelFiles" accept=".xlsx,.csv" multiple></div></div>
-                    <div class="conditional-section" id="s4CustomMetadataSection"><div class="form-group"><label class="form-label">Custom metadata fields</label><textarea class="form-textarea" id="s4CustomMetadata" placeholder="Describe custom fields..."></textarea></div></div>
                     <div class="btn-group"><button class="btn btn-secondary" onclick="prevSection(4)"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back</button><button class="btn btn-primary" onclick="nextSection(4)">Continue to Integrations<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button></div>
                 </div>
             </div>
 
             <!-- SECTION 5: Integration Readiness -->
-            <div class="form-section" id="section5">
+            <div class="form-section" id="section5" style="display: none;">
                 <div class="section-header">
                     <div class="section-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="8" height="8"/><rect x="14" y="2" width="8" height="8"/></svg>Section 5 of 8</div>
                     <h2 class="section-title">Integration Readiness Scanner</h2>
@@ -1680,7 +1656,6 @@
                 <div class="form-card">
                     <div class="form-grid">
                         <div class="form-group"><label class="form-label">Approval workflow? <span class="required">*</span></label><div class="form-hint" style="margin-bottom: var(--space-sm);">Do you have an existing approval workflow for contracts? This refers to the process of getting contracts reviewed and approved by different stakeholders (e.g., Legal, Finance, Management) before execution.</div><select class="form-select" id="s6ApprovalWorkflow" onchange="toggleSection('s6WorkflowDetailsSection')"><option value="">Select</option><option value="Yes - documented">Yes - documented (formal process with clear steps and stakeholders)</option><option value="Yes - informal">Yes - informal (process exists but not formally documented)</option><option value="No">No (no approval workflow currently in place)</option></select></div>
-                        <div class="form-group"><label class="form-label">Contracts/month <span class="required">*</span></label><input type="number" class="form-input" id="s6ContractsPerMonth" placeholder="e.g., 150" min="1"></div>
                         <div class="form-group full-width"><label class="form-label">Who generates contracts? <span class="required">*</span></label><div class="chip-group" id="s6ContractGenerators"><div class="chip" data-value="Sales" onclick="toggleChip(this)">Sales</div><div class="chip" data-value="Legal" onclick="toggleChip(this)">Legal</div><div class="chip" data-value="Operations" onclick="toggleChip(this)">Operations</div><div class="chip" data-value="Mixed" onclick="toggleChip(this)">Mixed</div></div></div>
                     </div>
                     <div class="conditional-section" id="s6WorkflowDetailsSection"><div class="form-group"><label class="form-label">Describe workflow</label><textarea class="form-textarea" id="s6WorkflowDetails" placeholder="e.g., Legal > Manager > Finance"></textarea></div></div>
@@ -1725,9 +1700,7 @@
                 <div class="form-card">
                     <div class="form-grid">
                         <div class="form-group"><label class="form-label">Templates</label><input type="file" class="form-input" id="s8Templates" accept=".docx,.pdf" multiple><div class="form-hint">Contract templates</div></div>
-                        <div class="form-group"><label class="form-label">Clause libraries</label><input type="file" class="form-input" id="s8ClauseLibraries" accept=".docx,.xlsx,.pdf" multiple></div>
                         <div class="form-group"><label class="form-label">Approval matrices</label><input type="file" class="form-input" id="s8ApprovalMatrices" accept=".xlsx,.pdf" multiple></div>
-                        <div class="form-group"><label class="form-label">Metadata sheets</label><input type="file" class="form-input" id="s8MetadataSheets" accept=".xlsx,.csv" multiple></div>
                         <div class="form-group"><label class="form-label">Sample contracts</label><input type="file" class="form-input" id="s8SampleContracts" accept=".pdf,.docx" multiple></div>
                         <div class="form-group"><label class="form-label">Integration docs</label><input type="file" class="form-input" id="s8IntegrationDocs" accept=".pdf,.docx" multiple></div>
                         <div class="form-group"><label class="form-label">Brand guidelines</label><input type="file" class="form-input" id="s8BrandGuidelines" accept=".pdf,.zip" multiple></div>
@@ -1761,7 +1734,6 @@
                 <div class="results-section"><h3 class="results-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Red Flags & Risks</h3><div id="redFlagsList"></div></div>
                 <div class="results-section"><h3 class="results-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Action Items</h3><div class="action-tabs"><button class="action-tab active" onclick="switchActionTab('customer')">Your Team</button><button class="action-tab" onclick="switchActionTab('spotdraft')">SpotDraft Team</button></div><div class="action-tab-content active" id="customerActions"></div><div class="action-tab-content" id="spotdraftActions"></div></div>
                 <div class="results-section"><h3 class="results-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Implementation Plan</h3><div id="timelineSummary" style="margin-bottom: var(--space-lg); padding: var(--space-md); background: var(--info-light); border-radius: var(--radius-md);"></div><div id="implementationPhases"></div></div>
-                <div class="results-section" id="geminiDebugSection" style="display: none;"><h3 class="results-section-title" onclick="toggleGeminiDebug()" style="cursor: pointer;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Gemini AI Request/Response <span id="geminiToggleIcon" style="float: right; font-size: 14px;">▼</span></h3><div id="geminiDebugContent" style="display: none;"><div style="margin-bottom: var(--space-lg);"><h4 style="margin-bottom: var(--space-sm); color: var(--text);">Request (Prompt sent to Gemini):</h4><pre id="geminiRequest" style="background: var(--bg-secondary); padding: var(--space-md); border-radius: var(--radius-md); overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; font-size: 12px; line-height: 1.5;"></pre></div><div><h4 style="margin-bottom: var(--space-sm); color: var(--text);">Response (from Gemini):</h4><pre id="geminiResponse" style="background: var(--bg-secondary); padding: var(--space-md); border-radius: var(--radius-md); overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; font-size: 12px; line-height: 1.5;"></pre></div></div></div>
                 <div class="btn-group" style="border-top: none;"><button class="btn btn-secondary" onclick="location.reload()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/></svg>New Assessment</button><button class="btn btn-primary" onclick="window.print()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print Report</button></div>
             </div>
         </main>
@@ -1995,9 +1967,6 @@
             },
             section2: {
                 purchasedModules: [],
-                templateCount: null,
-                migrationContractCount: null,
-                migrationFileFormats: [],
                 integrations: [],
                 additionalAddons: ''
             }
@@ -2193,6 +2162,16 @@
                 }
                 
                 // Expected Go-Live
+                const startDate = document.getElementById('implementationStartDate');
+                if (!startDate.value) {
+                    startDate.classList.add('error');
+                    isValid = false;
+                } else {
+                    startDate.classList.remove('error');
+                    // Calculate go-live date
+                    calculateGoLiveDate();
+                }
+                
                 const goLive = document.getElementById('expectedGoLive');
                 if (!goLive.value) {
                     goLive.classList.add('error');
@@ -2213,38 +2192,6 @@
                     if (modulesError) modulesError.classList.remove('visible');
                 }
                 
-                // Template Count (if Template Setup selected)
-                const hasTemplateSetup = formData.section2.purchasedModules.includes('Template Setup');
-                if (hasTemplateSetup) {
-                    const templateCount = document.getElementById('templateCount');
-                    if (!templateCount) {
-                        isValid = false;
-                    } else if (!templateCount.value || parseInt(templateCount.value) < 1) {
-                        templateCount.classList.add('error');
-                        isValid = false;
-                    } else {
-                        templateCount.classList.remove('error');
-                    }
-                }
-                
-                // Migration Details (if Migration selected)
-                const hasMigration = formData.section2.purchasedModules.includes('Migration');
-                if (hasMigration) {
-                    const migrationCount = document.getElementById('migrationContractCount');
-                    if (!migrationCount) {
-                        isValid = false;
-                    } else if (!migrationCount.value || parseInt(migrationCount.value) < 1) {
-                        migrationCount.classList.add('error');
-                        isValid = false;
-                    } else {
-                        migrationCount.classList.remove('error');
-                    }
-                    
-                    const selectedFormats = document.querySelectorAll('#migrationFileFormats .chip.selected');
-                    if (selectedFormats.length === 0) {
-                        isValid = false;
-                    }
-                }
                 
             }
             
@@ -2278,6 +2225,7 @@
                     } : null,
                     availability: document.getElementById('availability').value,
                     communicationChannels: getSelectedChips('communicationChannels'),
+                    implementationStartDate: document.getElementById('implementationStartDate').value,
                     expectedGoLive: document.getElementById('expectedGoLive').value
                 };
                 
@@ -2286,15 +2234,6 @@
             if (section === 2) {
                 formData.section2 = {
                     purchasedModules: getSelectedModules(),
-                    templateCount: (() => {
-                        const el = document.getElementById('templateCount');
-                        return el && el.value ? parseInt(el.value) : null;
-                    })(),
-                    migrationContractCount: (() => {
-                        const el = document.getElementById('migrationContractCount');
-                        return el && el.value ? parseInt(el.value) : null;
-                    })(),
-                    migrationFileFormats: getSelectedChips('migrationFileFormats'),
                     integrations: getSelectedIntegrations(),
                     additionalAddons: document.getElementById('additionalAddons').value
                 };
@@ -2309,6 +2248,7 @@
             const toggle = document.getElementById('integrationsToggle');
             const label = document.getElementById('integrationsToggleLabel');
             const section = document.getElementById('technicalPocSection');
+            const section5 = document.getElementById('section5');
             
             toggle.classList.toggle('active');
             formData.section1.integrationsRequired = toggle.classList.contains('active');
@@ -2316,8 +2256,10 @@
             
             if (formData.section1.integrationsRequired) {
                 section.classList.add('visible');
+                if (section5) section5.style.display = 'block';
             } else {
                 section.classList.remove('visible');
+                if (section5) section5.style.display = 'none';
             }
         }
         
@@ -2347,30 +2289,8 @@
         }
         
         function updateModuleConditionalSections() {
-            const selectedModules = getSelectedModules();
-            
-            // Template Count Section
-            const templateSection = document.getElementById('templateCountSection');
-            if (templateSection) {
-                if (selectedModules.includes('Template Setup')) {
-                    templateSection.classList.add('visible');
-                } else {
-                    templateSection.classList.remove('visible');
-                }
-            }
-            
-            // Migration Details Section
-            const migrationSection = document.getElementById('migrationDetailsSection');
-            if (migrationSection) {
-                if (selectedModules.includes('Migration')) {
-                    migrationSection.classList.add('visible');
-                } else {
-                    migrationSection.classList.remove('visible');
-                }
-            }
-            
-            // Integration Systems Section (removed - now in Section 5)
-            // No longer needed in Section 2
+            // No conditional sections in Section 2 anymore
+            // This function is kept for backward compatibility but does nothing
         }
         
         // ============================================
@@ -2467,24 +2387,24 @@
                     technical_poc: isToggleActive('integrationsToggle') ? { name: getValue('technicalPocName'), email: getValue('technicalPocEmail'), timezone: getValue('technicalPocTimezone') } : null,
                     availability: getValue('availability'),
                     communication_channels: getSelectedChips('communicationChannels'),
+                    implementation_start_date: getValue('implementationStartDate'),
                     expected_go_live: getValue('expectedGoLive')
                 },
                 section_2_order_form_scope: {
                     purchased_modules: getSelectedModules(),
-                    template_count: getNumericValue('templateCount'),
-                    migration_contract_count: getNumericValue('migrationContractCount'),
-                    migration_file_formats: getSelectedChips('migrationFileFormats'),
                     integrations: getSelectedIntegrations(),
                     additional_addons: getValue('additionalAddons')
                 },
                 section_3_template_readiness: {
                     template_count: getNumericValue('s3TemplateCount'),
-                    templates_finalized: getValue('s3TemplatesFinalized'),
+                    templates_finalized_count: getNumericValue('s3TemplatesFinalized'),
+                    integrated_templates_count: getNumericValue('s3IntegratedTemplates'),
                     template_formats: getSelectedChips('s3TemplateFormats'),
-                    clause_level_changes: isToggleActive('s3ClauseChanges'),
                     dynamic_rendering_needed: getValue('s3DynamicRendering'),
                     dynamic_rendering_complexity: getValue('s3DynamicRenderingComplexity'),
                     conditional_logic: getValue('s3ConditionalLogic'),
+                    merged_templates: isToggleActive('s3MergedTemplates'),
+                    clause_level_changes: isToggleActive('s3ClauseChanges'),
                     language_variations: isToggleActive('s3LanguageVariations'),
                     calculations_involved: isToggleActive('s3Calculations'),
                     approval_matrices_exist: isToggleActive('s3ApprovalMatrices')
@@ -2515,7 +2435,6 @@
                 section_6_business_process: {
                     approval_workflow: getValue('s6ApprovalWorkflow'),
                     workflow_details: getValue('s6WorkflowDetails'),
-                    contracts_per_month: getNumericValue('s6ContractsPerMonth'),
                     contract_generators: getSelectedChips('s6ContractGenerators'),
                     bottlenecks: getValue('s6Bottlenecks'),
                     phase1_must_haves: getValue('s6Phase1MustHaves'),
@@ -2533,9 +2452,7 @@
                 },
                 section_8_uploads: {
                     templates: getFileList('s8Templates'),
-                    clause_libraries: getFileList('s8ClauseLibraries'),
                     approval_matrices: getFileList('s8ApprovalMatrices'),
-                    metadata_sheets: getFileList('s8MetadataSheets'),
                     sample_contracts: getFileList('s8SampleContracts'),
                     integration_docs: getFileList('s8IntegrationDocs'),
                     brand_guidelines: getFileList('s8BrandGuidelines')
@@ -2744,35 +2661,6 @@
             }).join('');
             document.getElementById('implementationPhases').innerHTML = phasesHtml;
             
-            // Display Gemini request/response if available (for debugging in production)
-            const geminiSection = document.getElementById('geminiDebugSection');
-            const geminiRequestEl = document.getElementById('geminiRequest');
-            const geminiResponseEl = document.getElementById('geminiResponse');
-            
-            // Show section if gemini_request or gemini_response keys exist in data (even if null/empty)
-            if ('gemini_request' in data || 'gemini_response' in data) {
-                if (geminiSection) {
-                    geminiSection.style.display = 'block';
-                }
-                if (geminiRequestEl) {
-                    geminiRequestEl.textContent = data.gemini_request || 'No request data available';
-                }
-                if (geminiResponseEl) {
-                    geminiResponseEl.textContent = data.gemini_response || 'No response data available';
-                }
-            } else {
-                if (geminiSection) geminiSection.style.display = 'none';
-            }
-        }
-        
-        function toggleGeminiDebug() {
-            const content = document.getElementById('geminiDebugContent');
-            const icon = document.getElementById('geminiToggleIcon');
-            if (content && icon) {
-                const isVisible = content.style.display !== 'none';
-                content.style.display = isVisible ? 'none' : 'block';
-                icon.textContent = isVisible ? '▶' : '▼';
-            }
         }
         
         function switchActionTab(tab) {
@@ -2786,10 +2674,49 @@
         // ============================================
         // INITIALIZATION
         // ============================================
+        // Calculate go-live date from implementation start date (8-12 weeks)
+        function calculateGoLiveDate() {
+            const startDateInput = document.getElementById('implementationStartDate');
+            const goLiveInput = document.getElementById('expectedGoLive');
+            
+            if (startDateInput && goLiveInput && startDateInput.value) {
+                const startDate = new Date(startDateInput.value);
+                if (startDate && !isNaN(startDate.getTime())) {
+                    // Calculate 10 weeks from start date (middle of 8-12 week range)
+                    const goLiveDate = new Date(startDate);
+                    goLiveDate.setDate(goLiveDate.getDate() + (10 * 7)); // 10 weeks = 70 days
+                    
+                    // Ensure go-live is not in the past
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (goLiveDate < today) {
+                        goLiveDate.setTime(today.getTime());
+                    }
+                    
+                    goLiveInput.value = goLiveDate.toISOString().split('T')[0];
+                }
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
-            // Set minimum date for go-live to today
+            // Set minimum date for implementation start to today
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('expectedGoLive').setAttribute('min', today);
+            const startDateInput = document.getElementById('implementationStartDate');
+            if (startDateInput) {
+                startDateInput.setAttribute('min', today);
+                startDateInput.addEventListener('change', calculateGoLiveDate);
+            }
+            
+            // Initialize Section 5 visibility based on integration toggle
+            const integrationsToggle = document.getElementById('integrationsToggle');
+            const section5 = document.getElementById('section5');
+            if (integrationsToggle && section5) {
+                if (integrationsToggle.classList.contains('active')) {
+                    section5.style.display = 'block';
+                } else {
+                    section5.style.display = 'none';
+                }
+            }
         });
     </script>
 </body>
