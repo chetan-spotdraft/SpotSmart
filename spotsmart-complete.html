@@ -1979,11 +1979,23 @@
         // NAVIGATION
         // ============================================
         function startAssessment() {
+            // Hide ALL sections first
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+                section.style.display = 'none';
+            });
+            
             const welcomeScreen = document.getElementById('welcomeScreen');
             const section1 = document.getElementById('section1');
             const progressContainer = document.getElementById('progressContainer');
+            const resultsScreen = document.getElementById('resultsScreen');
+            
             if (welcomeScreen) welcomeScreen.style.display = 'none';
-            if (section1) section1.classList.add('active');
+            if (resultsScreen) resultsScreen.classList.remove('active');
+            if (section1) {
+                section1.style.display = 'block';
+                section1.classList.add('active');
+            }
             if (progressContainer) progressContainer.style.display = 'block';
             currentSection = 1;
             updateProgress();
@@ -2025,9 +2037,17 @@
                 }
             }
             
-            // Add active class only to the next section
+            // Add active class only to the next section and ensure it's visible
             const nextSectionEl = document.getElementById(`section${nextSectionNum}`);
             if (nextSectionEl) {
+                // Ensure all other sections are explicitly hidden
+                document.querySelectorAll('.form-section').forEach(section => {
+                    if (section.id !== `section${nextSectionNum}`) {
+                        section.style.display = 'none';
+                    }
+                });
+                // Show and activate the next section
+                nextSectionEl.style.display = 'block';
                 nextSectionEl.classList.add('active');
             }
             currentSection = nextSectionNum;
@@ -2059,9 +2079,17 @@
                 }
             }
             
-            // Add active class only to the previous section
+            // Add active class only to the previous section and ensure it's visible
             const prevSectionEl = document.getElementById(`section${prevSectionNum}`);
             if (prevSectionEl) {
+                // Ensure all other sections are explicitly hidden
+                document.querySelectorAll('.form-section').forEach(section => {
+                    if (section.id !== `section${prevSectionNum}`) {
+                        section.style.display = 'none';
+                    }
+                });
+                // Show and activate the previous section
+                prevSectionEl.style.display = 'block';
                 prevSectionEl.classList.add('active');
             }
             currentSection = prevSectionNum;
@@ -2743,6 +2771,16 @@
         // DISPLAY RESULTS
         // ============================================
         function displayResults(data) {
+            // Hide ALL form sections first
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+                section.style.display = 'none'; // Force hide
+            });
+            
+            // Hide progress container
+            const progressContainer = document.getElementById('progressContainer');
+            if (progressContainer) progressContainer.style.display = 'none';
+            
             const loadingScreen = document.getElementById('loadingScreen');
             const resultsScreen = document.getElementById('resultsScreen');
             if (loadingScreen) loadingScreen.classList.remove('active');
