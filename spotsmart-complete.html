@@ -1180,13 +1180,13 @@
                 </div>
                 
                 <div style="display: flex; gap: var(--space-md); flex-wrap: wrap; justify-content: center;">
-                    <button class="btn btn-primary btn-lg" onclick="startAssessment()">
-                        Start Assessment
-                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                            <polyline points="12 5 19 12 12 19"/>
-                        </svg>
-                    </button>
+                <button class="btn btn-primary btn-lg" onclick="startAssessment()">
+                    Start Assessment
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </button>
                 </div>
             </div>
             
@@ -1292,14 +1292,14 @@
                                     <label class="form-label">Email <span class="required">*</span></label>
                                     <input type="email" class="form-input" id="legalPocEmail" placeholder="email@company.com" required onblur="validateEmailField('legalPocEmail')">
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Timezone <span class="required">*</span></label>
-                                    <select class="form-select" id="legalPocTimezone" required>
-                                        <option value="">Select timezone</option>
-                                        <option value="APAC">APAC</option>
-                                        <option value="US">US</option>
-                                        <option value="EMEA">EMEA</option>
-                                    </select>
+                            <div class="form-group">
+                                <label class="form-label">Timezone <span class="required">*</span></label>
+                                <select class="form-select" id="legalPocTimezone" required>
+                                    <option value="">Select timezone</option>
+                                    <option value="APAC">APAC</option>
+                                    <option value="US">US</option>
+                                    <option value="EMEA">EMEA</option>
+                                </select>
                                 </div>
                             </div>
                         </div>
@@ -2003,7 +2003,11 @@
             
             saveSection(current);
             
-            const currentSectionEl = document.getElementById(`section${current}`);
+            // Remove active class from ALL sections first
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
             let nextSectionNum = current + 1;
             
             // Handle Section 5 visibility based on integrations requirement
@@ -2021,8 +2025,8 @@
                 }
             }
             
+            // Add active class only to the next section
             const nextSectionEl = document.getElementById(`section${nextSectionNum}`);
-            if (currentSectionEl) currentSectionEl.classList.remove('active');
             if (nextSectionEl) {
                 nextSectionEl.classList.add('active');
             }
@@ -2033,7 +2037,11 @@
         }
         
         function prevSection(current) {
-            const currentSectionEl = document.getElementById(`section${current}`);
+            // Remove active class from ALL sections first
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
             let prevSectionNum = current - 1;
             
             // Handle Section 5 visibility based on integrations requirement
@@ -2051,8 +2059,8 @@
                 }
             }
             
+            // Add active class only to the previous section
             const prevSectionEl = document.getElementById(`section${prevSectionNum}`);
-            if (currentSectionEl) currentSectionEl.classList.remove('active');
             if (prevSectionEl) {
                 prevSectionEl.classList.add('active');
             }
@@ -2264,8 +2272,8 @@
                 const adminAccess = document.getElementById('s5AdminAccess');
                 if (!adminAccess || !adminAccess.value) {
                     if (adminAccess) adminAccess.classList.add('error');
-                    isValid = false;
-                } else {
+                        isValid = false;
+                    } else {
                     adminAccess.classList.remove('error');
                 }
                 
@@ -2285,14 +2293,14 @@
                 
                 if (!decisionMakerName || !decisionMakerName.value.trim()) {
                     if (decisionMakerName) decisionMakerName.classList.add('error');
-                    isValid = false;
-                } else {
+                        isValid = false;
+                    } else {
                     decisionMakerName.classList.remove('error');
-                }
-                
+                    }
+                    
                 if (!decisionMakerRole || !decisionMakerRole.value.trim()) {
                     if (decisionMakerRole) decisionMakerRole.classList.add('error');
-                    isValid = false;
+                        isValid = false;
                 } else {
                     decisionMakerRole.classList.remove('error');
                 }
@@ -2312,7 +2320,7 @@
                 // Expected outcomes (required)
                 const selectedOutcomes = document.querySelectorAll('#s5IntegrationOutcomes .chip.selected');
                 if (selectedOutcomes.length === 0) {
-                    isValid = false;
+                        isValid = false;
                     // Show error message
                     const outcomesContainer = document.getElementById('s5IntegrationOutcomes');
                     if (outcomesContainer) {
@@ -2575,14 +2583,14 @@
                     }
                     // If integrations required, collect actual data from Section 5
                     return {
-                        systems_to_integrate: getSelectedIntegrationsFromSection('s5IntegrationSystems'),
-                        custom_integration: isToggleActive('s5CustomIntegration'),
-                        custom_integration_details: getValue('s5CustomIntegrationDetails'),
-                        api_webhook_access: isToggleActive('s5ApiAccess'),
-                        admin_access: getValue('s5AdminAccess'),
-                        security_approval: getValue('s5SecurityApproval'),
-                        decision_maker: { name: getValue('s5DecisionMakerName'), role: getValue('s5DecisionMakerRole'), email: getValue('s5DecisionMakerEmail') },
-                        expected_outcomes: getSelectedChips('s5IntegrationOutcomes')
+                    systems_to_integrate: getSelectedIntegrationsFromSection('s5IntegrationSystems'),
+                    custom_integration: isToggleActive('s5CustomIntegration'),
+                    custom_integration_details: getValue('s5CustomIntegrationDetails'),
+                    api_webhook_access: isToggleActive('s5ApiAccess'),
+                    admin_access: getValue('s5AdminAccess'),
+                    security_approval: getValue('s5SecurityApproval'),
+                    decision_maker: { name: getValue('s5DecisionMakerName'), role: getValue('s5DecisionMakerRole'), email: getValue('s5DecisionMakerEmail') },
+                    expected_outcomes: getSelectedChips('s5IntegrationOutcomes')
                     };
                 })(),
                 section_6_business_process: {
@@ -2703,7 +2711,7 @@
                     // Complete the progress bar
                     updateLoadingProgress(100, 'Assessment complete!');
                     setTimeout(() => {
-                        displayResults(result.data);
+                    displayResults(result.data);
                     }, 300);
                 } else {
                     throw new Error(result.error || 'Assessment failed');
@@ -2859,6 +2867,12 @@
                 startDateInput.setAttribute('min', today);
                 startDateInput.addEventListener('change', calculateGoLiveDate);
             }
+            
+            // Ensure all sections are properly hidden initially (except section 1 which will be shown on start)
+            // Remove active class from all sections
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
             
             // Initialize Section 5 - always hidden initially, shown only when navigating to it
             const section5 = document.getElementById('section5');
