@@ -2004,10 +2004,26 @@
             saveSection(current);
             
             const currentSectionEl = document.getElementById(`section${current}`);
-            const nextSectionEl = document.getElementById(`section${current + 1}`);
+            let nextSectionNum = current + 1;
+            
+            // Skip Section 5 if integrations are not required
+            if (nextSectionNum === 5) {
+                const integrationsRequired = formData.section1?.integrationsRequired || false;
+                if (!integrationsRequired) {
+                    nextSectionNum = 6; // Skip to Section 6
+                }
+            }
+            
+            const nextSectionEl = document.getElementById(`section${nextSectionNum}`);
             if (currentSectionEl) currentSectionEl.classList.remove('active');
-            if (nextSectionEl) nextSectionEl.classList.add('active');
-            currentSection = current + 1;
+            if (nextSectionEl) {
+                nextSectionEl.classList.add('active');
+                // Make sure Section 5 is visible if we're going to it
+                if (nextSectionNum === 5) {
+                    nextSectionEl.style.display = 'block';
+                }
+            }
+            currentSection = nextSectionNum;
             updateProgress();
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2015,10 +2031,26 @@
         
         function prevSection(current) {
             const currentSectionEl = document.getElementById(`section${current}`);
-            const prevSectionEl = document.getElementById(`section${current - 1}`);
+            let prevSectionNum = current - 1;
+            
+            // Skip Section 5 if integrations are not required
+            if (prevSectionNum === 5) {
+                const integrationsRequired = formData.section1?.integrationsRequired || false;
+                if (!integrationsRequired) {
+                    prevSectionNum = 4; // Skip to Section 4
+                }
+            }
+            
+            const prevSectionEl = document.getElementById(`section${prevSectionNum}`);
             if (currentSectionEl) currentSectionEl.classList.remove('active');
-            if (prevSectionEl) prevSectionEl.classList.add('active');
-            currentSection = current - 1;
+            if (prevSectionEl) {
+                prevSectionEl.classList.add('active');
+                // Make sure Section 5 is visible if we're going to it
+                if (prevSectionNum === 5) {
+                    prevSectionEl.style.display = 'block';
+                }
+            }
+            currentSection = prevSectionNum;
             updateProgress();
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2191,8 +2223,106 @@
                 } else {
                     if (modulesError) modulesError.classList.remove('visible');
                 }
+            }
+            
+            if (section === 5) {
+                // Check if Section 5 should be visible (only if integrations are required)
+                const integrationsRequired = formData.section1?.integrationsRequired || false;
+                if (!integrationsRequired) {
+                    // Section 5 is not required, skip validation
+                    return true;
+                }
                 
+                // Systems to integrate (required)
+                const selectedSystems = document.querySelectorAll('#s5IntegrationSystems .integration-chip.selected');
+                if (selectedSystems.length === 0) {
+                    isValid = false;
+                    // Show error message
+                    const systemsContainer = document.getElementById('s5IntegrationSystems');
+                    if (systemsContainer) {
+                        let errorMsg = systemsContainer.parentElement.querySelector('.error-message');
+                        if (!errorMsg) {
+                            errorMsg = document.createElement('div');
+                            errorMsg.className = 'error-message';
+                            errorMsg.textContent = 'Please select at least one system to integrate';
+                            systemsContainer.parentElement.appendChild(errorMsg);
+                        }
+                        errorMsg.classList.add('visible');
+                    }
+                } else {
+                    const errorMsg = document.querySelector('#s5IntegrationSystems').parentElement.querySelector('.error-message');
+                    if (errorMsg) errorMsg.classList.remove('visible');
+                }
                 
+                // Admin access (required)
+                const adminAccess = document.getElementById('s5AdminAccess');
+                if (!adminAccess || !adminAccess.value) {
+                    if (adminAccess) adminAccess.classList.add('error');
+                    isValid = false;
+                } else {
+                    adminAccess.classList.remove('error');
+                }
+                
+                // IT approval needed (required)
+                const securityApproval = document.getElementById('s5SecurityApproval');
+                if (!securityApproval || !securityApproval.value) {
+                    if (securityApproval) securityApproval.classList.add('error');
+                    isValid = false;
+                } else {
+                    securityApproval.classList.remove('error');
+                }
+                
+                // Integration Decision Maker (required)
+                const decisionMakerName = document.getElementById('s5DecisionMakerName');
+                const decisionMakerRole = document.getElementById('s5DecisionMakerRole');
+                const decisionMakerEmail = document.getElementById('s5DecisionMakerEmail');
+                
+                if (!decisionMakerName || !decisionMakerName.value.trim()) {
+                    if (decisionMakerName) decisionMakerName.classList.add('error');
+                    isValid = false;
+                } else {
+                    decisionMakerName.classList.remove('error');
+                }
+                
+                if (!decisionMakerRole || !decisionMakerRole.value.trim()) {
+                    if (decisionMakerRole) decisionMakerRole.classList.add('error');
+                    isValid = false;
+                } else {
+                    decisionMakerRole.classList.remove('error');
+                }
+                
+                if (!decisionMakerEmail || !decisionMakerEmail.value.trim()) {
+                    if (decisionMakerEmail) decisionMakerEmail.classList.add('error');
+                    isValid = false;
+                } else {
+                    decisionMakerEmail.classList.remove('error');
+                    // Validate email format
+                    if (!validateEmail(decisionMakerEmail.value.trim())) {
+                        decisionMakerEmail.classList.add('error');
+                        isValid = false;
+                    }
+                }
+                
+                // Expected outcomes (required)
+                const selectedOutcomes = document.querySelectorAll('#s5IntegrationOutcomes .chip.selected');
+                if (selectedOutcomes.length === 0) {
+                    isValid = false;
+                    // Show error message
+                    const outcomesContainer = document.getElementById('s5IntegrationOutcomes');
+                    if (outcomesContainer) {
+                        let errorMsg = outcomesContainer.parentElement.querySelector('.error-message');
+                        if (!errorMsg) {
+                            errorMsg = document.createElement('div');
+                            errorMsg.className = 'error-message';
+                            errorMsg.textContent = 'Please select at least one expected outcome';
+                            outcomesContainer.parentElement.appendChild(errorMsg);
+                        }
+                        errorMsg.classList.add('visible');
+                    }
+                } else {
+                    const errorMsg = document.querySelector('#s5IntegrationOutcomes').parentElement.querySelector('.error-message');
+                    if (errorMsg) errorMsg.classList.remove('visible');
+                }
             }
             
             return isValid;
