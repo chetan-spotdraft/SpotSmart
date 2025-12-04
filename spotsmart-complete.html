@@ -2006,11 +2006,18 @@
             const currentSectionEl = document.getElementById(`section${current}`);
             let nextSectionNum = current + 1;
             
-            // Skip Section 5 if integrations are not required
+            // Handle Section 5 visibility based on integrations requirement
             if (nextSectionNum === 5) {
                 const integrationsRequired = formData.section1?.integrationsRequired || false;
                 if (!integrationsRequired) {
+                    // Skip Section 5 if integrations are not required
                     nextSectionNum = 6; // Skip to Section 6
+                } else {
+                    // Show Section 5 if integrations are required
+                    const section5 = document.getElementById('section5');
+                    if (section5) {
+                        section5.style.display = 'block';
+                    }
                 }
             }
             
@@ -2018,10 +2025,6 @@
             if (currentSectionEl) currentSectionEl.classList.remove('active');
             if (nextSectionEl) {
                 nextSectionEl.classList.add('active');
-                // Make sure Section 5 is visible if we're going to it
-                if (nextSectionNum === 5) {
-                    nextSectionEl.style.display = 'block';
-                }
             }
             currentSection = nextSectionNum;
             updateProgress();
@@ -2033,11 +2036,18 @@
             const currentSectionEl = document.getElementById(`section${current}`);
             let prevSectionNum = current - 1;
             
-            // Skip Section 5 if integrations are not required
+            // Handle Section 5 visibility based on integrations requirement
             if (prevSectionNum === 5) {
                 const integrationsRequired = formData.section1?.integrationsRequired || false;
                 if (!integrationsRequired) {
+                    // Skip Section 5 if integrations are not required
                     prevSectionNum = 4; // Skip to Section 4
+                } else {
+                    // Show Section 5 if integrations are required
+                    const section5 = document.getElementById('section5');
+                    if (section5) {
+                        section5.style.display = 'block';
+                    }
                 }
             }
             
@@ -2045,10 +2055,6 @@
             if (currentSectionEl) currentSectionEl.classList.remove('active');
             if (prevSectionEl) {
                 prevSectionEl.classList.add('active');
-                // Make sure Section 5 is visible if we're going to it
-                if (prevSectionNum === 5) {
-                    prevSectionEl.style.display = 'block';
-                }
             }
             currentSection = prevSectionNum;
             updateProgress();
@@ -2378,18 +2384,17 @@
             const toggle = document.getElementById('integrationsToggle');
             const label = document.getElementById('integrationsToggleLabel');
             const section = document.getElementById('technicalPocSection');
-            const section5 = document.getElementById('section5');
             
             toggle.classList.toggle('active');
             formData.section1.integrationsRequired = toggle.classList.contains('active');
             label.textContent = formData.section1.integrationsRequired ? 'Yes' : 'No';
             
+            // Only show/hide Technical POC section within Section 1
+            // Section 5 visibility is controlled by navigation logic
             if (formData.section1.integrationsRequired) {
-                section.classList.add('visible');
-                if (section5) section5.style.display = 'block';
+                if (section) section.classList.add('visible');
             } else {
-                section.classList.remove('visible');
-                if (section5) section5.style.display = 'none';
+                if (section) section.classList.remove('visible');
             }
         }
         
@@ -2552,16 +2557,34 @@
                     excel_trackers: isToggleActive('s4ExcelTrackers'),
                     migration_priority: getValue('s4MigrationPriority')
                 },
-                section_5_integration_readiness: {
-                    systems_to_integrate: getSelectedIntegrationsFromSection('s5IntegrationSystems'),
-                    custom_integration: isToggleActive('s5CustomIntegration'),
-                    custom_integration_details: getValue('s5CustomIntegrationDetails'),
-                    api_webhook_access: isToggleActive('s5ApiAccess'),
-                    admin_access: getValue('s5AdminAccess'),
-                    security_approval: getValue('s5SecurityApproval'),
-                    decision_maker: { name: getValue('s5DecisionMakerName'), role: getValue('s5DecisionMakerRole'), email: getValue('s5DecisionMakerEmail') },
-                    expected_outcomes: getSelectedChips('s5IntegrationOutcomes')
-                },
+                section_5_integration_readiness: (() => {
+                    // Always collect integration data - use empty/default values if Section 5 was skipped
+                    const integrationsRequired = isToggleActive('integrationsToggle');
+                    if (!integrationsRequired) {
+                        // If integrations not required, return empty/default values
+                        return {
+                            systems_to_integrate: [],
+                            custom_integration: false,
+                            custom_integration_details: '',
+                            api_webhook_access: false,
+                            admin_access: '',
+                            security_approval: '',
+                            decision_maker: { name: '', role: '', email: '' },
+                            expected_outcomes: []
+                        };
+                    }
+                    // If integrations required, collect actual data from Section 5
+                    return {
+                        systems_to_integrate: getSelectedIntegrationsFromSection('s5IntegrationSystems'),
+                        custom_integration: isToggleActive('s5CustomIntegration'),
+                        custom_integration_details: getValue('s5CustomIntegrationDetails'),
+                        api_webhook_access: isToggleActive('s5ApiAccess'),
+                        admin_access: getValue('s5AdminAccess'),
+                        security_approval: getValue('s5SecurityApproval'),
+                        decision_maker: { name: getValue('s5DecisionMakerName'), role: getValue('s5DecisionMakerRole'), email: getValue('s5DecisionMakerEmail') },
+                        expected_outcomes: getSelectedChips('s5IntegrationOutcomes')
+                    };
+                })(),
                 section_6_business_process: {
                     approval_workflow: getValue('s6ApprovalWorkflow'),
                     workflow_details: getValue('s6WorkflowDetails'),
@@ -2837,15 +2860,10 @@
                 startDateInput.addEventListener('change', calculateGoLiveDate);
             }
             
-            // Initialize Section 5 visibility based on integration toggle
-            const integrationsToggle = document.getElementById('integrationsToggle');
+            // Initialize Section 5 - always hidden initially, shown only when navigating to it
             const section5 = document.getElementById('section5');
-            if (integrationsToggle && section5) {
-                if (integrationsToggle.classList.contains('active')) {
-                    section5.style.display = 'block';
-                } else {
-                    section5.style.display = 'none';
-                }
+            if (section5) {
+                section5.style.display = 'none'; // Hidden by default, shown during navigation if needed
             }
         });
     </script>
