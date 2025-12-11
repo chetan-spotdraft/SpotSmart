@@ -1593,7 +1593,7 @@
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                             <circle cx="12" cy="7" r="4"/>
                         </svg>
-                        Section 1 of 4
+                        Section 1 of 5
                     </div>
                     <h2 class="section-title">Basics</h2>
                     <p class="section-description">Let's start with some basic information about your organization.</p>
@@ -4277,10 +4277,12 @@
             });
             
             let nextSectionNum = current + 1;
+            let logicalSectionNum = nextSectionNum;
             
             // Skip section 5 (removed)
             if (nextSectionNum === 5) {
-                nextSectionNum = 6;
+                nextSectionNum = 6; // Use section 6 HTML element
+                logicalSectionNum = 5; // But treat it as section 5 for progress
             }
             
             // Show next IM section
@@ -4296,7 +4298,7 @@
                 nextSectionEl.style.display = 'block';
                 nextSectionEl.classList.add('active');
             }
-            currentSection = nextSectionNum;
+            currentSection = logicalSectionNum; // Use logical section number for progress
             updateProgress();
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4308,11 +4310,15 @@
                 section.classList.remove('active');
             });
             
-            let prevSectionNum = current - 1;
+            // If current is 6 (which is logically section 5), treat it as 5
+            let logicalCurrent = current === 6 ? 5 : current;
+            let prevSectionNum = logicalCurrent - 1;
+            let prevSectionElementNum = prevSectionNum;
             
-            // Skip section 5 (removed)
+            // Skip section 5 (removed) - if going to section 4, use section 4 element
             if (prevSectionNum === 5) {
                 prevSectionNum = 4;
+                prevSectionElementNum = 4;
             }
             
             // If going back from IM Section 1, go to section 0
@@ -4335,11 +4341,11 @@
             }
             
             // Show previous IM section
-            const prevSectionEl = document.getElementById(`imSection${prevSectionNum}`);
+            const prevSectionEl = document.getElementById(`imSection${prevSectionElementNum}`);
             if (prevSectionEl) {
                 // Ensure all other sections are explicitly hidden
                 document.querySelectorAll('.form-section').forEach(section => {
-                    if (section.id !== `imSection${prevSectionNum}`) {
+                    if (section.id !== `imSection${prevSectionElementNum}`) {
                         section.style.display = 'none';
                     }
                 });
@@ -4347,7 +4353,7 @@
                 prevSectionEl.style.display = 'block';
                 prevSectionEl.classList.add('active');
             }
-            currentSection = prevSectionNum;
+            currentSection = prevSectionNum; // Use logical section number for progress
             updateProgress();
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4387,9 +4393,11 @@
             // Handle Implementation Manager flow (5 sections)
             if (formData.userType === 'implementation_manager') {
                 const imTotalSections = 5;
-                const percent = Math.round((currentSection / imTotalSections) * 100);
+                // If currentSection is 6 (which is the HTML section 6, logically section 5), treat it as 5
+                const logicalSection = currentSection === 6 ? 5 : currentSection;
+                const percent = Math.round((logicalSection / imTotalSections) * 100);
                 document.getElementById('progressFill').style.width = `${percent}%`;
-                document.getElementById('progressText').textContent = `Section ${currentSection} of ${imTotalSections}`;
+                document.getElementById('progressText').textContent = `Section ${logicalSection} of ${imTotalSections}`;
                 document.getElementById('progressPercent').textContent = `${percent}%`;
                 return;
             }
@@ -7002,7 +7010,7 @@
             }
             
             // Initialize all Prospect sections - hidden by default
-            for (let i = 1; i <= 4; i++) {
+            for (let i = 1; i <= 5; i++) {
                 const prospectSection = document.getElementById(`prospectSection${i}`);
                 if (prospectSection) {
                     prospectSection.style.display = 'none';
