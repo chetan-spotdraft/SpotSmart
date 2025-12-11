@@ -1674,7 +1674,7 @@
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/>
                         </svg>
-                        Section 2 of 4
+                        Section 2 of 5
                     </div>
                     <h2 class="section-title">Scope Clarity</h2>
                     <p class="section-description">Help us understand what you're looking for from SpotDraft.</p>
@@ -1774,7 +1774,7 @@
                             <rect x="2" y="14" width="8" height="8" rx="1"/>
                             <rect x="14" y="14" width="8" height="8" rx="1"/>
                         </svg>
-                        Section 3 of 4
+                        Section 3 of 5
                     </div>
                     <h2 class="section-title">Systems and Integrations</h2>
                     <p class="section-description">Tell us about your existing systems and integration needs.</p>
@@ -2047,13 +2047,14 @@
                 <div class="form-card">
                     <div class="form-group">
                         <label class="form-label">
-                            Which SpotDraft modules have you purchased? <span class="required">*</span>
+                            Purchased Modules <span class="required">*</span>
                         </label>
                         <div class="form-hint" style="margin-bottom: var(--space-md);">Select all that apply</div>
                         <div class="chip-group" id="customerPurchasedModules">
                             <div class="chip" data-value="Repository" onclick="toggleChip(this)">Repository</div>
                             <div class="chip" data-value="Approvals" onclick="toggleChip(this)">Approvals</div>
                             <div class="chip" data-value="Assisted Workflows" onclick="toggleChip(this)">Assisted Workflows</div>
+                            <div class="chip" data-value="Assisted Migration" onclick="toggleChip(this)">Assisted Migration</div>
                             <div class="chip" data-value="Integrations" onclick="toggleChip(this)">Integrations</div>
                         </div>
                         <div class="error-message" id="customerPurchasedModulesError">Please select at least one module</div>
@@ -2094,13 +2095,12 @@
                 <div class="form-card">
                     <div class="form-group">
                         <label class="form-label">
-                            Do you need to migrate existing contracts? <span class="required">*</span>
+                            Assisted Migration <span class="required">*</span>
                         </label>
                         <select class="form-select" id="customerMigrationNeeded" onchange="toggleCustomerMigrationQuestions()" required>
                             <option value="">Select</option>
+                            <option value="Yes">Yes</option>
                             <option value="No">No</option>
-                            <option value="Yes, partial">Yes, partial</option>
-                            <option value="Yes, full">Yes, full</option>
                         </select>
                     </div>
                     
@@ -2195,7 +2195,7 @@
                 <div class="form-card">
                     <div class="form-group">
                         <label class="form-label">
-                            Which systems must integrate with SpotDraft? <span class="required">*</span>
+                            Required Integrations <span class="required">*</span>
                         </label>
                         <div class="form-hint" style="margin-bottom: var(--space-md);">Select all that apply</div>
                         <div class="chip-group" id="customerIntegrationSystems">
@@ -2452,7 +2452,7 @@
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                             <circle cx="12" cy="7" r="4"/>
                         </svg>
-                        Section 1 of 6
+                        Section 1 of 5
                     </div>
                     <h2 class="section-title">Customer Context</h2>
                     <p class="section-description">Provide context about the customer and known risks.</p>
@@ -2629,7 +2629,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">
-                                Will migration require support from engineering? <span class="required">*</span>
+                                CSV Migration Required <span class="required">*</span>
                             </label>
                             <select class="form-select" id="imMigrationEngineeringSupport" required>
                                 <option value="">Select</option>
@@ -2640,7 +2640,34 @@
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Expected migration volume <span class="required">*</span>
+                                Assisted Migration <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="imAssistedMigration" required>
+                                <option value="">Select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid" style="margin-top: var(--space-lg);">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Type of Metadata <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="imMetadataType" required>
+                                <option value="">Select</option>
+                                <option value="Standard">Standard</option>
+                                <option value="Custom">Custom</option>
+                            </select>
+                            <div class="form-hint" style="margin-top: var(--space-sm);">
+                                <a href="https://docs.google.com/document/d/1QBB6IgfQxKCEkyjfYITrixCuxjtnFQtIxxnO8XUjR_g/edit?pli=1&tab=t.0" target="_blank" style="color: var(--primary); text-decoration: underline;">Standard Metadata List</a>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Expected Volume of Migration <span class="required">*</span>
                             </label>
                             <select class="form-select" id="imMigrationVolume" required>
                                 <option value="">Select</option>
@@ -2690,7 +2717,7 @@
                 <div class="form-card">
                     <div class="form-group">
                         <label class="form-label">
-                            Integration types confirmed? <span class="required">*</span>
+                            Integration Needs <span class="required">*</span>
                         </label>
                         <div class="form-hint" style="margin-bottom: var(--space-md);">Select all that apply</div>
                         <div class="chip-group" id="imIntegrationTypes">
@@ -2707,7 +2734,7 @@
                     <div class="form-grid" style="margin-top: var(--space-lg);">
                         <div class="form-group">
                             <label class="form-label">
-                                Does integration require engineering effort? <span class="required">*</span>
+                                Require Engineering Effort <span class="required">*</span>
                             </label>
                             <select class="form-select" id="imIntegrationEngineeringEffort" required>
                                 <option value="">Select</option>
@@ -2719,7 +2746,7 @@
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Do we foresee multiple UAT rounds for integrations? <span class="required">*</span>
+                                UAT Cycles Expected <span class="required">*</span>
                             </label>
                             <select class="form-select" id="imIntegrationUATRounds" required>
                                 <option value="">Select</option>
@@ -2727,6 +2754,14 @@
                                 <option value="No">No</option>
                             </select>
                         </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: var(--space-lg);">
+                        <label class="form-label">
+                            Pre-known Blockers
+                        </label>
+                        <textarea class="form-textarea" id="imPreKnownBlockers" placeholder="Describe any known blockers or challenges..."></textarea>
+                        <div class="form-hint">Optional - This helps identify potential risks early</div>
                     </div>
                     
                     <div class="btn-group">
@@ -2768,7 +2803,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">
-                                What is your realistic go-live expectation? <span class="required">*</span>
+                                Expected Go-Live <span class="required">*</span>
                             </label>
                             <select class="form-select" id="imGoLiveExpectation" required>
                                 <option value="">Select</option>
@@ -2782,7 +2817,7 @@
                     
                     <div class="form-group" style="margin-top: var(--space-lg);">
                         <label class="form-label">
-                            Any known blockers that will delay the project?
+                            Known Blockers
                         </label>
                         <textarea class="form-textarea" id="imKnownBlockers" placeholder="Describe any known blockers or delays..."></textarea>
                         <div class="form-hint">Optional - This helps with timeline planning</div>
@@ -4329,9 +4364,9 @@
                 return;
             }
             
-            // Handle Prospect flow (4 sections)
+            // Handle Prospect flow (5 sections)
             if (formData.userType === 'prospect') {
-                const prospectTotalSections = 4;
+                const prospectTotalSections = 5;
                 const percent = Math.round((currentSection / prospectTotalSections) * 100);
                 document.getElementById('progressFill').style.width = `${percent}%`;
                 document.getElementById('progressText').textContent = `Section ${currentSection} of ${prospectTotalSections}`;
@@ -4349,9 +4384,9 @@
                 return;
             }
             
-            // Handle Implementation Manager flow (6 sections)
+            // Handle Implementation Manager flow (5 sections)
             if (formData.userType === 'implementation_manager') {
-                const imTotalSections = 6;
+                const imTotalSections = 5;
                 const percent = Math.round((currentSection / imTotalSections) * 100);
                 document.getElementById('progressFill').style.width = `${percent}%`;
                 document.getElementById('progressText').textContent = `Section ${currentSection} of ${imTotalSections}`;
@@ -4990,7 +5025,7 @@
                 // Fill Section 3
                 const migrationNeeded = document.getElementById('customerMigrationNeeded');
                 if (migrationNeeded) {
-                    migrationNeeded.value = 'Yes, partial';
+                    migrationNeeded.value = 'Yes';
                     toggleCustomerMigrationQuestions();
                 }
                 
@@ -5116,14 +5151,20 @@
                 if (customDetails) customDetails.value = 'Custom approval workflows and integration with legacy systems';
                 
                 // Fill Section 3
-                const migrationSupport = document.getElementById('imMigrationEngineeringSupport');
-                if (migrationSupport) migrationSupport.value = 'Yes';
+                const csvMigration = document.getElementById('imMigrationEngineeringSupport');
+                if (csvMigration) csvMigration.value = 'Yes';
+                
+                const assistedMigration = document.getElementById('imAssistedMigration');
+                if (assistedMigration) assistedMigration.value = 'Yes';
+                
+                const metadataType = document.getElementById('imMetadataType');
+                if (metadataType) metadataType.value = 'Standard';
                 
                 const migrationVolume = document.getElementById('imMigrationVolume');
                 if (migrationVolume) migrationVolume.value = 'Large';
                 
                 // Fill Section 4
-                const integrationTypes = ['crm', 'custom_api'];
+                const integrationTypes = ['CRM (SFDC, HubSpot, Zoho)', 'Custom API'];
                 integrationTypes.forEach(value => {
                     const chip = document.querySelector(`#imIntegrationTypes .chip[data-value="${value}"]`);
                     if (chip && !chip.classList.contains('selected')) chip.click();
@@ -5134,6 +5175,9 @@
                 
                 const uatRounds = document.getElementById('imIntegrationUATRounds');
                 if (uatRounds) uatRounds.value = 'Yes';
+                
+                const preKnownBlockers = document.getElementById('imPreKnownBlockers');
+                if (preKnownBlockers) preKnownBlockers.value = 'API access delays and security review pending';
                 
                 // Section 5 - Removed per user request
                 
@@ -5918,16 +5962,34 @@
             }
             
             if (section === 3) {
-                // Migration engineering support
-                const migrationSupport = document.getElementById('imMigrationEngineeringSupport');
-                if (!migrationSupport || !migrationSupport.value) {
-                    if (migrationSupport) migrationSupport.classList.add('error');
+                // CSV Migration Required
+                const csvMigration = document.getElementById('imMigrationEngineeringSupport');
+                if (!csvMigration || !csvMigration.value) {
+                    if (csvMigration) csvMigration.classList.add('error');
                     isValid = false;
                 } else {
-                    migrationSupport.classList.remove('error');
+                    csvMigration.classList.remove('error');
                 }
                 
-                // Migration volume
+                // Assisted Migration
+                const assistedMigration = document.getElementById('imAssistedMigration');
+                if (!assistedMigration || !assistedMigration.value) {
+                    if (assistedMigration) assistedMigration.classList.add('error');
+                    isValid = false;
+                } else {
+                    assistedMigration.classList.remove('error');
+                }
+                
+                // Type of Metadata
+                const metadataType = document.getElementById('imMetadataType');
+                if (!metadataType || !metadataType.value) {
+                    if (metadataType) metadataType.classList.add('error');
+                    isValid = false;
+                } else {
+                    metadataType.classList.remove('error');
+                }
+                
+                // Expected Volume of Migration
                 const migrationVolume = document.getElementById('imMigrationVolume');
                 if (!migrationVolume || !migrationVolume.value) {
                     if (migrationVolume) migrationVolume.classList.add('error');
@@ -6010,16 +6072,19 @@
             
             if (section === 3) {
                 formData.im.section3 = {
-                    migrationEngineeringSupport: document.getElementById('imMigrationEngineeringSupport').value,
-                    migrationVolume: document.getElementById('imMigrationVolume').value
+                    csvMigrationRequired: document.getElementById('imMigrationEngineeringSupport')?.value || '',
+                    assistedMigration: document.getElementById('imAssistedMigration')?.value || '',
+                    metadataType: document.getElementById('imMetadataType')?.value || '',
+                    migrationVolume: document.getElementById('imMigrationVolume')?.value || ''
                 };
             }
             
             if (section === 4) {
                 formData.im.section4 = {
                     integrationTypes: getSelectedChips('imIntegrationTypes'),
-                    integrationEngineeringEffort: document.getElementById('imIntegrationEngineeringEffort').value,
-                    integrationUATRounds: document.getElementById('imIntegrationUATRounds').value
+                    integrationEngineeringEffort: document.getElementById('imIntegrationEngineeringEffort')?.value || '',
+                    integrationUATRounds: document.getElementById('imIntegrationUATRounds')?.value || '',
+                    preKnownBlockers: document.getElementById('imPreKnownBlockers')?.value || ''
                 };
             }
             
@@ -6052,13 +6117,16 @@
                     custom_development_details: getValue('imCustomDevelopmentDetails')
                 },
                 im_section_3_migration_details: {
-                    migration_engineering_support: getValue('imMigrationEngineeringSupport'),
+                    csv_migration_required: getValue('imMigrationEngineeringSupport'),
+                    assisted_migration: getValue('imAssistedMigration'),
+                    metadata_type: getValue('imMetadataType'),
                     migration_volume: getValue('imMigrationVolume')
                 },
                 im_section_4_integrations: {
                     integration_types: getSelectedChips('imIntegrationTypes'),
                     integration_engineering_effort: getValue('imIntegrationEngineeringEffort'),
-                    integration_uat_rounds: getValue('imIntegrationUATRounds')
+                    integration_uat_rounds: getValue('imIntegrationUATRounds'),
+                    pre_known_blockers: getValue('imPreKnownBlockers')
                 },
                 im_section_5_timeline_expectations: {
                     go_live_expectation: getValue('imGoLiveExpectation'),
@@ -6311,10 +6379,16 @@
                     const contractCount = document.getElementById('customerMigrationContractCount');
                     const storage = document.getElementById('customerContractStorage');
                     const cleanliness = document.getElementById('customerDataCleanliness');
+                    const dataFormat = document.getElementById('customerDataFormat');
                     if (contractCount) contractCount.required = false;
                     if (storage) storage.required = false;
                     if (cleanliness) cleanliness.required = false;
-                } else {
+                    // Clear data format chips selection
+                    if (dataFormat) {
+                        const selectedChips = dataFormat.querySelectorAll('.chip.selected');
+                        selectedChips.forEach(chip => chip.classList.remove('selected'));
+                    }
+                } else if (migrationNeeded.value === 'Yes') {
                     migrationSection.classList.add('visible');
                     // Make migration questions required
                     const contractCount = document.getElementById('customerMigrationContractCount');
