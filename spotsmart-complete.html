@@ -426,6 +426,139 @@
         }
         
         /* ============================================
+           AUTO-SAVE UI
+           ============================================ */
+        .save-indicator {
+            position: fixed;
+            top: var(--space-lg);
+            right: var(--space-lg);
+            background: var(--success);
+            color: var(--white);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            gap: var(--space-xs);
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all var(--transition-base);
+        }
+        
+        .save-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .save-indicator svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .data-actions {
+            position: fixed;
+            bottom: var(--space-lg);
+            right: var(--space-lg);
+            display: flex;
+            gap: var(--space-sm);
+            z-index: 1000;
+        }
+        
+        .data-action-btn {
+            background: var(--white);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            padding: var(--space-sm) var(--space-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .data-action-btn:hover {
+            background: var(--gray-50);
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .data-action-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .restore-prompt {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--white);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-xl);
+            z-index: 2000;
+            max-width: 500px;
+            width: 90%;
+            display: none;
+        }
+        
+        .restore-prompt h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-md);
+        }
+        
+        .restore-prompt p {
+            color: var(--gray-600);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .restore-prompt-actions {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: flex-end;
+        }
+        
+        .restore-btn {
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+        
+        .restore-btn.primary {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+        }
+        
+        .restore-btn.primary:hover {
+            background: var(--primary-light);
+        }
+        
+        .restore-btn.secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        
+        .restore-btn.secondary:hover {
+            background: var(--gray-200);
+        }
+        
+        /* ============================================
            FORM SECTIONS
            ============================================ */
         .form-section {
@@ -3529,6 +3662,175 @@
         const totalSections = 8;
         
         // ============================================
+        // LOCALSTORAGE AUTO-SAVE
+        // ============================================
+        const STORAGE_KEY = 'spotsmart_form_data';
+        const STORAGE_TIMESTAMP_KEY = 'spotsmart_form_timestamp';
+        
+        function saveToLocalStorage() {
+            try {
+                const dataToSave = {
+                    userType: formData.userType,
+                    prospect: formData.prospect,
+                    customer: formData.customer,
+                    im: formData.im,
+                    section1: formData.section1,
+                    section2: formData.section2,
+                    currentSection: currentSection
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+                localStorage.setItem(STORAGE_TIMESTAMP_KEY, new Date().toISOString());
+                showSaveIndicator();
+            } catch (error) {
+                console.warn('Failed to save to LocalStorage:', error);
+            }
+        }
+        
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.userType) formData.userType = data.userType;
+                    if (data.prospect) formData.prospect = data.prospect;
+                    if (data.customer) formData.customer = data.customer;
+                    if (data.im) formData.im = data.im;
+                    if (data.section1) formData.section1 = data.section1;
+                    if (data.section2) formData.section2 = data.section2;
+                    if (data.currentSection !== undefined) currentSection = data.currentSection;
+                    return true;
+                }
+            } catch (error) {
+                console.warn('Failed to load from LocalStorage:', error);
+            }
+            return false;
+        }
+        
+        function clearLocalStorage() {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem(STORAGE_TIMESTAMP_KEY);
+            } catch (error) {
+                console.warn('Failed to clear LocalStorage:', error);
+            }
+        }
+        
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            if (indicator) {
+                indicator.style.display = 'inline-flex';
+                indicator.classList.add('show');
+                setTimeout(() => {
+                    indicator.classList.remove('show');
+                    setTimeout(() => {
+                        if (!indicator.classList.contains('show')) {
+                            indicator.style.display = 'none';
+                        }
+                    }, 300);
+                }, 2000);
+            }
+        }
+        
+        function exportFormData() {
+            try {
+                const dataToExport = {
+                    userType: formData.userType,
+                    prospect: formData.prospect,
+                    customer: formData.customer,
+                    im: formData.im,
+                    section1: formData.section1,
+                    section2: formData.section2,
+                    exportedAt: new Date().toISOString()
+                };
+                const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `spotsmart-form-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert('Failed to export form data: ' + error.message);
+            }
+        }
+        
+        function importFormData(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported.userType) formData.userType = imported.userType;
+                    if (imported.prospect) formData.prospect = imported.prospect;
+                    if (imported.customer) formData.customer = imported.customer;
+                    if (imported.im) formData.im = imported.im;
+                    if (imported.section1) formData.section1 = imported.section1;
+                    if (imported.section2) formData.section2 = imported.section2;
+                    
+                    // Save to LocalStorage
+                    saveToLocalStorage();
+                    
+                    // Restore form fields
+                    restoreFormFields();
+                    
+                    alert('Form data imported successfully!');
+                } catch (error) {
+                    alert('Failed to import form data: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function restoreFormFields() {
+            // Restore user type selection
+            if (formData.userType) {
+                const userTypeCard = document.querySelector(`[data-user-type="${formData.userType}"]`);
+                if (userTypeCard) {
+                    userTypeCard.click();
+                }
+            }
+            
+            // Restore prospect fields
+            if (formData.prospect) {
+                if (formData.prospect.section1) {
+                    const s1 = formData.prospect.section1;
+                    if (s1.companyName) document.getElementById('prospectCompanyName')?.setAttribute('value', s1.companyName);
+                    if (s1.industry) document.getElementById('prospectIndustry')?.setAttribute('value', s1.industry);
+                    if (s1.userCount) document.getElementById('prospectUserCount')?.setAttribute('value', s1.userCount);
+                }
+                // Add more restoration logic for other sections as needed
+            }
+            
+            // Restore customer fields
+            if (formData.customer) {
+                // Add restoration logic for customer sections
+            }
+            
+            // Restore IM fields
+            if (formData.im) {
+                // Add restoration logic for IM sections
+            }
+        }
+        
+        // Auto-save wrapper for save functions
+        function autoSave() {
+            saveToLocalStorage();
+        }
+        
+        // Load saved data on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const hasSavedData = loadFromLocalStorage();
+            if (hasSavedData) {
+                // Show restore prompt
+                const restorePrompt = document.getElementById('restorePrompt');
+                if (restorePrompt) {
+                    restorePrompt.style.display = 'block';
+                }
+            }
+        });
+        
+        // ============================================
         // NAVIGATION
         // ============================================
         function startAssessment() {
@@ -4503,6 +4805,8 @@
                     biggestConcern: document.getElementById('prospectBiggestConcern').value
                 };
             }
+            
+            autoSave();
         }
         
         // ============================================
@@ -5002,6 +5306,8 @@
                     sampleContracts: getFileList('customerSampleContracts')
                 };
             }
+            
+            autoSave();
         }
         
         // ============================================
@@ -5453,6 +5759,8 @@
                     knownBlockers: document.getElementById('imKnownBlockers').value
                 };
             }
+            
+            autoSave();
         }
         
         // ============================================
@@ -5800,6 +6108,8 @@
                 };
                 
             }
+            
+            autoSave();
         }
         
         // ============================================
@@ -6378,5 +6688,43 @@
             // Initialize IM custom development section - hidden by default (already hidden via CSS)
         });
     </script>
+    
+    <!-- Auto-Save UI Elements -->
+    <div id="saveIndicator" class="save-indicator">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        Saved
+    </div>
+    
+    <div class="data-actions">
+        <button class="data-action-btn" onclick="exportFormData()" title="Export form data">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export
+        </button>
+        <label class="data-action-btn" title="Import form data" style="cursor: pointer;">
+            <input type="file" accept=".json" style="display: none;" onchange="if(this.files[0]) importFormData(this.files[0])">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Import
+        </label>
+    </div>
+    
+    <!-- Restore Prompt -->
+    <div id="restorePrompt" class="restore-prompt">
+        <h3>Restore Saved Progress?</h3>
+        <p>We found saved form data from a previous session. Would you like to restore it and continue where you left off?</p>
+        <div class="restore-prompt-actions">
+            <button class="restore-btn secondary" onclick="document.getElementById('restorePrompt').style.display='none'; clearLocalStorage();">Start Fresh</button>
+            <button class="restore-btn primary" onclick="document.getElementById('restorePrompt').style.display='none'; restoreFormFields();">Restore</button>
+        </div>
+    </div>
 </body>
 </html>
