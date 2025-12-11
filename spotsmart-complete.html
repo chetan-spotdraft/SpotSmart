@@ -458,43 +458,6 @@
             height: 16px;
         }
         
-        .data-actions {
-            position: fixed;
-            bottom: var(--space-lg);
-            right: var(--space-lg);
-            display: flex;
-            gap: var(--space-sm);
-            z-index: 1000;
-        }
-        
-        .data-action-btn {
-            background: var(--white);
-            border: 1px solid var(--gray-300);
-            border-radius: var(--radius-lg);
-            padding: var(--space-sm) var(--space-md);
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--gray-700);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: var(--space-xs);
-            transition: all var(--transition-base);
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .data-action-btn:hover {
-            background: var(--gray-50);
-            border-color: var(--primary);
-            color: var(--primary);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .data-action-btn svg {
-            width: 16px;
-            height: 16px;
-        }
-        
         .restore-prompt {
             position: fixed;
             top: 50%;
@@ -1640,7 +1603,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">
-                                Company name <span class="required">*</span>
+                                Company Name <span class="required">*</span>
                             </label>
                             <input type="text" class="form-input" id="prospectCompanyName" placeholder="Enter your company name" required>
                         </div>
@@ -1667,7 +1630,7 @@
                         
                         <div class="form-group">
                             <label class="form-label">
-                                How many people will use SpotDraft? <span class="required">*</span>
+                                No. of Users <span class="required">*</span>
                             </label>
                             <select class="form-select" id="prospectUserCount" required>
                                 <option value="">Select range</option>
@@ -1695,6 +1658,11 @@
                             </svg>
                         </button>
                     </div>
+                    <div style="margin-top: var(--space-md); text-align: center;">
+                        <button class="btn btn-test" onclick="fillProspectTestData()" style="background: var(--warning); color: var(--white); border: none; padding: var(--space-sm) var(--space-md); font-size: 0.875rem;">
+                            🧪 Fill Test Data (Testing Only)
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -1715,16 +1683,14 @@
                 <div class="form-card">
                     <div class="form-group">
                         <label class="form-label">
-                            Which SpotDraft modules are you interested in? <span class="required">*</span>
+                            Desired Modules <span class="required">*</span>
                         </label>
                         <div class="form-hint" style="margin-bottom: var(--space-md);">Select all that apply</div>
                         <div class="chip-group" id="prospectModules">
-                            <div class="chip" data-value="Contract Automation" onclick="toggleChip(this)">Contract Automation</div>
                             <div class="chip" data-value="Repository" onclick="toggleChip(this)">Repository</div>
                             <div class="chip" data-value="Approvals" onclick="toggleChip(this)">Approvals</div>
                             <div class="chip" data-value="Workflows" onclick="toggleChip(this)">Workflows</div>
                             <div class="chip" data-value="Integrations" onclick="toggleChip(this)">Integrations</div>
-                            <div class="chip" data-value="Customisation needs" onclick="toggleChip(this)">Customisation needs</div>
                             <div class="chip" data-value="Not sure yet" onclick="toggleChip(this)">Not sure yet</div>
                         </div>
                         <div class="error-message" id="prospectModulesError">Please select at least one module</div>
@@ -1733,25 +1699,47 @@
                     <div class="form-grid" style="margin-top: var(--space-lg);">
                         <div class="form-group">
                             <label class="form-label">
-                                Are your contract templates ready? <span class="required">*</span>
+                                Assisted Workflows <span class="required">*</span>
                             </label>
-                            <select class="form-select" id="prospectTemplatesReady" required>
+                            <select class="form-select" id="prospectAssistedWorkflows" required>
                                 <option value="">Select</option>
                                 <option value="Yes">Yes</option>
-                                <option value="Partially">Partially</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Contract Templates <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="prospectContractTemplates" required>
+                                <option value="">Select</option>
+                                <option value="Yes, all available">Yes, all available</option>
+                                <option value="Yes, some available">Yes, some available</option>
                                 <option value="No, need help">No, need help</option>
                             </select>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Do you expect to migrate existing contracts? <span class="required">*</span>
+                                Assisted Migration <span class="required">*</span>
                             </label>
-                            <select class="form-select" id="prospectMigrationExpected" onchange="toggleProspectMigrationSection()" required>
+                            <select class="form-select" id="prospectAssistedMigration" required>
                                 <option value="">Select</option>
+                                <option value="Yes">Yes</option>
                                 <option value="No">No</option>
-                                <option value="Some">Some</option>
-                                <option value="Yes, a lot">Yes, a lot</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Legacy Contracts <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="prospectLegacyContracts" required>
+                                <option value="">Select</option>
+                                <option value="Yes, all available">Yes, all available</option>
+                                <option value="Yes, some available">Yes, some available</option>
+                                <option value="No, need help">No, need help</option>
                             </select>
                         </div>
                     </div>
@@ -1794,7 +1782,7 @@
                 <div class="form-card">
                     <div class="form-group">
                         <label class="form-label">
-                            Which systems do you use today? <span class="required">*</span>
+                            Desired Integrations <span class="required">*</span>
                         </label>
                         <div class="form-hint" style="margin-bottom: var(--space-md);">Select all that apply</div>
                         <div class="chip-group" id="prospectSystems">
@@ -1810,7 +1798,7 @@
                     
                     <div class="form-group" style="margin-top: var(--space-lg);">
                         <label class="form-label">
-                            Do you have API access for these systems? <span class="required">*</span>
+                            API Access Available <span class="required">*</span>
                         </label>
                         <select class="form-select" id="prospectApiAccess" required>
                             <option value="">Select</option>
@@ -1859,7 +1847,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">
-                                When are you hoping to go live? <span class="required">*</span>
+                                Desired Go-Live <span class="required">*</span>
                             </label>
                             <select class="form-select" id="prospectGoLiveTimeline" required>
                                 <option value="">Select</option>
@@ -1874,7 +1862,7 @@
                     
                     <div class="form-group" style="margin-top: var(--space-lg);">
                         <label class="form-label">
-                            What is your biggest concern about implementing a CLM?
+                            Biggest Fear/Concern
                         </label>
                         <textarea class="form-textarea" id="prospectBiggestConcern" placeholder="Share your concerns or questions..."></textarea>
                         <div class="form-hint">Optional - This helps us address your specific needs</div>
@@ -1893,6 +1881,11 @@
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="20 6 9 17 4 12"/>
                             </svg>
+                        </button>
+                    </div>
+                    <div style="margin-top: var(--space-md); text-align: center;">
+                        <button class="btn btn-test" onclick="fillProspectTestData()" style="background: var(--warning); color: var(--white); border: none; padding: var(--space-sm) var(--space-md); font-size: 0.875rem;">
+                            🧪 Fill Test Data (Testing Only)
                         </button>
                     </div>
                 </div>
@@ -1920,57 +1913,37 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">
-                                Primary business contact name <span class="required">*</span>
+                                Primary POC Name <span class="required">*</span>
                             </label>
                             <input type="text" class="form-input" id="customerPrimaryContactName" placeholder="Full name" required>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Primary business contact role <span class="required">*</span>
+                                Primary POC Role <span class="required">*</span>
                             </label>
                             <input type="text" class="form-input" id="customerPrimaryContactRole" placeholder="e.g., Legal Ops Manager" required>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Technical contact name <span class="required">*</span>
+                                Approving Stakeholder for Templates <span class="required">*</span>
                             </label>
-                            <input type="text" class="form-input" id="customerTechnicalContactName" placeholder="Full name" required>
+                            <input type="text" class="form-input" id="customerTemplateApprover" placeholder="Name and role" required>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Technical contact role <span class="required">*</span>
+                                Approving Stakeholder for Migrations <span class="required">*</span>
                             </label>
-                            <input type="text" class="form-input" id="customerTechnicalContactRole" placeholder="e.g., IT Manager" required>
+                            <input type="text" class="form-input" id="customerMigrationApprover" placeholder="Name and role" required>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Team distribution <span class="required">*</span>
+                                Approving Stakeholder for Integrations <span class="required">*</span>
                             </label>
-                            <div class="chip-group" id="customerTeamDistribution">
-                                <div class="chip" data-value="APAC" onclick="toggleChip(this)">APAC</div>
-                                <div class="chip" data-value="EMEA" onclick="toggleChip(this)">EMEA</div>
-                                <div class="chip" data-value="US" onclick="toggleChip(this)">US</div>
-                            </div>
-                            <div class="error-message" id="customerTeamDistributionError">Please select at least one region</div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                Who will approve implementation decisions? <span class="required">*</span>
-                            </label>
-                            <select class="form-select" id="customerDecisionApprover" required>
-                                <option value="">Select</option>
-                                <option value="Legal team">Legal team</option>
-                                <option value="IT team">IT team</option>
-                                <option value="Executive leadership">Executive leadership</option>
-                                <option value="Project manager">Project manager</option>
-                                <option value="Mixed/Committee">Mixed/Committee</option>
-                                <option value="Other">Other</option>
-                            </select>
+                            <input type="text" class="form-input" id="customerIntegrationApprover" placeholder="Name and role" required>
                         </div>
                     </div>
                     
@@ -1988,6 +1961,11 @@
                                 <line x1="5" y1="12" x2="19" y2="12"/>
                                 <polyline points="12 5 19 12 12 19"/>
                             </svg>
+                        </button>
+                    </div>
+                    <div style="margin-top: var(--space-md); text-align: center;">
+                        <button class="btn btn-test" onclick="fillCustomerTestData()" style="background: var(--warning); color: var(--white); border: none; padding: var(--space-sm) var(--space-md); font-size: 0.875rem;">
+                            🧪 Fill Test Data (Testing Only)
                         </button>
                     </div>
                 </div>
@@ -2014,40 +1992,12 @@
                         </label>
                         <div class="form-hint" style="margin-bottom: var(--space-md);">Select all that apply</div>
                         <div class="chip-group" id="customerPurchasedModules">
-                            <div class="chip" data-value="Contract Automation" onclick="toggleChip(this)">Contract Automation</div>
                             <div class="chip" data-value="Repository" onclick="toggleChip(this)">Repository</div>
                             <div class="chip" data-value="Approvals" onclick="toggleChip(this)">Approvals</div>
-                            <div class="chip" data-value="Workflows" onclick="toggleChip(this)">Workflows</div>
+                            <div class="chip" data-value="Assisted Workflows" onclick="toggleChip(this)">Assisted Workflows</div>
                             <div class="chip" data-value="Integrations" onclick="toggleChip(this)">Integrations</div>
-                            <div class="chip" data-value="Customisation needs" onclick="toggleChip(this)">Customisation needs</div>
                         </div>
                         <div class="error-message" id="customerPurchasedModulesError">Please select at least one module</div>
-                    </div>
-                    
-                    <div class="form-grid" style="margin-top: var(--space-lg);">
-                        <div class="form-group">
-                            <label class="form-label">
-                                How many templates do you plan to automate initially? <span class="required">*</span>
-                            </label>
-                            <select class="form-select" id="customerTemplateCount" required>
-                                <option value="">Select</option>
-                                <option value="0-5">0–5</option>
-                                <option value="5-15">5–15</option>
-                                <option value="15+">15+</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                Template readiness <span class="required">*</span>
-                            </label>
-                            <select class="form-select" id="customerTemplateReadiness" required>
-                                <option value="">Select</option>
-                                <option value="Ready">Ready</option>
-                                <option value="Partially ready">Partially ready</option>
-                                <option value="Not ready">Not ready</option>
-                            </select>
-                        </div>
                     </div>
                     
                     <div class="btn-group">
@@ -2099,7 +2049,7 @@
                         <div class="form-grid" style="margin-top: var(--space-lg);">
                             <div class="form-group">
                                 <label class="form-label">
-                                    Estimated number of contracts to migrate <span class="required">*</span>
+                                    Volume of Contracts <span class="required">*</span>
                                 </label>
                                 <select class="form-select" id="customerMigrationContractCount" required>
                                     <option value="">Select</option>
@@ -2111,7 +2061,7 @@
                             
                             <div class="form-group">
                                 <label class="form-label">
-                                    Where are your contracts currently stored? <span class="required">*</span>
+                                    Current Location <span class="required">*</span>
                                 </label>
                                 <select class="form-select" id="customerContractStorage" required>
                                     <option value="">Select</option>
@@ -2124,7 +2074,7 @@
                             
                             <div class="form-group">
                                 <label class="form-label">
-                                    How clean is the data? <span class="required">*</span>
+                                    Data Cleanliness <span class="required">*</span>
                                 </label>
                                 <select class="form-select" id="customerDataCleanliness" required>
                                     <option value="">Select</option>
@@ -2132,6 +2082,18 @@
                                     <option value="Mixed">Mixed</option>
                                     <option value="Messy">Messy</option>
                                 </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Data Format <span class="required">*</span>
+                                </label>
+                                <div class="chip-group" id="customerDataFormat">
+                                    <div class="chip" data-value="PDF" onclick="toggleChip(this)">PDF</div>
+                                    <div class="chip" data-value="DOC" onclick="toggleChip(this)">DOC</div>
+                                    <div class="chip" data-value="Email exports" onclick="toggleChip(this)">Email exports</div>
+                                </div>
+                                <div class="error-message" id="customerDataFormatError">Please select at least one format</div>
                             </div>
                         </div>
                     </div>
@@ -2195,7 +2157,7 @@
                     <div class="form-grid" style="margin-top: var(--space-lg);">
                         <div class="form-group">
                             <label class="form-label">
-                                Do you have API access for these systems? <span class="required">*</span>
+                                API Access Available <span class="required">*</span>
                             </label>
                             <select class="form-select" id="customerApiAccess" required>
                                 <option value="">Select</option>
@@ -2207,7 +2169,7 @@
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Do these systems support webhooks? <span class="required">*</span>
+                                Webhooks Supported <span class="required">*</span>
                             </label>
                             <select class="form-select" id="customerWebhooksSupport" required>
                                 <option value="">Select</option>
@@ -2254,7 +2216,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">
-                                How complex are your approval workflows? <span class="required">*</span>
+                                Approval Workflows <span class="required">*</span>
                             </label>
                             <select class="form-select" id="customerApprovalComplexity" required>
                                 <option value="">Select</option>
@@ -2266,19 +2228,7 @@
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Do you need conditional routing based on data? <span class="required">*</span>
-                            </label>
-                            <select class="form-select" id="customerConditionalRouting" required>
-                                <option value="">Select</option>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
-                                <option value="Not sure">Not sure</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                Who signs the agreements? <span class="required">*</span>
+                                Signatories <span class="required">*</span>
                             </label>
                             <select class="form-select" id="customerAgreementSigners" required>
                                 <option value="">Select</option>
@@ -2325,7 +2275,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">
-                                Do you require SSO/SAML? <span class="required">*</span>
+                                Require SSO/SAML <span class="required">*</span>
                             </label>
                             <select class="form-select" id="customerSSORequired" required>
                                 <option value="">Select</option>
@@ -2337,7 +2287,7 @@
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Any VPN, IP allowlisting, or data residency needs? <span class="required">*</span>
+                                VPN/IP Allowlisting/Data Residency Requirements <span class="required">*</span>
                             </label>
                             <select class="form-select" id="customerSecurityNeeds" required>
                                 <option value="">Select</option>
@@ -2348,7 +2298,7 @@
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Status of your DPA <span class="required">*</span>
+                                DPA Status <span class="required">*</span>
                             </label>
                             <select class="form-select" id="customerDPAStatus" required>
                                 <option value="">Select</option>
@@ -2396,13 +2346,13 @@
                 <div class="form-card">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label">Upload your contract templates</label>
+                            <label class="form-label">Upload Template Contracts</label>
                             <input type="file" class="form-input" id="customerTemplates" accept=".docx,.pdf" multiple>
                             <div class="form-hint">Optional - Contract templates</div>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Upload sample contracts or workflow diagrams</label>
+                            <label class="form-label">Upload Sample Legacy Contracts</label>
                             <input type="file" class="form-input" id="customerSampleContracts" accept=".pdf,.docx,.png,.jpg" multiple>
                             <div class="form-hint">Optional - Sample contracts or workflow diagrams</div>
                         </div>
@@ -2421,6 +2371,11 @@
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="20 6 9 17 4 12"/>
                             </svg>
+                        </button>
+                    </div>
+                    <div style="margin-top: var(--space-md); text-align: center;">
+                        <button class="btn btn-test" onclick="fillCustomerTestData()" style="background: var(--warning); color: var(--white); border: none; padding: var(--space-sm) var(--space-md); font-size: 0.875rem;">
+                            🧪 Fill Test Data (Testing Only)
                         </button>
                     </div>
                 </div>
@@ -2448,14 +2403,14 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">
-                                Customer name <span class="required">*</span>
+                                Company Name <span class="required">*</span>
                             </label>
                             <input type="text" class="form-input" id="imCustomerName" placeholder="Enter customer name" required>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">
-                                What package are they on? <span class="required">*</span>
+                                Purchased Package <span class="required">*</span>
                             </label>
                             <select class="form-select" id="imPackage" required>
                                 <option value="">Select</option>
@@ -2467,7 +2422,7 @@
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Expected implementation complexity <span class="required">*</span>
+                                Expected Implementation Complexity <span class="required">*</span>
                             </label>
                             <select class="form-select" id="imComplexity" required>
                                 <option value="">Select</option>
@@ -2480,7 +2435,7 @@
                     
                     <div class="form-group" style="margin-top: var(--space-lg);">
                         <label class="form-label">
-                            Are there known risks from Day 0? <span class="required">*</span>
+                            Known Risks since Day 0
                         </label>
                         <div class="form-hint" style="margin-bottom: var(--space-md);">Select all that apply</div>
                         <div class="chip-group" id="imKnownRisks">
@@ -2491,7 +2446,7 @@
                             <div class="chip" data-value="Custom workflows expected" onclick="toggleChip(this)">Custom workflows expected</div>
                             <div class="chip" data-value="Integration feasibility unclear" onclick="toggleChip(this)">Integration feasibility unclear</div>
                         </div>
-                        <div class="form-hint" style="margin-top: var(--space-sm);">If no risks, leave unselected</div>
+                        <div class="form-hint" style="margin-top: var(--space-sm);">Optional - If no risks, leave unselected</div>
                     </div>
                     
                     <div class="btn-group">
@@ -2510,6 +2465,11 @@
                             </svg>
                         </button>
                     </div>
+                    <div style="margin-top: var(--space-md); text-align: center;">
+                        <button class="btn btn-test" onclick="fillIMTestData()" style="background: var(--warning); color: var(--white); border: none; padding: var(--space-sm) var(--space-md); font-size: 0.875rem;">
+                            🧪 Fill Test Data (Testing Only)
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -2523,7 +2483,7 @@
                         </svg>
                         Section 2 of 6
                     </div>
-                    <h2 class="section-title">Scope & Deliverables</h2>
+                    <h2 class="section-title">Template Needs</h2>
                     <p class="section-description">Define the scope and any custom development needs.</p>
                 </div>
                 
@@ -2531,7 +2491,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">
-                                How many templates will be automated? <span class="required">*</span>
+                                Templates <span class="required">*</span>
                             </label>
                             <select class="form-select" id="imTemplateCount" required>
                                 <option value="">Select</option>
@@ -2543,7 +2503,7 @@
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Workflow complexity as per IM <span class="required">*</span>
+                                Template Complexity <span class="required">*</span>
                             </label>
                             <select class="form-select" id="imWorkflowComplexity" required>
                                 <option value="">Select</option>
@@ -2555,7 +2515,7 @@
                         
                         <div class="form-group">
                             <label class="form-label">
-                                Do you anticipate any custom development? <span class="required">*</span>
+                                Custom Development Anticipated <span class="required">*</span>
                             </label>
                             <select class="form-select" id="imCustomDevelopment" onchange="toggleIMCustomDevelopment()" required>
                                 <option value="">Select</option>
@@ -2568,7 +2528,7 @@
                     <div class="conditional-section" id="imCustomDevelopmentSection">
                         <div class="form-group" style="margin-top: var(--space-lg);">
                             <label class="form-label">
-                                Describe the expected custom build <span class="required">*</span>
+                                Describe <span class="required">*</span>
                             </label>
                             <textarea class="form-textarea" id="imCustomDevelopmentDetails" placeholder="Describe the custom development requirements..."></textarea>
                         </div>
@@ -2846,6 +2806,11 @@
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="20 6 9 17 4 12"/>
                             </svg>
+                        </button>
+                    </div>
+                    <div style="margin-top: var(--space-md); text-align: center;">
+                        <button class="btn btn-test" onclick="fillIMTestData()" style="background: var(--warning); color: var(--white); border: none; padding: var(--space-sm) var(--space-md); font-size: 0.875rem;">
+                            🧪 Fill Test Data (Testing Only)
                         </button>
                     </div>
                 </div>
@@ -4713,22 +4678,40 @@
                     if (modulesError) modulesError.classList.remove('visible');
                 }
                 
-                // Templates ready
-                const templatesReady = document.getElementById('prospectTemplatesReady');
-                if (!templatesReady || !templatesReady.value) {
-                    if (templatesReady) templatesReady.classList.add('error');
+                // Assisted Workflows
+                const assistedWorkflows = document.getElementById('prospectAssistedWorkflows');
+                if (!assistedWorkflows || !assistedWorkflows.value) {
+                    if (assistedWorkflows) assistedWorkflows.classList.add('error');
                     isValid = false;
                 } else {
-                    templatesReady.classList.remove('error');
+                    assistedWorkflows.classList.remove('error');
                 }
                 
-                // Migration expected
-                const migrationExpected = document.getElementById('prospectMigrationExpected');
-                if (!migrationExpected || !migrationExpected.value) {
-                    if (migrationExpected) migrationExpected.classList.add('error');
+                // Contract Templates
+                const contractTemplates = document.getElementById('prospectContractTemplates');
+                if (!contractTemplates || !contractTemplates.value) {
+                    if (contractTemplates) contractTemplates.classList.add('error');
                     isValid = false;
                 } else {
-                    migrationExpected.classList.remove('error');
+                    contractTemplates.classList.remove('error');
+                }
+                
+                // Assisted Migration
+                const assistedMigration = document.getElementById('prospectAssistedMigration');
+                if (!assistedMigration || !assistedMigration.value) {
+                    if (assistedMigration) assistedMigration.classList.add('error');
+                    isValid = false;
+                } else {
+                    assistedMigration.classList.remove('error');
+                }
+                
+                // Legacy Contracts
+                const legacyContracts = document.getElementById('prospectLegacyContracts');
+                if (!legacyContracts || !legacyContracts.value) {
+                    if (legacyContracts) legacyContracts.classList.add('error');
+                    isValid = false;
+                } else {
+                    legacyContracts.classList.remove('error');
                 }
             }
             
@@ -4787,8 +4770,10 @@
             if (section === 2) {
                 formData.prospect.section2 = {
                     modulesInterested: getSelectedChips('prospectModules'),
-                    templatesReady: document.getElementById('prospectTemplatesReady').value,
-                    migrationExpected: document.getElementById('prospectMigrationExpected').value
+                    assistedWorkflows: document.getElementById('prospectAssistedWorkflows')?.value || '',
+                    contractTemplates: document.getElementById('prospectContractTemplates')?.value || '',
+                    assistedMigration: document.getElementById('prospectAssistedMigration')?.value || '',
+                    legacyContracts: document.getElementById('prospectLegacyContracts')?.value || ''
                 };
             }
             
@@ -4822,8 +4807,10 @@
                 },
                 prospect_section_2_scope_clarity: {
                     modules_interested: getSelectedChips('prospectModules'),
-                    templates_ready: getValue('prospectTemplatesReady'),
-                    migration_expected: getValue('prospectMigrationExpected')
+                    assisted_workflows: getValue('prospectAssistedWorkflows'),
+                    contract_templates: getValue('prospectContractTemplates'),
+                    assisted_migration: getValue('prospectAssistedMigration'),
+                    legacy_contracts: getValue('prospectLegacyContracts')
                 },
                 prospect_section_3_systems_integrations: {
                     systems_used: getSelectedChips('prospectSystems'),
@@ -4834,6 +4821,315 @@
                     biggest_concern: getValue('prospectBiggestConcern')
                 }
             };
+        }
+        
+        // ============================================
+        // TEST DATA FUNCTIONS (FOR TESTING ONLY)
+        // ============================================
+        function fillProspectTestData() {
+            try {
+                console.log('🧪 fillProspectTestData called');
+                
+                // Set user type if not set
+                if (!formData.userType) {
+                    formData.userType = 'prospect';
+                }
+                
+                // Make all prospect sections visible temporarily to fill them
+                for (let i = 1; i <= 4; i++) {
+                    const section = document.getElementById(`prospectSection${i}`);
+                    if (section) {
+                        section.style.display = 'block';
+                    }
+                }
+                
+                // Fill Section 1
+                const companyName = document.getElementById('prospectCompanyName');
+                if (companyName) companyName.value = 'Test Company Inc.';
+                
+                const industry = document.getElementById('prospectIndustry');
+                if (industry) industry.value = 'Technology';
+                
+                const userCount = document.getElementById('prospectUserCount');
+                if (userCount) userCount.value = '10-50';
+                
+                // Fill Section 2
+                const modulesToSelect = ['Repository', 'Approvals'];
+                modulesToSelect.forEach(value => {
+                    const chip = document.querySelector(`#prospectModules .chip[data-value="${value}"]`);
+                    if (chip && !chip.classList.contains('selected')) {
+                        chip.click();
+                    }
+                });
+                
+                const assistedWorkflows = document.getElementById('prospectAssistedWorkflows');
+                if (assistedWorkflows) assistedWorkflows.value = 'Yes';
+                
+                const contractTemplates = document.getElementById('prospectContractTemplates');
+                if (contractTemplates) contractTemplates.value = 'Yes, all available';
+                
+                const assistedMigration = document.getElementById('prospectAssistedMigration');
+                if (assistedMigration) assistedMigration.value = 'Yes';
+                
+                const legacyContracts = document.getElementById('prospectLegacyContracts');
+                if (legacyContracts) legacyContracts.value = 'Yes, some available';
+                
+                // Fill Section 3
+                const systemsToSelect = ['CRM', 'ERP'];
+                systemsToSelect.forEach(value => {
+                    const chip = document.querySelector(`#prospectSystems .chip[data-value="${value}"]`);
+                    if (chip && !chip.classList.contains('selected')) {
+                        chip.click();
+                    }
+                });
+                
+                const apiAccess = document.getElementById('prospectApiAccess');
+                if (apiAccess) apiAccess.value = 'Yes';
+                
+                // Fill Section 4
+                const goLiveTimeline = document.getElementById('prospectGoLiveTimeline');
+                if (goLiveTimeline) goLiveTimeline.value = '3-6 months';
+                
+                const biggestConcern = document.getElementById('prospectBiggestConcern');
+                if (biggestConcern) biggestConcern.value = 'Integration complexity and timeline concerns';
+                
+                // Save all sections
+                saveProspectSection(1);
+                saveProspectSection(2);
+                saveProspectSection(3);
+                saveProspectSection(4);
+                
+                // Save to LocalStorage
+                autoSave();
+                
+                console.log('✅ Test data filled, submitting in 500ms...');
+                
+                // Automatically submit the assessment
+                setTimeout(() => {
+                    submitProspectAssessment();
+                }, 500);
+            } catch (error) {
+                console.error('❌ Error filling prospect test data:', error);
+                alert('Error filling test data: ' + error.message + '\n\nCheck console for details.');
+            }
+        }
+        
+        function fillCustomerTestData() {
+            try {
+                console.log('🧪 fillCustomerTestData called');
+                
+                // Set user type if not set
+                if (!formData.userType) {
+                    formData.userType = 'customer';
+                }
+                
+                // Make all customer sections visible temporarily to fill them
+                for (let i = 1; i <= 7; i++) {
+                    const section = document.getElementById(`customerSection${i}`);
+                    if (section) {
+                        section.style.display = 'block';
+                    }
+                }
+                
+                // Fill Section 1
+                const primaryName = document.getElementById('customerPrimaryContactName');
+                if (primaryName) primaryName.value = 'John Doe';
+                
+                const primaryRole = document.getElementById('customerPrimaryContactRole');
+                if (primaryRole) primaryRole.value = 'Legal Operations Manager';
+                
+                const templateApprover = document.getElementById('customerTemplateApprover');
+                if (templateApprover) templateApprover.value = 'Jane Smith - Legal Director';
+                
+                const migrationApprover = document.getElementById('customerMigrationApprover');
+                if (migrationApprover) migrationApprover.value = 'Mike Johnson - IT Manager';
+                
+                const integrationApprover = document.getElementById('customerIntegrationApprover');
+                if (integrationApprover) integrationApprover.value = 'Sarah Williams - Technical Lead';
+                
+                // Fill Section 2
+                const modules = ['Repository', 'Approvals', 'Assisted Workflows'];
+                modules.forEach(value => {
+                    const chip = document.querySelector(`#customerPurchasedModules .chip[data-value="${value}"]`);
+                    if (chip && !chip.classList.contains('selected')) chip.click();
+                });
+                
+                // Fill Section 3
+                const migrationNeeded = document.getElementById('customerMigrationNeeded');
+                if (migrationNeeded) {
+                    migrationNeeded.value = 'Yes, partial';
+                    toggleCustomerMigrationQuestions();
+                }
+                
+                const migrationCount = document.getElementById('customerMigrationContractCount');
+                if (migrationCount) migrationCount.value = '500-2000';
+                
+                const contractStorage = document.getElementById('customerContractStorage');
+                if (contractStorage) contractStorage.value = 'Drive';
+                
+                const dataCleanliness = document.getElementById('customerDataCleanliness');
+                if (dataCleanliness) dataCleanliness.value = 'Mixed';
+                
+                const formats = ['PDF', 'DOC'];
+                formats.forEach(value => {
+                    const chip = document.querySelector(`#customerDataFormat .chip[data-value="${value}"]`);
+                    if (chip && !chip.classList.contains('selected')) chip.click();
+                });
+                
+                // Fill Section 4
+                const integrations = ['CRM', 'Salesforce'];
+                integrations.forEach(value => {
+                    const chip = document.querySelector(`#customerIntegrationSystems .chip[data-value="${value}"]`);
+                    if (chip && !chip.classList.contains('selected')) chip.click();
+                });
+                
+                const apiAccess = document.getElementById('customerApiAccess');
+                if (apiAccess) apiAccess.value = 'Yes';
+                
+                const webhooks = document.getElementById('customerWebhooksSupport');
+                if (webhooks) webhooks.value = 'Yes';
+                
+                // Fill Section 5
+                const approvalComplexity = document.getElementById('customerApprovalComplexity');
+                if (approvalComplexity) approvalComplexity.value = 'Medium (3-5 steps)';
+                
+                const signers = document.getElementById('customerAgreementSigners');
+                if (signers) signers.value = 'Internal plus external';
+                
+                // Fill Section 6
+                const sso = document.getElementById('customerSSORequired');
+                if (sso) sso.value = 'Yes';
+                
+                const securityNeeds = document.getElementById('customerSecurityNeeds');
+                if (securityNeeds) securityNeeds.value = 'No';
+                
+                const dpaStatus = document.getElementById('customerDPAStatus');
+                if (dpaStatus) dpaStatus.value = 'Signed';
+                
+                // Section 7 - No file uploads for test data
+                
+                // Save all sections
+                saveCustomerSection(1);
+                saveCustomerSection(2);
+                saveCustomerSection(3);
+                saveCustomerSection(4);
+                saveCustomerSection(5);
+                saveCustomerSection(6);
+                saveCustomerSection(7);
+                
+                // Save to LocalStorage
+                autoSave();
+                
+                console.log('✅ Test data filled, submitting in 500ms...');
+                
+                // Automatically submit the assessment
+                setTimeout(() => {
+                    submitCustomerAssessment();
+                }, 500);
+            } catch (error) {
+                console.error('❌ Error filling customer test data:', error);
+                alert('Error filling test data: ' + error.message + '\n\nCheck console for details.');
+            }
+        }
+        
+        function fillIMTestData() {
+            try {
+                console.log('🧪 fillIMTestData called');
+                
+                // Set user type if not set
+                if (!formData.userType) {
+                    formData.userType = 'implementation_manager';
+                }
+                
+                // Make all IM sections visible temporarily to fill them
+                for (let i = 1; i <= 6; i++) {
+                    const section = document.getElementById(`imSection${i}`);
+                    if (section) {
+                        section.style.display = 'block';
+                    }
+                }
+                
+                // Fill Section 1
+                const customerName = document.getElementById('imCustomerName');
+                if (customerName) customerName.value = 'Acme Corporation';
+                
+                const package = document.getElementById('imPackage');
+                if (package) package.value = 'Enterprise';
+                
+                const complexity = document.getElementById('imComplexity');
+                if (complexity) complexity.value = 'High';
+                
+                const risks = ['Low responsiveness', 'Lack of template readiness'];
+                risks.forEach(value => {
+                    const chip = document.querySelector(`#imKnownRisks .chip[data-value="${value}"]`);
+                    if (chip && !chip.classList.contains('selected')) chip.click();
+                });
+                
+                // Fill Section 2
+                const templateCount = document.getElementById('imTemplateCount');
+                if (templateCount) templateCount.value = '15+';
+                
+                const workflowComplexity = document.getElementById('imWorkflowComplexity');
+                if (workflowComplexity) workflowComplexity.value = 'Complex (5+ flows)';
+                
+                const customDev = document.getElementById('imCustomDevelopment');
+                if (customDev) {
+                    customDev.value = 'Yes';
+                    toggleIMCustomDevelopment();
+                }
+                
+                const customDetails = document.getElementById('imCustomDevelopmentDetails');
+                if (customDetails) customDetails.value = 'Custom approval workflows and integration with legacy systems';
+                
+                // Fill Section 3
+                const migrationSupport = document.getElementById('imMigrationEngineeringSupport');
+                if (migrationSupport) migrationSupport.value = 'Yes';
+                
+                const migrationVolume = document.getElementById('imMigrationVolume');
+                if (migrationVolume) migrationVolume.value = 'Large';
+                
+                // Fill Section 4
+                const integrationTypes = ['crm', 'custom_api'];
+                integrationTypes.forEach(value => {
+                    const chip = document.querySelector(`#imIntegrationTypes .chip[data-value="${value}"]`);
+                    if (chip && !chip.classList.contains('selected')) chip.click();
+                });
+                
+                const integrationEffort = document.getElementById('imIntegrationEngineeringEffort');
+                if (integrationEffort) integrationEffort.value = 'Yes';
+                
+                const uatRounds = document.getElementById('imIntegrationUATRounds');
+                if (uatRounds) uatRounds.value = 'Yes';
+                
+                // Section 5 - Removed per user request
+                
+                // Fill Section 6
+                const goLive = document.getElementById('imGoLiveExpectation');
+                if (goLive) goLive.value = '8-12 weeks';
+                
+                const blockers = document.getElementById('imKnownBlockers');
+                if (blockers) blockers.value = 'Pending security review and API access approval';
+                
+                // Save all sections
+                saveIMSection(1);
+                saveIMSection(2);
+                saveIMSection(3);
+                saveIMSection(4);
+                saveIMSection(6);
+                
+                // Save to LocalStorage
+                autoSave();
+                
+                console.log('✅ Test data filled, submitting in 500ms...');
+                
+                // Automatically submit the assessment
+                setTimeout(() => {
+                    submitIMAssessment();
+                }, 500);
+            } catch (error) {
+                console.error('❌ Error filling IM test data:', error);
+                alert('Error filling test data: ' + error.message + '\n\nCheck console for details.');
+            }
         }
         
         // ============================================
@@ -5070,7 +5366,7 @@
                 if (!approver || !approver.value) {
                     if (approver) approver.classList.add('error');
                     isValid = false;
-                } else {
+            } else {
                     approver.classList.remove('error');
                 }
             }
@@ -5082,7 +5378,7 @@
                 if (selectedModules.length === 0) {
                     if (modulesError) modulesError.classList.add('visible');
                     isValid = false;
-                } else {
+            } else {
                     if (modulesError) modulesError.classList.remove('visible');
                 }
                 
@@ -5091,7 +5387,7 @@
                 if (!templateCount || !templateCount.value) {
                     if (templateCount) templateCount.classList.add('error');
                     isValid = false;
-                } else {
+            } else {
                     templateCount.classList.remove('error');
                 }
                 
@@ -5956,7 +6252,7 @@
                 <div class="red-flag-item ${risk.severity === 'medium' ? 'warning' : ''}">
                     <div class="red-flag-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
                     <div class="red-flag-content"><div class="red-flag-title">${risk.issue || risk.category || risk}</div><div class="red-flag-desc">${risk.impact || risk.description || ''}</div></div>
-                </div>
+                    </div>
             `;
             }).join('');
             document.getElementById('redFlagsList').innerHTML = flagsHtml || '<p style="color: var(--gray-500);">No risks identified.</p>';
@@ -5995,9 +6291,9 @@
                         <div>
                             <div class="timeline-phase-title">Phase ${phase.phase || 'N/A'}: ${phase.name || 'Unnamed'}</div>
                             <div class="timeline-phase-duration">${phase.duration || 'TBD'}</div>
-                        </div>
+                </div>
                         <span class="timeline-phase-status ${statusClass}">${status}</span>
-                    </div>
+                </div>
                     <div class="timeline-phase-content">
                         ${(phase.activities || []).map(a => `<div class="timeline-activity">${a}</div>`).join('')}
                         ${phase.dependencies ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-500);"><strong>Dependencies:</strong> ${phase.dependencies}</div>` : ''}
@@ -6449,7 +6745,7 @@
                             displayIMResults(result.data);
                         } else {
                             // Fallback to generic display
-                            displayResults(result.data);
+                    displayResults(result.data);
                         }
                     }, 300);
                 } else {
@@ -6695,26 +6991,6 @@
             <path d="M20 6L9 17l-5-5"/>
         </svg>
         Saved
-    </div>
-    
-    <div class="data-actions">
-        <button class="data-action-btn" onclick="exportFormData()" title="Export form data">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Export
-        </button>
-        <label class="data-action-btn" title="Import form data" style="cursor: pointer;">
-            <input type="file" accept=".json" style="display: none;" onchange="if(this.files[0]) importFormData(this.files[0])">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-            Import
-        </label>
     </div>
     
     <!-- Restore Prompt -->
