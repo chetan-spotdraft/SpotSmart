@@ -29,13 +29,6 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 let genAI = null;
 let geminiModel = null;
 
-// Optimized generation config for production accuracy (shared across all model initializations)
-const GEMINI_GENERATION_CONFIG = {
-    temperature: 0.3,  // Lower temperature for consistent, accurate results
-    topP: 0.95,        // Focus on high-probability tokens
-    topK: 40           // Consider top 40 tokens for better accuracy
-};
-
 // Initialize Gemini AI (async initialization)
 async function initializeGemini() {
     if (GEMINI_API_KEY) {
@@ -56,11 +49,7 @@ async function initializeGemini() {
             
             for (const modelName of modelNames) {
                 try {
-                    // Initialize with optimized config for maximum accuracy
-                    geminiModel = genAI.getGenerativeModel({ 
-                        model: modelName,
-                        generationConfig: GEMINI_GENERATION_CONFIG
-                    });
+                    geminiModel = genAI.getGenerativeModel({ model: modelName });
                     // Test with a simple request (just 1 token to verify it works)
                     const testResult = await geminiModel.generateContent('Hi');
                     await testResult.response;
@@ -247,7 +236,7 @@ app.post('/assess', async (req, res) => {
             });
         }
 
-        // Use deterministic scoring + Gemini for insights
+        // Use Gemini to calculate readiness scores and generate all assessment data
         let readinessScore = null;
         let redFlags = [];
         let actionItems = { customer: [], spotdraft: [] };
@@ -257,7 +246,6 @@ app.post('/assess', async (req, res) => {
         let geminiResponse = null;
         let statusLabel = 'Calculating...';
         let statusDescription = 'Analyzing your responses...';
-        let rationales = null;
 
         if (!geminiModel) {
             return res.status(500).json({
@@ -267,18 +255,61 @@ app.post('/assess', async (req, res) => {
         }
 
         try {
-            const assessmentResult = await calculateReadinessWithGemini(intake_responses);
-            readinessScore = assessmentResult.readiness_score;
-            redFlags = assessmentResult.red_flags;
-            actionItems = assessmentResult.action_items;
-            implementationPlan = assessmentResult.implementation_plan;
-            aiInsights = assessmentResult.ai_insights;
-            statusLabel = assessmentResult.status_label;
-            statusDescription = assessmentResult.status_description;
-            geminiRequest = assessmentResult.gemini_request;
-            geminiResponse = assessmentResult.gemini_response;
-            const rationales = assessmentResult.rationales; // Include scoring rationales
-            console.log('Gemini assessment completed successfully');
+            // Route to persona-specific assessment functions
+            if (intake_responses.user_type === 'prospect') {
+                // Prospect assessment (4 sections)
+                const assessmentResult = await calculateProspectReadinessWithGemini(intake_responses);
+                readinessScore = assessmentResult.readiness_score;
+                redFlags = assessmentResult.red_flags;
+                actionItems = assessmentResult.action_items;
+                implementationPlan = assessmentResult.implementation_plan;
+                aiInsights = assessmentResult.ai_insights;
+                statusLabel = assessmentResult.status_label;
+                statusDescription = assessmentResult.status_description;
+                geminiRequest = assessmentResult.gemini_request;
+                geminiResponse = assessmentResult.gemini_response;
+                console.log('Prospect assessment completed successfully');
+            } else if (intake_responses.user_type === 'customer') {
+                // Customer assessment (7 sections)
+                const assessmentResult = await calculateCustomerReadinessWithGemini(intake_responses);
+                readinessScore = assessmentResult.readiness_score;
+                redFlags = assessmentResult.red_flags;
+                actionItems = assessmentResult.action_items;
+                implementationPlan = assessmentResult.implementation_plan;
+                aiInsights = assessmentResult.ai_insights;
+                statusLabel = assessmentResult.status_label;
+                statusDescription = assessmentResult.status_description;
+                geminiRequest = assessmentResult.gemini_request;
+                geminiResponse = assessmentResult.gemini_response;
+                console.log('Customer assessment completed successfully');
+            } else if (intake_responses.user_type === 'implementation_manager') {
+                // IM assessment (6 sections) with rule-based plan generation
+                const imPlan = createIMImplementationPlan(intake_responses);
+                const imAssessment = await calculateIMReadinessWithGemini(intake_responses, imPlan);
+                readinessScore = imAssessment.readiness_score;
+                redFlags = imAssessment.red_flags;
+                actionItems = imAssessment.action_items;
+                implementationPlan = imPlan;
+                aiInsights = imAssessment.ai_insights;
+                statusLabel = imAssessment.status_label || 'Plan Generated';
+                statusDescription = imAssessment.status_description || 'Rocketlane-ready implementation plan generated';
+                geminiRequest = imAssessment.gemini_request;
+                geminiResponse = imAssessment.gemini_response;
+                console.log('IM assessment completed successfully');
+            } else {
+                // Fallback to standard assessment (for backward compatibility)
+                const assessmentResult = await calculateReadinessWithGemini(intake_responses);
+                readinessScore = assessmentResult.readiness_score;
+                redFlags = assessmentResult.red_flags;
+                actionItems = assessmentResult.action_items;
+                implementationPlan = assessmentResult.implementation_plan;
+                aiInsights = assessmentResult.ai_insights;
+                statusLabel = assessmentResult.status_label;
+                statusDescription = assessmentResult.status_description;
+                geminiRequest = assessmentResult.gemini_request;
+                geminiResponse = assessmentResult.gemini_response;
+                console.log('Standard assessment completed successfully');
+            }
         } catch (error) {
             console.error('Error calculating assessment with Gemini:', error);
             return res.status(500).json({
@@ -293,7 +324,6 @@ app.post('/assess', async (req, res) => {
             readiness_score: readinessScore,
             status_label: statusLabel,
             status_description: statusDescription,
-            rationales: rationales, // Include scoring rationales for explainability
             red_flags: redFlags,
             action_items: actionItems,
             implementation_plan: implementationPlan,
@@ -342,11 +372,8 @@ async function extractOrderFormDataWithGemini(textContent, fileBuffer, fileType)
             genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
         }
         // Always use gemini-2.5-flash which we know works
-        // Apply optimized generation config for consistent production accuracy
-        geminiModel = genAI.getGenerativeModel({ 
-            model: 'gemini-2.5-flash',
-            generationConfig: GEMINI_GENERATION_CONFIG
-        });
+        geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        console.log('Reinitialized Gemini model with gemini-2.5-flash');
     }
 
     const prompt = `You are an expert at extracting structured data from order forms and contracts. 
@@ -377,11 +404,7 @@ Return ONLY valid JSON, no additional text or explanation.`;
     try {
         // Ensure we have a valid model - if not, try to get one
         if (!geminiModel && genAI) {
-            // Apply optimized generation config for consistent production accuracy
-            geminiModel = genAI.getGenerativeModel({ 
-                model: 'gemini-2.5-flash',
-                generationConfig: GEMINI_GENERATION_CONFIG
-            });
+            geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
         }
         
         const result = await geminiModel.generateContent(prompt);
@@ -413,11 +436,7 @@ Return ONLY valid JSON, no additional text or explanation.`;
             console.log('Attempting to reinitialize with gemini-2.5-flash...');
             if (genAI) {
                 try {
-                    // Apply optimized generation config for consistent production accuracy
-                    geminiModel = genAI.getGenerativeModel({ 
-                        model: 'gemini-2.5-flash',
-                        generationConfig: GEMINI_GENERATION_CONFIG
-                    });
+                    geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
                     // Retry once
                     const result = await geminiModel.generateContent(prompt);
                     const response = await result.response;
@@ -843,6 +862,904 @@ function generateActionItems(responses, redFlags) {
     };
 }
 
+/**
+ * Create Rocketlane-ready implementation plan for IM persona using rule-based logic
+ */
+function createIMImplementationPlan(responses) {
+    const planLogic = {
+        complexity: {
+            low: { duration_multiplier: 0.8, extra_tasks: [] },
+            medium: { duration_multiplier: 1.0, extra_tasks: [] },
+            high: {
+                duration_multiplier: 1.3,
+                extra_tasks: [{
+                    phase: "Kickoff & Scoping",
+                    task: "Additional alignment touchpoint",
+                    duration_hours: 1,
+                    assignee: "PM"
+                }]
+            }
+        },
+        risks: {
+            low_responsiveness: {
+                phase: "Weekly Client Engagement",
+                task: "Set weekly cadence with customer",
+                duration_hours: 0.5,
+                assignee: "PM"
+            },
+            template_unready: {
+                phase: "Template Automation",
+                task: "Template readiness workshop",
+                duration_hours: 2,
+                assignee: "PM"
+            },
+            technical_owner_missing: {
+                phase: "Kickoff & Scoping",
+                task: "Identify technical owner",
+                duration_hours: 1,
+                assignee: "PM"
+            },
+            security_review_delays: {
+                phase: "Pre-Onboarding",
+                task: "Security review & questionnaire",
+                duration_hours: 2,
+                assignee: "Security"
+            },
+            integration_unclear: {
+                phase: "Integrations",
+                task: "Integration discovery session",
+                duration_hours: 1,
+                assignee: "PM"
+            }
+        },
+        template_volume: {
+            small: { extra_tasks: [] },
+            medium: {
+                extra_tasks: [{
+                    phase: "Template Automation",
+                    task: "Additional placeholder mapping session",
+                    duration_hours: 2,
+                    assignee: "Implementation Engineer"
+                }]
+            },
+            large: {
+                extra_tasks: [
+                    {
+                        phase: "Template Automation",
+                        task: "Batch template intake session",
+                        duration_hours: 3,
+                        assignee: "PM"
+                    },
+                    {
+                        phase: "Template Automation",
+                        task: "Template prioritisation exercise",
+                        duration_hours: 2,
+                        assignee: "PM"
+                    }
+                ]
+            }
+        },
+        workflow_complexity: {
+            simple: { tasks_to_add: [] },
+            medium: {
+                tasks_to_add: [{
+                    phase: "Configuration",
+                    task: "Configure conditional routing",
+                    duration_hours: 2,
+                    assignee: "Implementation Engineer"
+                }]
+            },
+            complex: {
+                tasks_to_add: [
+                    {
+                        phase: "Configuration",
+                        task: "Configure cross-functional workflows",
+                        duration_hours: 3,
+                        assignee: "Implementation Engineer"
+                    },
+                    {
+                        phase: "Configuration",
+                        task: "Setup multi-level escalations",
+                        duration_hours: 2,
+                        assignee: "Implementation Engineer"
+                    }
+                ]
+            }
+        },
+        custom_development: {
+            yes: {
+                new_phase: {
+                    title: "Custom Development",
+                    tasks: [
+                        { task: "Scope custom requirements", duration_hours: 2, assignee: "PM" },
+                        { task: "Engineering handoff", duration_hours: 1, assignee: "Engineering" },
+                        { task: "Custom build UAT", duration_hours: 2, assignee: "PM" },
+                        { task: "Deploy custom feature", duration_hours: 1, assignee: "Engineering" }
+                    ]
+                }
+            },
+            no: { new_phase: null }
+        },
+        migration_engineering_needed: {
+            yes: {
+                tasks: [
+                    { phase: "Migration", task: "Migration schema validation", duration_hours: 2, assignee: "Engineering" },
+                    { phase: "Migration", task: "Engineering-assisted import", duration_hours: 3, assignee: "Engineering" },
+                    { phase: "Migration", task: "Post-import data verification", duration_hours: 2, assignee: "PM" }
+                ],
+                extend_uat_hours: 2
+            },
+            no: { tasks: [], extend_uat_hours: 0 }
+        },
+        migration_volume: {
+            none: { hide_migration_phase: true, extra_tasks: [] },
+            small: { hide_migration_phase: false, extra_tasks: [] },
+            medium: {
+                hide_migration_phase: false,
+                extra_tasks: [{
+                    phase: "Migration",
+                    task: "Sample import test",
+                    duration_hours: 2,
+                    assignee: "PM"
+                }]
+            },
+            large: {
+                hide_migration_phase: false,
+                extra_tasks: [
+                    { phase: "Migration", task: "Phased migration planning", duration_hours: 3, assignee: "PM" },
+                    { phase: "Migration", task: "Parallel migration execution", duration_hours: 4, assignee: "Engineering" }
+                ]
+            }
+        },
+        integrations: {
+            crm: [
+                { phase: "Integrations", task: "Field mapping workshop (CRM)", duration_hours: 2, assignee: "PM" },
+                { phase: "Integrations", task: "CRM sandbox validation", duration_hours: 2, assignee: "Implementation Engineer" }
+            ],
+            cpq: [{
+                phase: "Integrations",
+                task: "CPQ sync feasibility check",
+                duration_hours: 2,
+                assignee: "Implementation Engineer"
+            }],
+            hris: [{
+                phase: "Integrations",
+                task: "Master data mapping workshop",
+                duration_hours: 2,
+                assignee: "PM"
+            }],
+            erp: [{
+                phase: "Integrations",
+                task: "ERP credential validation",
+                duration_hours: 2,
+                assignee: "Customer/IT"
+            }],
+            custom_api: [{
+                phase: "Integrations",
+                task: "Custom endpoint testing",
+                duration_hours: 3,
+                assignee: "Implementation Engineer"
+            }]
+        },
+        integration_engineering_needed: {
+            yes: [{
+                phase: "Integrations",
+                task: "Engineering review session for integrations",
+                duration_hours: 2,
+                assignee: "Engineering"
+            }],
+            no: []
+        },
+        internal_dependencies: {
+            security: [{
+                phase: "Pre-Onboarding",
+                task: "Security review session",
+                duration_hours: 1,
+                assignee: "Security"
+            }],
+            legal: [{
+                phase: "Pre-Onboarding",
+                task: "DPA review",
+                duration_hours: 1,
+                assignee: "Legal"
+            }],
+            solutions_engineering: [{
+                phase: "Kickoff & Scoping",
+                task: "Technical discovery session",
+                duration_hours: 1,
+                assignee: "Solutions Engineering"
+            }],
+            engineering: [{
+                phase: "Kickoff & Scoping",
+                task: "Technical handoff and estimation",
+                duration_hours: 2,
+                assignee: "Engineering"
+            }]
+        },
+        engineering_effort: {
+            none: "No engineering dependency",
+            "1_3_days": "Estimated engineering dependency: 1–3 days",
+            "3_7_days": "Estimated engineering dependency: 3–7 days",
+            "7_plus_days": "Estimated engineering dependency: 7 plus days"
+        },
+        go_live_expectation: {
+            "4_6_weeks": { duration_multiplier: 0.9, extra_tasks: [] },
+            "6_8_weeks": { duration_multiplier: 1.0, extra_tasks: [] },
+            "8_12_weeks": {
+                duration_multiplier: 1.1,
+                extra_tasks: [{
+                    phase: "Training",
+                    task: "Extended UAT support",
+                    duration_hours: 2,
+                    assignee: "PM"
+                }]
+            },
+            "12_plus_weeks": {
+                duration_multiplier: 1.2,
+                extra_tasks: [{
+                    phase: "Kickoff & Scoping",
+                    task: "Phased rollout planning",
+                    duration_hours: 2,
+                    assignee: "PM"
+                }]
+            }
+        }
+    };
+
+    const im = responses.im_section_1_customer_context || {};
+    const scope = responses.im_section_2_scope_deliverables || {};
+    const migration = responses.im_section_3_migration_details || {};
+    const integrations = responses.im_section_4_integrations || {};
+    const dependencies = responses.im_section_5_internal_dependencies || {};
+    const timeline = responses.im_section_6_timeline_expectations || {};
+
+    // Base phases structure - create standard phases first
+    const phaseOrder = [
+        "Pre-Onboarding",
+        "Kickoff & Scoping",
+        "Configuration",
+        "Template Automation",
+        "Integrations",
+        "Migration",
+        "Training",
+        "Weekly Client Engagement"
+    ];
+    
+    const phases = [];
+    const phaseMap = {};
+
+    // Initialize base phases
+    phaseOrder.forEach((name, index) => {
+        phaseMap[name] = {
+            phase: index + 1,
+            name: name,
+            duration: "TBD",
+            activities: [],
+            dependencies: null,
+            status: "Scheduled",
+            internal_notes: null
+        };
+        phases.push(phaseMap[name]);
+    });
+
+    // Helper to get or create phase
+    function getOrCreatePhase(name) {
+        if (!phaseMap[name]) {
+            const phaseNum = phases.length + 1;
+            phaseMap[name] = {
+                phase: phaseNum,
+                name: name,
+                duration: "TBD",
+                activities: [],
+                dependencies: null,
+                status: "Scheduled",
+                internal_notes: null
+            };
+            phases.push(phaseMap[name]);
+        }
+        return phaseMap[name];
+    }
+
+    // Helper to add task to phase
+    function addTaskToPhase(phaseName, task, duration, assignee) {
+        const phase = getOrCreatePhase(phaseName);
+        phase.activities.push(`${task} (${assignee}, ${duration}h)`);
+    }
+
+    // 1. Apply complexity multiplier
+    const complexity = (im.complexity || "medium").toLowerCase();
+    const complexityConfig = planLogic.complexity[complexity] || planLogic.complexity.medium;
+    if (complexityConfig.extra_tasks.length > 0) {
+        complexityConfig.extra_tasks.forEach(t => {
+            addTaskToPhase(t.phase, t.task, t.duration_hours, t.assignee);
+        });
+    }
+
+    // 2. Add risk-based tasks
+    const knownRisks = im.known_risks || [];
+    knownRisks.forEach(risk => {
+        const riskKey = risk.toLowerCase().replace(/\s+/g, '_')
+            .replace('lack_of_template_readiness', 'template_unready')
+            .replace('lack_of_technical_ownership', 'technical_owner_missing')
+            .replace('security_review_delays', 'security_review_delays')
+            .replace('integration_feasibility_unclear', 'integration_unclear');
+        const riskConfig = planLogic.risks[riskKey];
+        if (riskConfig) {
+            addTaskToPhase(riskConfig.phase, riskConfig.task, riskConfig.duration_hours, riskConfig.assignee);
+        }
+    });
+
+    // 3. Template volume tasks
+    const templateCount = scope.template_count || "0-5";
+    let templateVolume = "small";
+    if (templateCount === "5-15") templateVolume = "medium";
+    else if (templateCount === "15+") templateVolume = "large";
+    const templateConfig = planLogic.template_volume[templateVolume] || planLogic.template_volume.small;
+    templateConfig.extra_tasks.forEach(t => {
+        addTaskToPhase(t.phase, t.task, t.duration_hours, t.assignee);
+    });
+
+    // 4. Workflow complexity tasks
+    const workflowComplexity = (scope.workflow_complexity || "").toLowerCase();
+    let workflowKey = "simple";
+    if (workflowComplexity.includes("medium")) workflowKey = "medium";
+    else if (workflowComplexity.includes("complex")) workflowKey = "complex";
+    const workflowConfig = planLogic.workflow_complexity[workflowKey] || planLogic.workflow_complexity.simple;
+    workflowConfig.tasks_to_add.forEach(t => {
+        addTaskToPhase(t.phase, t.task, t.duration_hours, t.assignee);
+    });
+
+    // 5. Custom development phase
+    if (scope.custom_development === "Yes" && scope.custom_development_details) {
+        const customPhase = planLogic.custom_development.yes.new_phase;
+        const phase = getOrCreatePhase(customPhase.title);
+        customPhase.tasks.forEach(t => {
+            phase.activities.push(`${t.task} (${t.assignee}, ${t.duration_hours}h)`);
+        });
+    }
+
+    // 6. Migration tasks
+    const migrationVolume = (migration.migration_volume || "none").toLowerCase();
+    const migrationConfig = planLogic.migration_volume[migrationVolume] || planLogic.migration_volume.none;
+    if (!migrationConfig.hide_migration_phase) {
+        const migrationPhase = getOrCreatePhase("Migration");
+        migrationConfig.extra_tasks.forEach(t => {
+            addTaskToPhase(t.phase, t.task, t.duration_hours, t.assignee);
+        });
+        if (migration.migration_engineering_support === "Yes") {
+            planLogic.migration_engineering_needed.yes.tasks.forEach(t => {
+                addTaskToPhase(t.phase, t.task, t.duration_hours, t.assignee);
+            });
+        }
+    }
+
+    // 7. Integration tasks
+    const integrationTypes = integrations.integration_types || [];
+    integrationTypes.forEach(type => {
+        const typeKey = type.toLowerCase()
+            .replace('crm (sfdc, hubspot, zoho)', 'crm')
+            .replace('custom api', 'custom_api');
+        const integrationTasks = planLogic.integrations[typeKey];
+        if (integrationTasks) {
+            integrationTasks.forEach(t => {
+                addTaskToPhase(t.phase, t.task, t.duration_hours, t.assignee);
+            });
+        }
+    });
+    if (integrations.integration_engineering_effort === "Yes") {
+        planLogic.integration_engineering_needed.yes.forEach(t => {
+            addTaskToPhase(t.phase, t.task, t.duration_hours, t.assignee);
+        });
+    }
+
+    // 8. Internal dependencies
+    const internalTeams = dependencies.internal_teams || [];
+    internalTeams.forEach(team => {
+        const teamKey = team.toLowerCase().replace(/\s+/g, '_');
+        const teamTasks = planLogic.internal_dependencies[teamKey];
+        if (teamTasks) {
+            teamTasks.forEach(t => {
+                addTaskToPhase(t.phase, t.task, t.duration_hours, t.assignee);
+            });
+        }
+    });
+
+    // 9. Go-live expectation adjustments
+    const goLiveKey = (timeline.go_live_expectation || "6-8 weeks").toLowerCase().replace(/\s+/g, '_');
+    const goLiveConfig = planLogic.go_live_expectation[goLiveKey] || planLogic.go_live_expectation["6_8_weeks"];
+    goLiveConfig.extra_tasks.forEach(t => {
+        addTaskToPhase(t.phase, t.task, t.duration_hours, t.assignee);
+    });
+
+    // Remove empty phases (phases with no activities)
+    const filteredPhases = phases.filter(p => p.activities.length > 0);
+
+    // Calculate recommended go-live date
+    const baseWeeks = 8;
+    const durationMultiplier = complexityConfig.duration_multiplier * goLiveConfig.duration_multiplier;
+    const estimatedWeeks = Math.round(baseWeeks * durationMultiplier);
+    const goLiveDate = new Date();
+    goLiveDate.setDate(goLiveDate.getDate() + (estimatedWeeks * 7));
+
+    // Engineering effort note
+    const engEffortKey = (dependencies.engineering_effort || "none").toLowerCase().replace(/\s+/g, '_');
+    const engEffortNote = planLogic.engineering_effort[engEffortKey] || planLogic.engineering_effort.none;
+
+    // Re-number phases after filtering
+    filteredPhases.forEach((phase, index) => {
+        phase.phase = index + 1;
+    });
+
+    return {
+        recommended_go_live: goLiveDate.toISOString().split('T')[0],
+        timeline_adjusted: false,
+        adjustment_reason: null,
+        phases: filteredPhases,
+        internal_notes: engEffortNote,
+        estimated_timeline: `${estimatedWeeks} weeks`
+    };
+}
+
+/**
+ * Calculate Prospect readiness assessment using Gemini AI
+ */
+async function calculateProspectReadinessWithGemini(intake_responses) {
+    if (!geminiModel) {
+        throw new Error('Gemini model not available');
+    }
+
+    const prompt = `You are an expert implementation consultant for SpotDraft. Analyze this Prospect readiness assessment.
+
+## PROSPECT ASSESSMENT DATA:
+${JSON.stringify(intake_responses, null, 2)}
+
+## YOUR TASK:
+Calculate readiness scores for 4 sections (each out of 100 points), then calculate an overall weighted score:
+
+**Section 1: Basics (Weight: 25%)**
+Use ONLY these questions from prospect_section_1_basics:
+- company_name: Provided = +33 points, Missing = +0
+- industry: Selected = +33 points, Missing = +0
+- user_count: Selected = +34 points, Missing = +0
+- Max: 100 points
+
+**Section 2: Scope Clarity (Weight: 30%)**
+Use ONLY these questions from prospect_section_2_scope_clarity:
+- modules_interested: At least 1 selected = +40 points (bonus +5 per additional module, max +40)
+- templates_ready: Yes = +30, Partially = +20, No = +0, Missing = +0
+- migration_expected: No = +30, Some = +20, "Yes, a lot" = +10, Missing = +0
+- Max: 100 points
+
+**Section 3: Systems and Integrations (Weight: 25%)**
+Use ONLY these questions from prospect_section_3_systems_integrations:
+- systems_used: At least 1 selected = +50 points (bonus +5 per additional system, max +50)
+- api_access: Yes = +50, "Not sure" = +25, No = +0, Missing = +0
+- Max: 100 points
+
+**Section 4: Timeline Readiness (Weight: 20%)**
+Use ONLY these questions from prospect_section_4_timeline_readiness:
+- go_live_timeline: Selected = +70 points, Missing = +0
+- biggest_concern: Provided (optional) = +30 points bonus, Missing = +0
+- Max: 100 points (70 if concern not provided, 100 if provided)
+
+**Overall Score Calculation:**
+Overall = (Section1 × 0.25) + (Section2 × 0.30) + (Section3 × 0.25) + (Section4 × 0.20)
+Round to nearest integer.
+
+**Status Label & Description:**
+- 80-100: "Ready to Purchase" - "You're well-prepared to start with SpotDraft. Minor preparation may be needed."
+- 60-79: "Ready with Preparation" - "You're ready to purchase, but some preparation is recommended."
+- 40-59: "Needs Preparation" - "Some preparation is needed before purchasing SpotDraft."
+- 0-39: "Significant Preparation Required" - "Significant preparation is required before purchasing."
+
+**Red Flags/Key Blockers:**
+Identify critical issues that could block or delay implementation. Focus on:
+- Template readiness gaps
+- Integration complexity
+- Timeline concerns
+- Migration challenges
+
+**Action Items:**
+Create "What to prepare before purchasing SpotDraft" list with specific, actionable items.
+
+**Implementation Plan:**
+Generate a high-level timeline and estimated effort band (Small, Medium, Large).
+
+Return ONLY valid JSON in this structure:
+{
+    "readiness_score": {
+        "overall": <integer 0-100>,
+        "breakdown": {
+            "basics": <integer 0-100>,
+            "scope_clarity": <integer 0-100>,
+            "systems_integrations": <integer 0-100>,
+            "timeline_readiness": <integer 0-100>
+        }
+    },
+    "status_label": "<string>",
+    "status_description": "<string>",
+    "red_flags": [
+        {
+            "section": "<string>",
+            "issue": "<string>",
+            "impact": "<string>",
+            "severity": "<high|medium|low>"
+        }
+    ],
+    "action_items": {
+        "customer": [
+            {
+                "task": "<string>",
+                "section": "<string>",
+                "priority": "<high|medium|low>",
+                "deadline": "<YYYY-MM-DD>",
+                "owner": "<string>"
+            }
+        ],
+        "spotdraft": []
+    },
+    "implementation_plan": {
+        "recommended_go_live": "<YYYY-MM-DD>",
+        "high_level_timeline": "<string>",
+        "estimated_effort_band": "<Small|Medium|Large>",
+        "phases": [
+            {
+                "phase": <integer>,
+                "name": "<string>",
+                "duration": "<string>",
+                "activities": ["<string>"]
+            }
+        ]
+    },
+    "preparation_list": ["<string>"],
+    "ai_insights": {
+        "key_strengths": ["<string>"],
+        "critical_concerns": ["<string>"],
+        "recommendations": ["<string>"],
+        "risk_assessment": "<string>",
+        "timeline_confidence": "<high|medium|low>"
+    }
+}`;
+
+    try {
+        const result = await geminiModel.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        let jsonText = text.trim();
+        if (jsonText.startsWith('```json')) {
+            jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        } else if (jsonText.startsWith('```')) {
+            jsonText = jsonText.replace(/```\n?/g, '').trim();
+        }
+        
+        const assessmentData = JSON.parse(jsonText);
+        
+        return {
+            readiness_score: assessmentData.readiness_score,
+            status_label: assessmentData.status_label,
+            status_description: assessmentData.status_description,
+            red_flags: assessmentData.red_flags || [],
+            action_items: assessmentData.action_items || { customer: [], spotdraft: [] },
+            implementation_plan: assessmentData.implementation_plan,
+            preparation_list: assessmentData.preparation_list || [],
+            ai_insights: assessmentData.ai_insights,
+            gemini_request: prompt,
+            gemini_response: text
+        };
+    } catch (error) {
+        console.error('Error calculating Prospect assessment with Gemini:', error);
+        throw new Error(`Prospect assessment failed: ${error.message}`);
+    }
+}
+
+/**
+ * Calculate Customer readiness assessment using Gemini AI
+ */
+async function calculateCustomerReadinessWithGemini(intake_responses) {
+    if (!geminiModel) {
+        throw new Error('Gemini model not available');
+    }
+
+    const prompt = `You are an expert implementation consultant for SpotDraft. Analyze this Customer readiness assessment.
+
+## CUSTOMER ASSESSMENT DATA:
+${JSON.stringify(intake_responses, null, 2)}
+
+## YOUR TASK:
+Calculate readiness scores for 7 sections (each out of 100 points), then calculate an overall weighted score:
+
+**Section 1: Stakeholders (Weight: 15%)**
+Use ONLY these questions from customer_section_1_stakeholders:
+- primary_contact_name + primary_contact_role: Both provided = +40 points, Missing either = +0
+- technical_contact_name + technical_contact_role: Both provided = +40 points, Missing either = +0
+- team_distribution: At least 1 selected = +10 points, Missing = +0
+- decision_approver: Selected = +10 points, Missing = +0
+- Max: 100 points
+
+**Section 2: Purchased Scope (Weight: 20%)**
+Use ONLY these questions from customer_section_2_purchased_scope:
+- purchased_modules: At least 1 selected = +40 points (bonus +5 per additional module, max +40)
+- template_count: Selected = +30 points, Missing = +0
+- template_readiness: "Ready" = +30, "Partially ready" = +20, "Not ready" = +0, Missing = +0
+- Max: 100 points
+
+**Section 3: Migration (Weight: 15%)**
+Use ONLY these questions from customer_section_3_migration:
+- migration_needed: Selected = +30 points, Missing = +0
+- If migration_needed is NOT "No": 
+  - migration_contract_count: Selected = +25 points, Missing = +0
+  - contract_storage: Selected = +25 points, Missing = +0
+  - data_cleanliness: Selected = +20 points, Missing = +0
+- If migration_needed is "No": Skip the 3 conditional questions (they are hidden)
+- Max: 100 points (30 if migration = "No", 100 if migration needed and all 3 answered)
+
+**Section 4: Integrations (Weight: 15%)**
+Use ONLY these questions from customer_section_4_integrations:
+- integration_systems: At least 1 selected = +40 points (bonus +5 per additional system, max +40)
+- api_access: "Yes" = +30, "Not sure" = +15, "No" = +0, Missing = +0
+- webhooks_support: "Yes" = +30, "Not sure" = +15, "No" = +0, Missing = +0
+- Max: 100 points
+
+**Section 5: Business Processes (Weight: 15%)**
+Use ONLY these questions from customer_section_5_business_processes:
+- approval_complexity: Selected = +35 points, Missing = +0
+- conditional_routing: Selected = +35 points, Missing = +0
+- agreement_signers: Selected = +30 points, Missing = +0
+- Max: 100 points
+
+**Section 6: Security and Access (Weight: 10%)**
+Use ONLY these questions from customer_section_6_security_access:
+- sso_required: Selected = +35 points, Missing = +0
+- security_needs: "Yes" = +35, "No" = +30, Missing = +0
+- dpa_status: "Signed" = +30, "In progress" = +20, "Not started" = +0, Missing = +0
+- Max: 100 points
+
+**Section 7: Optional Uploads (Weight: 10%)**
+Use ONLY these questions from customer_section_7_uploads:
+- templates: Array has files = +50 points, Empty array = +0
+- sample_contracts: Array has files = +50 points, Empty array = +0
+- Max: 100 points (0 if nothing uploaded, 50 if one uploaded, 100 if both uploaded)
+
+**Overall Score Calculation:**
+Overall = (Section1 × 0.15) + (Section2 × 0.20) + (Section3 × 0.15) + (Section4 × 0.15) + (Section5 × 0.15) + (Section6 × 0.10) + (Section7 × 0.10)
+Round to nearest integer.
+
+**Status Label & Description:**
+- 80-100: "Ready to Proceed" - "Your organization is well-prepared for implementation."
+- 60-79: "Ready with Minor Blockers" - "A few items need attention before go-live."
+- 40-59: "Needs Preparation" - "Some preparation is needed before implementation can begin."
+- 0-39: "Significant Preparation Required" - "Significant preparation is required before implementation."
+
+**Red Flags/Blockers:**
+Identify blockers by category: template, migration, integration, security.
+
+**Action Items:**
+Create actionable tasks to fix readiness gaps for both customer and SpotDraft teams.
+
+**Implementation Plan:**
+Generate a high-level timeline and implementation plan preview.
+
+Return ONLY valid JSON in this structure:
+{
+    "readiness_score": {
+        "overall": <integer 0-100>,
+        "breakdown": {
+            "stakeholders": <integer 0-100>,
+            "purchased_scope": <integer 0-100>,
+            "migration": <integer 0-100>,
+            "integrations": <integer 0-100>,
+            "business_processes": <integer 0-100>,
+            "security_access": <integer 0-100>,
+            "uploads": <integer 0-100>
+        }
+    },
+    "status_label": "<string>",
+    "status_description": "<string>",
+    "red_flags": [
+        {
+            "section": "<string>",
+            "issue": "<string>",
+            "impact": "<string>",
+            "severity": "<high|medium|low>",
+            "category": "<template|migration|integration|security>"
+        }
+    ],
+    "action_items": {
+        "customer": [...],
+        "spotdraft": [...]
+    },
+    "implementation_plan": {
+        "recommended_go_live": "<YYYY-MM-DD>",
+        "high_level_timeline": "<string>",
+        "phases": [...]
+    },
+    "ai_insights": {
+        "key_strengths": ["<string>"],
+        "critical_concerns": ["<string>"],
+        "recommendations": ["<string>"],
+        "risk_assessment": "<string>",
+        "timeline_confidence": "<high|medium|low>"
+    }
+}`;
+
+    try {
+        const result = await geminiModel.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        let jsonText = text.trim();
+        if (jsonText.startsWith('```json')) {
+            jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        } else if (jsonText.startsWith('```')) {
+            jsonText = jsonText.replace(/```\n?/g, '').trim();
+        }
+        
+        const assessmentData = JSON.parse(jsonText);
+        
+        return {
+            readiness_score: assessmentData.readiness_score,
+            status_label: assessmentData.status_label,
+            status_description: assessmentData.status_description,
+            red_flags: assessmentData.red_flags || [],
+            action_items: assessmentData.action_items || { customer: [], spotdraft: [] },
+            implementation_plan: assessmentData.implementation_plan,
+            ai_insights: assessmentData.ai_insights,
+            gemini_request: prompt,
+            gemini_response: text
+        };
+    } catch (error) {
+        console.error('Error calculating Customer assessment with Gemini:', error);
+        throw new Error(`Customer assessment failed: ${error.message}`);
+    }
+}
+
+/**
+ * Calculate IM readiness assessment using Gemini AI
+ */
+async function calculateIMReadinessWithGemini(intake_responses, implementationPlan) {
+    if (!geminiModel) {
+        throw new Error('Gemini model not available');
+    }
+
+    const prompt = `You are an expert implementation consultant for SpotDraft. Analyze this Implementation Manager assessment and generate readiness insights.
+
+## IM ASSESSMENT DATA:
+${JSON.stringify(intake_responses, null, 2)}
+
+## IMPLEMENTATION PLAN (Already Generated):
+${JSON.stringify(implementationPlan, null, 2)}
+
+## YOUR TASK:
+Calculate readiness scores for 6 sections (each out of 100 points), then calculate an overall weighted score:
+
+**Section 1: Customer Context (Weight: 20%)**
+Use ONLY these questions from im_section_1_customer_context:
+- customer_name: Provided = +30 points, Missing = +0
+- package: Selected = +30 points, Missing = +0
+- complexity: Selected = +30 points, Missing = +0
+- known_risks: At least 1 selected = +10 points bonus (proactive identification), Empty array = +0
+- Max: 100 points (90 if no risks identified, 100 if risks identified)
+
+**Section 2: Scope & Deliverables (Weight: 20%)**
+Use ONLY these questions from im_section_2_scope_deliverables:
+- template_count: Selected = +30 points, Missing = +0
+- workflow_complexity: Selected = +30 points, Missing = +0
+- custom_development: Selected = +20 points, Missing = +0
+- custom_development_details: If custom_development is "Yes" and details provided = +20 points, Otherwise = +0
+- Max: 100 points (80 if custom_development = "No", 100 if "Yes" with details)
+
+**Section 3: Migration Details (Weight: 15%)**
+Use ONLY these questions from im_section_3_migration_details:
+- migration_engineering_support: Selected = +50 points, Missing = +0
+- migration_volume: Selected = +50 points, Missing = +0
+- Max: 100 points
+
+**Section 4: Integrations (Weight: 20%)**
+Use ONLY these questions from im_section_4_integrations:
+- integration_types: At least 1 selected = +40 points (bonus +5 per additional type, max +40)
+- integration_engineering_effort: Selected = +30 points, Missing = +0
+- integration_uat_rounds: Selected = +30 points, Missing = +0
+- Max: 100 points
+
+**Section 5: Internal Dependencies (Weight: 15%)**
+Use ONLY these questions from im_section_5_internal_dependencies:
+- internal_teams: At least 1 selected = +50 points (bonus +5 per additional team, max +50)
+- engineering_effort: Selected = +50 points, Missing = +0
+- Max: 100 points
+
+**Section 6: Timeline Expectations (Weight: 10%)**
+Use ONLY these questions from im_section_6_timeline_expectations:
+- go_live_expectation: Selected = +70 points, Missing = +0
+- known_blockers: Provided (optional) = +30 points bonus, Missing or empty = +0
+- Max: 100 points (70 if blockers not provided, 100 if provided)
+
+**Overall Score Calculation:**
+Overall = (Section1 × 0.20) + (Section2 × 0.20) + (Section3 × 0.15) + (Section4 × 0.20) + (Section5 × 0.15) + (Section6 × 0.10)
+Round to nearest integer.
+
+**Status Label & Description:**
+- 80-100: "Plan Ready" - "All information captured. Ready to generate Rocketlane plan."
+- 60-79: "Plan Ready with Notes" - "Plan ready, but some areas need attention."
+- 40-59: "Incomplete Information" - "Some critical information missing for plan generation."
+- 0-39: "Significant Gaps" - "Significant information gaps. Please complete assessment."
+
+**Red Flags/Internal Notes:**
+Based on known risks and blockers identified. Include internal notes for SpotDraft team.
+
+**Action Items:**
+Create action items for customer, SpotDraft, and internal teams.
+
+**AI Insights:**
+Provide strategic insights for the implementation plan.
+
+Return ONLY valid JSON in this structure:
+{
+    "readiness_score": {
+        "overall": <integer 0-100>,
+        "breakdown": {
+            "customer_context": <integer>,
+            "scope_deliverables": <integer>,
+            "migration_details": <integer>,
+            "integrations": <integer>,
+            "internal_dependencies": <integer>,
+            "timeline_expectations": <integer>
+        }
+    },
+    "status_label": "<string>",
+    "status_description": "<string>",
+    "red_flags": [
+        {
+            "section": "<string>",
+            "issue": "<string>",
+            "impact": "<string>",
+            "severity": "<high|medium|low>"
+        }
+    ],
+    "action_items": {
+        "customer": [...],
+        "spotdraft": [...],
+        "internal": [...]
+    },
+    "ai_insights": {
+        "key_strengths": [...],
+        "critical_concerns": [...],
+        "recommendations": [...],
+        "risk_assessment": "<string>",
+        "timeline_confidence": "<high|medium|low>"
+    }
+}`;
+
+    try {
+        const result = await geminiModel.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        let jsonText = text.trim();
+        if (jsonText.startsWith('```json')) {
+            jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        } else if (jsonText.startsWith('```')) {
+            jsonText = jsonText.replace(/```\n?/g, '').trim();
+        }
+        
+        const assessmentData = JSON.parse(jsonText);
+        
+        return {
+            readiness_score: assessmentData.readiness_score,
+            status_label: assessmentData.status_label,
+            status_description: assessmentData.status_description,
+            red_flags: assessmentData.red_flags || [],
+            action_items: assessmentData.action_items || { customer: [], spotdraft: [], internal: [] },
+            ai_insights: assessmentData.ai_insights,
+            gemini_request: prompt,
+            gemini_response: text
+        };
+    } catch (error) {
+        console.error('Error calculating IM assessment with Gemini:', error);
+        throw new Error(`IM assessment failed: ${error.message}`);
+    }
+}
+
 function createImplementationPlan(responses, readinessScore) {
     const overallScore = readinessScore.overall;
     
@@ -919,691 +1836,161 @@ function createImplementationPlan(responses, readinessScore) {
 }
 
 /**
- * Deterministic Readiness Score Calculation
- * Implements rule-based scoring with explainable rationales
- */
-function calculateDeterministicReadinessScore(intake_responses) {
-    const s1 = intake_responses.section_1_account_stakeholder || {};
-    const s2 = intake_responses.section_2_order_form_scope || {};
-    const s3 = intake_responses.section_3_template_readiness || {};
-    const s4 = intake_responses.section_4_migration_readiness || {};
-    const s5 = intake_responses.section_5_integration_readiness || {};
-    const s6 = intake_responses.section_6_business_process || {};
-    const s7 = intake_responses.section_7_security_compliance || {};
-    
-    const rationales = {};
-    
-    // Helper: Check if value is complete & clear
-    function isComplete(value) {
-        return value && value !== '' && value !== null && value !== undefined;
-    }
-    
-    // Helper: Check if value is partial
-    function isPartial(value) {
-        return value && value !== '' && value !== null && value !== undefined && 
-               (typeof value === 'string' && value.length < 10);
-    }
-    
-    // Helper: Award points based on completeness
-    function awardPoints(value, maxPoints, itemName) {
-        if (isComplete(value)) {
-            rationales[itemName] = `Complete & Clear → ${maxPoints} pts`;
-            return maxPoints;
-        } else if (isPartial(value)) {
-            rationales[itemName] = `Partial / Draft → ${Math.floor(maxPoints * 0.5)} pts`;
-            return Math.floor(maxPoints * 0.5);
-        } else {
-            rationales[itemName] = `Missing / High Risk → 0 pts`;
-            return 0;
-        }
-    }
-    
-    // Helper: Check if object has all required fields
-    function isPOCComplete(poc) {
-        return poc && isComplete(poc.name) && isComplete(poc.email) && 
-               (isComplete(poc.role) || isComplete(poc.timezone));
-    }
-    
-    // ============================================
-    // SECTION 1: Account & Stakeholders (100 pts)
-    // ============================================
-    let s1Score = 0;
-    const s1Rationales = {};
-    
-    // Primary POC identified & responsive: 30 pts
-    const primaryPOCComplete = isPOCComplete(s1.primary_poc);
-    s1Score += primaryPOCComplete ? 30 : (s1.primary_poc ? 15 : 0);
-    s1Rationales.primary_poc = primaryPOCComplete ? 
-        'Primary POC complete (name, email, role/timezone) → 30 pts' : 
-        (s1.primary_poc ? 'Primary POC partial → 15 pts' : 'Primary POC missing → 0 pts');
-    
-    // Legal POC identified: 20 pts
-    const legalPOCComplete = isPOCComplete(s1.legal_poc);
-    s1Score += legalPOCComplete ? 20 : (s1.legal_poc ? 10 : 0);
-    s1Rationales.legal_poc = legalPOCComplete ? 
-        'Legal POC complete → 20 pts' : 
-        (s1.legal_poc ? 'Legal POC partial → 10 pts' : 'Legal POC missing → 0 pts');
-    
-    // Technical POC identified (if needed): 20 pts
-    if (s1.integrations_required) {
-        const techPOCComplete = isPOCComplete(s1.technical_poc);
-        s1Score += techPOCComplete ? 20 : (s1.technical_poc ? 10 : 0);
-        s1Rationales.technical_poc = techPOCComplete ? 
-            'Technical POC complete → 20 pts' : 
-            (s1.technical_poc ? 'Technical POC partial → 10 pts' : 'Technical POC missing → 0 pts');
-    } else {
-        s1Rationales.technical_poc = 'No integrations required → N/A';
-    }
-    
-    // Decision-maker identified: 20 pts (using primary POC as proxy if no separate field)
-    s1Score += awardPoints(s1.primary_poc?.name || s1.legal_poc?.name, 20, 'decision_maker');
-    s1Rationales.decision_maker = rationales.decision_maker;
-    delete rationales.decision_maker;
-    
-    // Communication cadence agreed: 10 pts
-    const hasCommChannels = s1.communication_channels && s1.communication_channels.length > 0;
-    const hasAvailability = isComplete(s1.availability);
-    s1Score += (hasCommChannels && hasAvailability) ? 10 : (hasCommChannels || hasAvailability ? 5 : 0);
-    s1Rationales.communication_cadence = (hasCommChannels && hasAvailability) ? 
-        'Communication channels and availability specified → 10 pts' : 
-        (hasCommChannels || hasAvailability ? 'Partial communication info → 5 pts' : 'Missing → 0 pts');
-    
-    rationales.section_1 = s1Rationales;
-    
-    // ============================================
-    // SECTION 2: Order Form Scope (100 pts)
-    // ============================================
-    let s2Score = 0;
-    const s2Rationales = {};
-    
-    // Modules mapped to implementation scope: 40 pts
-    const modules = s2.purchased_modules || [];
-    const moduleCount = modules.length;
-    s2Score += moduleCount >= 3 ? 40 : (moduleCount === 2 ? 30 : (moduleCount === 1 ? 20 : 0));
-    s2Rationales.modules_mapped = moduleCount >= 3 ? 
-        `${moduleCount} modules identified → 40 pts` : 
-        (moduleCount === 2 ? `${moduleCount} modules → 30 pts` : 
-        (moduleCount === 1 ? `${moduleCount} module → 20 pts` : 'No modules identified → 0 pts'));
-    
-    // Add-ons / custom features scoped: 30 pts
-    const addonsComplete = isComplete(s2.additional_addons);
-    s2Score += addonsComplete ? 30 : (isPartial(s2.additional_addons) ? 15 : 0);
-    s2Rationales.addons_scoped = addonsComplete ? 
-        'Add-ons/custom features specified → 30 pts' : 
-        (isPartial(s2.additional_addons) ? 'Partial add-ons info → 15 pts' : 'No add-ons specified → 0 pts');
-    
-    // Success criteria / acceptance defined: 30 pts
-    // Using additional_addons as proxy for success criteria
-    const successCriteriaComplete = isComplete(s2.additional_addons) && s2.additional_addons.length > 50;
-    s2Score += successCriteriaComplete ? 30 : (isComplete(s2.additional_addons) ? 15 : 0);
-    s2Rationales.success_criteria = successCriteriaComplete ? 
-        'Success criteria/acceptance defined → 30 pts' : 
-        (isComplete(s2.additional_addons) ? 'Partial success criteria → 15 pts' : 'Missing → 0 pts');
-    
-    rationales.section_2 = s2Rationales;
-    
-    // ============================================
-    // SECTION 3: Template Readiness (100 pts)
-    // ============================================
-    let s3Score = 0;
-    const s3Rationales = {};
-    
-    // Templates finalized ratio (bucket): 30 pts
-    const totalTemplates = s3.template_count || 0;
-    const finalizedTemplates = s3.templates_finalized_count || 0;
-    let finalizedRatio = 0;
-    if (totalTemplates > 0) {
-        finalizedRatio = (finalizedTemplates / totalTemplates) * 100;
-    }
-    
-    if (finalizedRatio >= 80) {
-        s3Score += 30;
-        s3Rationales.templates_finalized_ratio = `${finalizedTemplates} of ${totalTemplates} templates finalized → ${finalizedRatio.toFixed(1)}% → ≥80% bucket → 30 pts`;
-    } else if (finalizedRatio >= 30) {
-        s3Score += 15;
-        s3Rationales.templates_finalized_ratio = `${finalizedTemplates} of ${totalTemplates} templates finalized → ${finalizedRatio.toFixed(1)}% → 30-79% bucket → 15 pts`;
-    } else {
-        s3Score += 0;
-        s3Rationales.templates_finalized_ratio = totalTemplates > 0 ? 
-            `${finalizedTemplates} of ${totalTemplates} templates finalized → ${finalizedRatio.toFixed(1)}% → <30% bucket → 0 pts` : 
-            'Template count missing → 0 pts';
-    }
-    
-    // Template editable formats available: 15 pts
-    const formats = s3.template_formats || [];
-    s3Score += formats.length > 0 ? 15 : 0;
-    s3Rationales.template_formats = formats.length > 0 ? 
-        `${formats.length} template format(s) specified → 15 pts` : 'No template formats specified → 0 pts';
-    
-    // Conditional logic complexity: 20 pts (simple=20, moderate=10, complex=0)
-    const conditionalLogic = s3.conditional_logic || '';
-    if (conditionalLogic.toLowerCase() === 'none' || conditionalLogic === '') {
-        s3Score += 20;
-        s3Rationales.conditional_logic = 'No conditional logic → 20 pts';
-    } else if (conditionalLogic.toLowerCase().includes('simple')) {
-        s3Score += 20;
-        s3Rationales.conditional_logic = 'Simple conditional logic → 20 pts';
-    } else if (conditionalLogic.toLowerCase().includes('moderate')) {
-        s3Score += 10;
-        s3Rationales.conditional_logic = 'Moderate conditional logic → 10 pts';
-    } else if (conditionalLogic.toLowerCase().includes('complex')) {
-        s3Score += 0;
-        s3Rationales.conditional_logic = 'Complex conditional logic → 0 pts';
-    } else {
-        s3Score += 10; // Default to moderate if unclear
-        s3Rationales.conditional_logic = 'Conditional logic specified (unclear complexity) → 10 pts';
-    }
-    
-    // Clause library present: 15 pts (using clause_level_changes as proxy)
-    const hasClauseLibrary = !s3.clause_level_changes; // If no clause changes needed, library likely exists
-    s3Score += hasClauseLibrary ? 15 : 0;
-    s3Rationales.clause_library = hasClauseLibrary ? 
-        'Clause library present (no clause-level changes needed) → 15 pts' : 
-        'Clause library missing or incomplete → 0 pts';
-    
-    // Approval matrices mapped: 10 pts
-    const hasApprovalMatrices = s3.approval_matrices_exist;
-    s3Score += hasApprovalMatrices ? 10 : 0;
-    s3Rationales.approval_matrices = hasApprovalMatrices ? 
-        'Approval matrices exist → 10 pts' : 'Approval matrices missing → 0 pts';
-    
-    // Volume impact: 10 pts (0-5 templates=10, 6-12=5, >12=0)
-    if (totalTemplates >= 0 && totalTemplates <= 5) {
-        s3Score += 10;
-        s3Rationales.volume_impact = `${totalTemplates} templates → 0-5 bucket → 10 pts`;
-    } else if (totalTemplates >= 6 && totalTemplates <= 12) {
-        s3Score += 5;
-        s3Rationales.volume_impact = `${totalTemplates} templates → 6-12 bucket → 5 pts`;
-    } else if (totalTemplates > 12) {
-        s3Score += 0;
-        s3Rationales.volume_impact = `${totalTemplates} templates → >12 bucket → 0 pts`;
-    } else {
-        s3Rationales.volume_impact = 'Template count missing → 0 pts';
-    }
-    
-    rationales.section_3 = s3Rationales;
-    
-    // ============================================
-    // SECTION 4: Migration Readiness (100 pts)
-    // ============================================
-    let s4Score = 0;
-    const s4Rationales = {};
-    
-    // Contract count clarity: 20 pts
-    const contractCount = s4.contract_count || 0;
-    s4Score += contractCount > 0 ? 20 : 0;
-    s4Rationales.contract_count = contractCount > 0 ? 
-        `Contract count specified: ${contractCount} → 20 pts` : 'Contract count missing → 0 pts';
-    
-    // Naming conventions/structured folders: 20 pts
-    const structuredNaming = s4.structured_naming || '';
-    if (structuredNaming.toLowerCase().includes('100%') || structuredNaming.toLowerCase().includes('yes-100%')) {
-        s4Score += 20;
-        s4Rationales.naming_conventions = '100% structured naming → 20 pts';
-    } else if (structuredNaming.toLowerCase().includes('partial')) {
-        s4Score += 10;
-        s4Rationales.naming_conventions = 'Partial structured naming → 10 pts';
-    } else {
-        s4Score += 0;
-        s4Rationales.naming_conventions = 'No structured naming → 0 pts';
-    }
-    
-    // File formats usable (digital/OCR-able): 15 pts
-    const contractFormats = s4.contract_formats || [];
-    s4Score += contractFormats.length > 0 ? 15 : 0;
-    s4Rationales.file_formats = contractFormats.length > 0 ? 
-        `${contractFormats.length} usable format(s) specified → 15 pts` : 'No file formats specified → 0 pts';
-    
-    // Metadata availability (key fields): 25 pts
-    const existingMetadata = s4.existing_metadata || '';
-    if (existingMetadata.toLowerCase().includes('fully') || existingMetadata.toLowerCase().includes('yes-fully')) {
-        s4Score += 25;
-        s4Rationales.metadata_availability = 'Metadata fully available → 25 pts';
-    } else if (existingMetadata.toLowerCase().includes('partially') || existingMetadata.toLowerCase().includes('yes-partially')) {
-        s4Score += 12;
-        s4Rationales.metadata_availability = 'Metadata partially available → 12 pts';
-    } else {
-        s4Score += 0;
-        s4Rationales.metadata_availability = 'No metadata available → 0 pts';
-    }
-    
-    // Contract types mapped to templates: 20 pts
-    const contractTypes = s4.contract_types || '';
-    s4Score += isComplete(contractTypes) ? 20 : (isPartial(contractTypes) ? 10 : 0);
-    s4Rationales.contract_types = isComplete(contractTypes) ? 
-        'Contract types mapped → 20 pts' : (isPartial(contractTypes) ? 'Partial contract types → 10 pts' : 'Missing → 0 pts');
-    
-    rationales.section_4 = s4Rationales;
-    
-    // ============================================
-    // SECTION 5: Integration Readiness (100 pts)
-    // ============================================
-    let s5Score = 0;
-    const s5Rationales = {};
-    let s5Penalty = 0;
-    
-    // Systems + use-cases identified: 30 pts
-    const systems = s5.systems_to_integrate || [];
-    const systemCount = systems.length;
-    s5Score += systemCount >= 2 ? 30 : (systemCount === 1 ? 20 : 0);
-    s5Rationales.systems_identified = systemCount >= 2 ? 
-        `${systemCount} systems identified → 30 pts` : 
-        (systemCount === 1 ? `${systemCount} system identified → 20 pts` : 'No systems identified → 0 pts');
-    
-    // Technical access available (sandbox/API keys): 30 pts
-    const hasApiAccess = s5.api_webhook_access;
-    const adminAccess = s5.admin_access || '';
-    const hasTechnicalAccess = hasApiAccess && (adminAccess.toLowerCase().includes('yes-all') || adminAccess.toLowerCase().includes('yes-some'));
-    
-    if (!hasTechnicalAccess && systemCount > 0) {
-        // Blocking rule: No sandbox/technical access for critical integration → Section 5 = 0
-        s5Score = 0;
-        s5Rationales.technical_access = 'No technical access for required integrations → BLOCKING → Section 5 = 0';
-    } else {
-        s5Score += hasTechnicalAccess ? 30 : (hasApiAccess ? 15 : 0);
-        s5Rationales.technical_access = hasTechnicalAccess ? 
-            'Technical access available (API/webhook + admin access) → 30 pts' : 
-            (hasApiAccess ? 'Partial technical access → 15 pts' : 'No technical access → 0 pts');
-    }
-    
-    // Security/infosec approval status: 20 pts (partial if in-progress)
-    const securityApproval = s5.security_approval || '';
-    if (securityApproval.toLowerCase() === 'no' || securityApproval === '') {
-        s5Score += 20;
-        s5Rationales.security_approval = 'No security approval needed → 20 pts';
-    } else if (securityApproval.toLowerCase().includes('not sure') || securityApproval.toLowerCase().includes('in-progress')) {
-        s5Score += 10;
-        s5Rationales.security_approval = 'Security approval in-progress → 10 pts';
-    } else {
-        s5Score += 5;
-        s5Rationales.security_approval = 'Security approval pending → 5 pts';
-    }
-    
-    // Integration owner identified: 10 pts
-    const decisionMaker = s5.decision_maker || {};
-    const hasOwner = isComplete(decisionMaker.name) || isComplete(decisionMaker.email);
-    s5Score += hasOwner ? 10 : 0;
-    s5Rationales.integration_owner = hasOwner ? 
-        'Integration owner identified → 10 pts' : 'Integration owner missing → 0 pts';
-    
-    // Integration success metrics defined: 10 pts
-    const outcomes = s5.expected_outcomes || [];
-    s5Score += outcomes.length > 0 ? 10 : 0;
-    s5Rationales.success_metrics = outcomes.length > 0 ? 
-        `${outcomes.length} success metric(s) defined → 10 pts` : 'No success metrics defined → 0 pts';
-    
-    // Apply penalties for infosec not started for sensitive integrations
-    if (systemCount > 0 && securityApproval.toLowerCase() !== 'no' && securityApproval !== '') {
-        // Determine sensitivity based on system types
-        const sensitiveSystems = ['salesforce', 'sap', 'oracle', 'workday', 'okta', 'azure', 'aws'];
-        const hasSensitiveSystem = systems.some(s => sensitiveSystems.some(ss => s.toLowerCase().includes(ss)));
-        
-        if (hasSensitiveSystem) {
-            if (securityApproval.toLowerCase().includes('not started') || securityApproval === '') {
-                s5Penalty = -25; // High sensitivity
-                s5Rationales.infosec_penalty = 'High-sensitivity integration without infosec approval → -25 pts penalty';
-            } else if (securityApproval.toLowerCase().includes('in-progress')) {
-                s5Penalty = -15; // Medium sensitivity
-                s5Rationales.infosec_penalty = 'Medium-sensitivity integration with infosec in-progress → -15 pts penalty';
-            }
-        } else {
-            if (securityApproval.toLowerCase().includes('not started') || securityApproval === '') {
-                s5Penalty = -10; // Low sensitivity
-                s5Rationales.infosec_penalty = 'Low-sensitivity integration without infosec approval → -10 pts penalty';
-            }
-        }
-    }
-    
-    s5Score = Math.max(0, s5Score + s5Penalty); // Apply penalty, floor at 0
-    
-    rationales.section_5 = s5Rationales;
-    
-    // ============================================
-    // SECTION 6: Business Process (100 pts)
-    // ============================================
-    let s6Score = 0;
-    const s6Rationales = {};
-    
-    // Approval workflow documented: 35 pts
-    const approvalWorkflow = s6.approval_workflow || '';
-    if (approvalWorkflow.toLowerCase().includes('documented') || approvalWorkflow.toLowerCase().includes('yes-documented')) {
-        s6Score += 35;
-        s6Rationales.approval_workflow = 'Approval workflow documented → 35 pts';
-    } else if (approvalWorkflow.toLowerCase().includes('informal') || approvalWorkflow.toLowerCase().includes('yes-informal')) {
-        s6Score += 25;
-        s6Rationales.approval_workflow = 'Approval workflow informal → 25 pts';
-    } else {
-        s6Score += 0;
-        s6Rationales.approval_workflow = 'No approval workflow → 0 pts';
-    }
-    
-    // Phase 1 must-haves defined: 25 pts
-    const phase1MustHaves = s6.phase1_must_haves || '';
-    s6Score += isComplete(phase1MustHaves) ? 25 : (isPartial(phase1MustHaves) ? 12 : 0);
-    s6Rationales.phase1_must_haves = isComplete(phase1MustHaves) ? 
-        'Phase 1 must-haves defined → 25 pts' : 
-        (isPartial(phase1MustHaves) ? 'Partial Phase 1 must-haves → 12 pts' : 'Missing → 0 pts');
-    
-    // Key bottlenecks identified & mitigations: 20 pts
-    const bottlenecks = s6.bottlenecks || '';
-    s6Score += isComplete(bottlenecks) ? 20 : (isPartial(bottlenecks) ? 10 : 0);
-    s6Rationales.bottlenecks = isComplete(bottlenecks) ? 
-        'Bottlenecks identified with mitigations → 20 pts' : 
-        (isPartial(bottlenecks) ? 'Partial bottlenecks info → 10 pts' : 'Missing → 0 pts');
-    
-    // Contract generation touchpoints mapped: 10 pts
-    const generators = s6.contract_generators || [];
-    s6Score += generators.length > 0 ? 10 : 0;
-    s6Rationales.contract_generators = generators.length > 0 ? 
-        `${generators.length} contract generator(s) mapped → 10 pts` : 'No contract generators mapped → 0 pts';
-    
-    // Workflow details (SLAs, frequency): 10 pts
-    const workflowDetails = s6.workflow_details || '';
-    s6Score += isComplete(workflowDetails) ? 10 : 0;
-    s6Rationales.workflow_details = isComplete(workflowDetails) ? 
-        'Workflow details (SLAs, frequency) provided → 10 pts' : 'Missing → 0 pts';
-    
-    rationales.section_6 = s6Rationales;
-    
-    // ============================================
-    // SECTION 7: Security & Compliance (100 pts)
-    // ============================================
-    let s7Score = 0;
-    const s7Rationales = {};
-    
-    // Security questionnaire status: 40 pts (completed=40, in-progress=20, not-started=0)
-    const securityReview = s7.security_review || '';
-    if (securityReview.toLowerCase().includes('completed') || securityReview.toLowerCase().includes('no')) {
-        s7Score += 40;
-        s7Rationales.security_questionnaire = securityReview.toLowerCase().includes('completed') ? 
-            'Security questionnaire completed → 40 pts' : 'No security review needed → 40 pts';
-    } else if (securityReview.toLowerCase().includes('in-progress') || securityReview.toLowerCase().includes('yes')) {
-        s7Score += 20;
-        s7Rationales.security_questionnaire = 'Security questionnaire in-progress → 20 pts';
-    } else {
-        s7Score += 0;
-        s7Rationales.security_questionnaire = 'Security questionnaire not started → 0 pts';
-    }
-    
-    // Data residency requirements defined: 30 pts
-    const dataResidency = s7.data_residency || '';
-    if (dataResidency.toLowerCase() === 'no' || dataResidency === '') {
-        s7Score += 30;
-        s7Rationales.data_residency = 'No data residency requirements → 30 pts';
-    } else if (dataResidency.toLowerCase().includes('not sure')) {
-        s7Score += 15;
-        s7Rationales.data_residency = 'Data residency unclear → 15 pts';
-    } else {
-        s7Score += 10;
-        s7Rationales.data_residency = 'Data residency requirements defined → 10 pts';
-    }
-    
-    // Custom SSO/SCIM requirements: 20 pts
-    const customSSO = s7.custom_sso || '';
-    if (customSSO.toLowerCase() === 'no' || customSSO === '') {
-        s7Score += 20;
-        s7Rationales.custom_sso = 'No custom SSO/SCIM requirements → 20 pts';
-    } else {
-        s7Score += 10;
-        s7Rationales.custom_sso = 'Custom SSO/SCIM required → 10 pts';
-    }
-    
-    // Timeline for security reviews: 10 pts
-    const securityReviews = s7.security_reviews_needed || [];
-    s7Score += securityReviews.length > 0 ? 10 : 0;
-    s7Rationales.security_reviews_timeline = securityReviews.length > 0 ? 
-        'Security review timeline specified → 10 pts' : 'Missing → 0 pts';
-    
-    rationales.section_7 = s7Rationales;
-    
-    // ============================================
-    // OVERALL SCORE CALCULATION
-    // ============================================
-    // Section weights: S1=10%, S2=10%, S3=25%, S4=20%, S5=20%, S6=10%, S7=5%
-    const overallScore = Math.round(
-        s1Score * 0.10 +
-        s2Score * 0.10 +
-        s3Score * 0.25 +
-        s4Score * 0.20 +
-        s5Score * 0.20 +
-        s6Score * 0.10 +
-        s7Score * 0.05
-    );
-    
-    // Determine status
-    let statusLabel, statusDescription;
-    if (overallScore >= 85) {
-        statusLabel = 'Ready to Proceed';
-        statusDescription = 'Your organization is well-prepared for implementation. Minor items may need attention, but you\'re ready to move forward.';
-    } else if (overallScore >= 70) {
-        statusLabel = 'Ready with Minor Clarifications';
-        statusDescription = 'Your organization is well-prepared for implementation. A few items need clarification before go-live.';
-    } else if (overallScore >= 50) {
-        statusLabel = 'Needs Preparation';
-        statusDescription = 'Some preparation is needed before implementation can begin. Address the identified blockers first.';
-    } else {
-        statusLabel = 'Significant Preparation Required';
-        statusDescription = 'Significant preparation is required before implementation. Please address the critical blockers identified.';
-    }
-    
-    return {
-        readiness_score: {
-            overall: overallScore,
-            breakdown: {
-                account_stakeholder: s1Score,
-                order_form_scope: s2Score,
-                template_readiness: s3Score,
-                migration_readiness: s4Score,
-                integration_readiness: s5Score,
-                business_process: s6Score,
-                security_compliance: s7Score
-            }
-        },
-        status_label: statusLabel,
-        status_description: statusDescription,
-        rationales: rationales
-    };
-}
-
-/**
- * Calculate complete readiness assessment using deterministic scoring + Gemini AI for insights
- * Deterministic scoring provides explainable, consistent scores
- * Gemini AI generates insights, red flags, action items, and implementation plan
+ * Calculate complete readiness assessment using Gemini AI
+ * This replaces all manual calculations with AI-powered analysis
  */
 async function calculateReadinessWithGemini(intake_responses) {
     if (!geminiModel) {
         throw new Error('Gemini model not available');
     }
 
-    // First, calculate deterministic scores
-    const deterministicResult = calculateDeterministicReadinessScore(intake_responses);
-    const readinessScore = deterministicResult.readiness_score;
-    const statusLabel = deterministicResult.status_label;
-    const statusDescription = deterministicResult.status_description;
-    const rationales = deterministicResult.rationales;
-
-    // Calculate timeline confidence based on rules
-    const overallScore = readinessScore.overall;
-    const hasHighSeverityRedFlags = false; // Will be determined by Gemini
-    let timelineConfidence = 'medium';
-    if (overallScore >= 85 && !hasHighSeverityRedFlags) {
-        timelineConfidence = 'high';
-    } else if (overallScore >= 70 && !hasHighSeverityRedFlags) {
-        timelineConfidence = 'medium';
-    } else {
-        timelineConfidence = 'low';
-    }
-
-    // Get current date for deadline calculations
-    const today = new Date();
-    const assessmentDate = today.toISOString().split('T')[0];
-    
-    // Helper function to get date N days from now
-    function getDateDaysFromNow(days) {
-        const date = new Date(today);
-        date.setDate(date.getDate() + days);
-        return date.toISOString().split('T')[0];
-    }
-
-    const prompt = `You are an expert implementation consultant for SpotDraft, a contract lifecycle management (CLM) platform. Your task is to analyze a comprehensive implementation readiness assessment and generate insights, identify risks, and create an implementation plan.
+    const prompt = `You are an expert implementation consultant for SpotDraft, a contract lifecycle management (CLM) platform. Your task is to analyze a comprehensive implementation readiness assessment and calculate readiness scores, identify risks, and create an implementation plan.
 
 ## REQUEST PAYLOAD (Input Data):
 ${JSON.stringify(intake_responses, null, 2)}
 
-## DETERMINISTIC SCORES (Already Calculated):
-The readiness scores have been calculated using deterministic rules. Use these scores to inform your analysis:
+## CALCULATION INSTRUCTIONS:
 
-${JSON.stringify({
-    overall_score: readinessScore.overall,
-    section_scores: readinessScore.breakdown,
-    status: statusLabel,
-    status_description: statusDescription,
-    scoring_rationales: rationales
-}, null, 2)}
+### 1. READINESS SCORE CALCULATION
+Calculate readiness scores for 7 sections (each out of 100 points), then calculate an overall weighted score:
 
-## YOUR TASKS:
+**Section 1: Account & Stakeholder (Weight: 15%)**
+- Organization name provided: +20 points
+- Primary POC complete (name, role, email, timezone): +20 points
+- Legal POC complete (name, role, email, timezone): +15 points
+- Technical POC complete (if integrations required): +10 points
+- Availability specified: +10 points
+- Communication channels selected: +10 points
+- Expected go-live date provided: +15 points
+- Max: 100 points
 
-### 1. RED FLAGS IDENTIFICATION
-Identify critical issues that could block or delay implementation. Base your analysis on the provided scores and input data. For each red flag, provide:
+**Section 2: Order Form Scope (Weight: 15%)**
+- Purchased modules identified: +30 points (10 per module: Template Setup, Migration, Integrations)
+- Template count specified (if Template Setup module): +15 points
+- Migration contract count specified (if Migration module): +15 points
+- Migration file formats specified: +10 points
+- Additional add-ons mentioned: +10 points
+- Max: 100 points
+
+**Section 3: Template Readiness (Weight: 20%)**
+- Templates finalized (Yes: +30, In review: +20, No: +0)
+- Template formats specified: +15 points
+- Conditional logic complexity (None: +15, Simple: +10, Moderate: +5, Complex: +0)
+- Dynamic rendering (No: +15, Yes-Simple: +10, Yes-Moderate: +5, Yes-Complex: +0)
+- No clause-level changes needed: +10 points
+- Approval matrices exist: +10 points
+- Template count specified: +10 points
+- Max: 100 points
+
+**Section 4: Migration Readiness (Weight: 15%)**
+- Contract count specified: +20 points
+- Contract types listed: +15 points
+- Structured naming (Yes-100%: +25, Partial: +15, None: +0)
+- Storage location specified: +15 points
+- Contract formats specified: +10 points
+- Existing metadata (Yes-fully: +15, Yes-partially: +10, No: +0)
+- Migration priority specified: +5 points
+- Max: 100 points
+
+**Section 5: Integration Readiness (Weight: 15%)**
+- Systems to integrate specified: +25 points (5 per system)
+- Admin access (Yes-all: +25, Yes-some: +15, No: +0)
+- Security approval status (No: +20, Not sure: +10, Yes: +5)
+- API/Webhook access available: +15 points
+- Decision maker identified: +10 points
+- Integration outcomes specified: +5 points
+- Max: 100 points
+
+**Section 6: Business Process (Weight: 10%)**
+- Approval workflow (Yes-documented: +30, Yes-informal: +20, No: +0)
+- Contracts per month specified: +15 points
+- Contract generators identified: +15 points
+- Bottlenecks described: +15 points
+- Phase 1 must-haves specified: +15 points
+- Workflow details provided (if workflow exists): +10 points
+- Max: 100 points
+
+**Section 7: Security & Compliance (Weight: 10%)**
+- Security review (Completed: +30, No: +20, Yes: +10)
+- Infosec approvals (No: +20, Not sure: +10, Yes: +5)
+- Data residency (No: +20, Not sure: +10, Yes: +5)
+- Custom SSO (No: +15, Yes: +10)
+- Security reviews specified (if review needed): +10 points
+- Max: 100 points
+
+**Overall Score Calculation:**
+Multiply each section score by its weight, then sum:
+Overall = (Section1 × 0.15) + (Section2 × 0.15) + (Section3 × 0.20) + (Section4 × 0.15) + (Section5 × 0.15) + (Section6 × 0.10) + (Section7 × 0.10)
+Round to nearest integer.
+
+### 2. STATUS LABEL & DESCRIPTION
+Based on overall score:
+- 80-100: "Ready to Proceed" - "Your organization is well-prepared for implementation. Minor items may need attention, but you're ready to move forward."
+- 60-79: "Ready with Minor Blockers" - "Your organization is well-prepared for implementation. A few items need attention before go-live."
+- 40-59: "Needs Preparation" - "Some preparation is needed before implementation can begin. Address the identified blockers first."
+- 0-39: "Significant Preparation Required" - "Significant preparation is required before implementation. Please address the critical blockers identified."
+
+### 3. RED FLAGS IDENTIFICATION
+Identify critical issues that could block or delay implementation. For each red flag, provide:
 - section: Which section it relates to
 - issue: Brief description of the problem
 - impact: How this affects the timeline/implementation
 - severity: "high", "medium", or "low"
 
-Focus on issues that:
-- Are indicated by low section scores
-- Are mentioned in the input data but not properly addressed
-- Could cause delays or blockers
-- Require immediate attention
-
 Examples:
-- Security review pending but not specified (if Section 7 score is low)
-- Low ratio of finalized templates to total templates (if Section 3 score is low)
-- No admin access for required integrations (if Section 5 score is low)
-- Large migration volume with no structured naming (if Section 4 score is low)
-- Missing critical POC information (if Section 1 score is low)
-- Implementation start date in the past or unrealistic timeline
-- No merged templates strategy for similar contract types
+- Security review pending but not specified
+- Templates not finalized
+- No admin access for required integrations
+- Large migration volume with no structured naming
+- Missing critical POC information
 
-### 2. ACTION ITEMS
-Create actionable tasks for both customer and SpotDraft teams based on the scores and identified issues. For each item:
+### 4. ACTION ITEMS
+Create actionable tasks for both customer and SpotDraft teams. For each item:
 - task: Specific action to take
-- section: Related section name (e.g., "Account & Stakeholders", "Template Readiness")
-- priority: "high", "medium", or "low" (based on severity and score impact)
-- deadline: Suggested date (YYYY-MM-DD format)
-  - High priority → ${getDateDaysFromNow(7)} (7 days from assessment)
-  - Medium priority → ${getDateDaysFromNow(14)} (14 days from assessment)
-  - Low priority → ${getDateDaysFromNow(28)} (28 days from assessment)
-- owner: Who should handle it ("Customer" or "SpotDraft")
+- section: Related section
+- priority: "high", "medium", or "low"
+- deadline: Suggested date (YYYY-MM-DD format, 1-4 weeks from today)
+- owner: Who should handle it
 
-### 3. IMPLEMENTATION PLAN
-Create a comprehensive, score-driven phased implementation plan. Use the section scores to determine readiness, timeline, and phase structure.
+### 5. IMPLEMENTATION PLAN
+Create a phased implementation plan with:
+- recommended_go_live: Target date (YYYY-MM-DD, typically 8-12 weeks from today)
+- timeline_adjusted: true/false based on blockers
+- adjustment_reason: Why timeline was adjusted (if applicable)
+- phases: Array of implementation phases, each with:
+  - phase: Phase number (1, 2, 3, etc.)
+  - name: Phase name
+  - duration: Time estimate (e.g., "Week 1-2")
+  - activities: Array of specific activities
+  - dependencies: What must be completed first
+  - status: "Ready", "Partially ready", "Blocked", or "Scheduled"
 
-**Base Timeline Calculation:**
-- Start with 8-12 weeks from ${assessmentDate} as baseline
-- Adjust based on section scores:
-  - If overall score ≥ 85: 8-10 weeks (optimistic timeline)
-  - If overall score 70-84: 10-12 weeks (standard timeline)
-  - If overall score 50-69: 12-16 weeks (extended timeline for preparation)
-  - If overall score < 50: 16-20 weeks (significant preparation needed)
-
-**Timeline Adjustments:**
-- Add 2-4 weeks if Section 3 (Template Readiness) score < 60
-- Add 2-3 weeks if Section 4 (Migration Readiness) score < 60
-- Add 3-5 weeks if Section 5 (Integration Readiness) score < 60
-- Add 1-2 weeks if Section 7 (Security & Compliance) score < 50
-- Add 1 week for each high-severity red flag
-
-**Phase Structure (Create 4-6 phases):**
-1. **Phase 1: Discovery & Setup** (Week 1-2)
-   - Kickoff meetings, stakeholder alignment
-   - System access and permissions setup
-   - Project plan finalization
-   - Status: Based on Section 1 score (Account & Stakeholders)
-     - Score ≥ 80: "Ready"
-     - Score 60-79: "Partially ready"
-     - Score < 60: "Blocked"
-
-2. **Phase 2: Template Configuration** (Week 2-5)
-   - Template design and configuration
-   - Conditional logic setup
-   - Approval matrix configuration
-   - Status: Based on Section 3 score (Template Readiness)
-     - Score ≥ 80: "Ready"
-     - Score 60-79: "Partially ready" (may need template finalization first)
-     - Score < 60: "Blocked" (templates need to be finalized)
-
-3. **Phase 3: Integration Setup** (Week 3-6, parallel with Phase 2 if possible)
-   - System integrations configuration
-   - API/webhook setup
-   - Security approvals
-   - Status: Based on Section 5 score (Integration Readiness)
-     - Score ≥ 80: "Ready"
-     - Score 60-79: "Partially ready" (may need security approvals)
-     - Score < 60: "Blocked" (technical access or approvals missing)
-
-4. **Phase 4: Migration Preparation** (Week 4-7)
-   - Data mapping and validation
-   - Migration scripts/tools setup
-   - Test migration runs
-   - Status: Based on Section 4 score (Migration Readiness)
-     - Score ≥ 80: "Ready"
-     - Score 60-79: "Partially ready" (may need data cleanup)
-     - Score < 60: "Blocked" (data structure issues)
-
-5. **Phase 5: Testing & Training** (Week 7-10)
-   - User acceptance testing
-   - Training sessions
-   - Process documentation
-   - Status: Based on Section 6 score (Business Process)
-     - Score ≥ 80: "Ready"
-     - Score 60-79: "Partially ready"
-     - Score < 60: "Blocked" (workflow not defined)
-
-6. **Phase 6: Go-Live & Support** (Week 10-12)
-   - Production deployment
-   - Go-live support
-   - Post-launch optimization
-   - Status: "Scheduled" (depends on all previous phases)
-
-**For each phase, provide:**
-- phase: Phase number (1, 2, 3, etc.)
-- name: Descriptive phase name
-- duration: Specific week range (e.g., "Week 1-2", "Week 3-5")
-- activities: Array of 5-8 specific, actionable activities for this phase
-- dependencies: What must be completed first (null if no dependencies, or list specific phases/activities)
-- status: "Ready", "Partially ready", "Blocked", or "Scheduled" (based on relevant section scores and red flags)
-
-**Implementation Plan JSON Structure:**
-{
-  "recommended_go_live": "<YYYY-MM-DD>",
-  "timeline_adjusted": <boolean>,
-  "adjustment_reason": "<string or null>",
-  "phases": [
-    {
-      "phase": <integer>,
-      "name": "<string>",
-      "duration": "<string>",
-      "activities": ["<string>", ...],
-      "dependencies": "<string or null>",
-      "status": "<Ready|Partially ready|Blocked|Scheduled>"
-    }
-  ]
-}
-
-### 4. AI INSIGHTS
-Provide strategic insights based on the scores and input data:
-- key_strengths: 2-3 main strengths (focus on sections with high scores)
-- critical_concerns: 2-3 main concerns (focus on sections with low scores or identified issues)
-- recommendations: 2-3 priority recommendations (actionable steps to improve readiness)
-- risk_assessment: Brief risk assessment (1-2 sentences) based on overall score and red flags
-- timeline_confidence: "${timelineConfidence}" (already calculated based on overall score: ${overallScore >= 85 ? 'high' : overallScore >= 70 ? 'medium' : 'low'})
+### 6. AI INSIGHTS
+Provide strategic insights:
+- key_strengths: 2-3 main strengths
+- critical_concerns: 2-3 main concerns
+- recommendations: 2-3 priority recommendations
+- risk_assessment: Brief risk assessment (1-2 sentences)
+- timeline_confidence: "high", "medium", or "low"
 
 ## RESPONSE PAYLOAD (Required JSON Format):
 Return ONLY valid JSON in this exact structure (no markdown, no explanations):
-NOTE: Do NOT include readiness_score, status_label, or status_description - these are already calculated deterministically.
 
 {
+    "readiness_score": {
+        "overall": <integer 0-100>,
+        "breakdown": {
+            "account_stakeholder": <integer 0-100>,
+            "order_form_scope": <integer 0-100>,
+            "template_readiness": <integer 0-100>,
+            "migration_readiness": <integer 0-100>,
+            "integration_readiness": <integer 0-100>,
+            "business_process": <integer 0-100>,
+            "security_compliance": <integer 0-100>
+        }
+    },
+    "status_label": "<string>",
+    "status_description": "<string>",
     "red_flags": [
         {
             "section": "<string>",
@@ -1679,19 +2066,19 @@ IMPORTANT: Return ONLY the JSON object, no additional text, no markdown code blo
         
         const assessmentData = JSON.parse(jsonText);
         
-        // Merge deterministic scores with Gemini-generated insights
+        // Validate required fields
+        if (!assessmentData.readiness_score || !assessmentData.readiness_score.overall) {
+            throw new Error('Invalid response: missing readiness_score');
+        }
+        
         return {
-            readiness_score: readinessScore, // Use deterministic scores
-            status_label: statusLabel, // Use deterministic status
-            status_description: statusDescription, // Use deterministic description
-            rationales: rationales, // Include scoring rationales for explainability
+            readiness_score: assessmentData.readiness_score,
+            status_label: assessmentData.status_label,
+            status_description: assessmentData.status_description,
             red_flags: assessmentData.red_flags || [],
             action_items: assessmentData.action_items || { customer: [], spotdraft: [] },
             implementation_plan: assessmentData.implementation_plan,
-            ai_insights: {
-                ...assessmentData.ai_insights,
-                timeline_confidence: timelineConfidence // Use deterministic timeline confidence
-            },
+            ai_insights: assessmentData.ai_insights,
             gemini_request: prompt,
             gemini_response: text
         };
@@ -1780,3 +2167,4 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
