@@ -1658,11 +1658,6 @@
                             </svg>
                         </button>
                     </div>
-                    <div style="margin-top: var(--space-md); text-align: center;">
-                        <button class="btn btn-test" onclick="fillProspectTestData()" style="background: var(--warning); color: var(--white); border: none; padding: var(--space-sm) var(--space-md); font-size: 0.875rem;">
-                            🧪 Fill Test Data (Testing Only)
-                        </button>
-                    </div>
                 </div>
             </div>
             
@@ -1942,11 +1937,6 @@
                             </svg>
                         </button>
                     </div>
-                    <div style="margin-top: var(--space-md); text-align: center;">
-                        <button class="btn btn-test" onclick="fillProspectTestData()" style="background: var(--warning); color: var(--white); border: none; padding: var(--space-sm) var(--space-md); font-size: 0.875rem;">
-                            🧪 Fill Test Data (Testing Only)
-                        </button>
-                    </div>
                 </div>
             </div>
             
@@ -2020,11 +2010,6 @@
                                 <line x1="5" y1="12" x2="19" y2="12"/>
                                 <polyline points="12 5 19 12 12 19"/>
                             </svg>
-                        </button>
-                    </div>
-                    <div style="margin-top: var(--space-md); text-align: center;">
-                        <button class="btn btn-test" onclick="fillCustomerTestData()" style="background: var(--warning); color: var(--white); border: none; padding: var(--space-sm) var(--space-md); font-size: 0.875rem;">
-                            🧪 Fill Test Data (Testing Only)
                         </button>
                     </div>
                 </div>
@@ -2432,11 +2417,6 @@
                             </svg>
                         </button>
                     </div>
-                    <div style="margin-top: var(--space-md); text-align: center;">
-                        <button class="btn btn-test" onclick="fillCustomerTestData()" style="background: var(--warning); color: var(--white); border: none; padding: var(--space-sm) var(--space-md); font-size: 0.875rem;">
-                            🧪 Fill Test Data (Testing Only)
-                        </button>
-                    </div>
                 </div>
             </div>
             
@@ -2522,11 +2502,6 @@
                                 <line x1="5" y1="12" x2="19" y2="12"/>
                                 <polyline points="12 5 19 12 12 19"/>
                             </svg>
-                        </button>
-                    </div>
-                    <div style="margin-top: var(--space-md); text-align: center;">
-                        <button class="btn btn-test" onclick="fillIMTestData()" style="background: var(--warning); color: var(--white); border: none; padding: var(--space-sm) var(--space-md); font-size: 0.875rem;">
-                            🧪 Fill Test Data (Testing Only)
                         </button>
                     </div>
                 </div>
@@ -2836,11 +2811,6 @@
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="20 6 9 17 4 12"/>
                             </svg>
-                        </button>
-                    </div>
-                    <div style="margin-top: var(--space-md); text-align: center;">
-                        <button class="btn btn-test" onclick="fillIMTestData()" style="background: var(--warning); color: var(--white); border: none; padding: var(--space-sm) var(--space-md); font-size: 0.875rem;">
-                            🧪 Fill Test Data (Testing Only)
                         </button>
                     </div>
                 </div>
@@ -4886,336 +4856,6 @@
                     past_clm_experience: getValue('prospectPastCLMExperience')
                 }
             };
-        }
-        
-        // ============================================
-        // TEST DATA FUNCTIONS (FOR TESTING ONLY)
-        // ============================================
-        function fillProspectTestData() {
-            try {
-                console.log('🧪 fillProspectTestData called');
-                
-                // Set user type if not set
-                if (!formData.userType) {
-                    formData.userType = 'prospect';
-                }
-                
-                // Make all prospect sections visible temporarily to fill them
-                for (let i = 1; i <= 4; i++) {
-                    const section = document.getElementById(`prospectSection${i}`);
-                    if (section) {
-                        section.style.display = 'block';
-                    }
-                }
-                
-                // Fill Section 1
-                const companyName = document.getElementById('prospectCompanyName');
-                if (companyName) companyName.value = 'Test Company Inc.';
-                
-                const industry = document.getElementById('prospectIndustry');
-                if (industry) industry.value = 'Technology';
-                
-                const userCount = document.getElementById('prospectUserCount');
-                if (userCount) userCount.value = '10-50';
-                
-                // Fill Section 2
-                const modulesToSelect = ['Repository', 'Approvals'];
-                modulesToSelect.forEach(value => {
-                    const chip = document.querySelector(`#prospectModules .chip[data-value="${value}"]`);
-                    if (chip && !chip.classList.contains('selected')) {
-                        chip.click();
-                    }
-                });
-                
-                const assistedWorkflows = document.getElementById('prospectAssistedWorkflows');
-                if (assistedWorkflows) assistedWorkflows.value = 'Yes';
-                
-                const contractTemplates = document.getElementById('prospectContractTemplates');
-                if (contractTemplates) contractTemplates.value = 'Yes, all available';
-                
-                const assistedMigration = document.getElementById('prospectAssistedMigration');
-                if (assistedMigration) assistedMigration.value = 'Yes';
-                
-                const legacyContracts = document.getElementById('prospectLegacyContracts');
-                if (legacyContracts) legacyContracts.value = 'Yes, some available';
-                
-                // Fill Section 3
-                const systemsToSelect = ['CRM', 'ERP'];
-                systemsToSelect.forEach(value => {
-                    const chip = document.querySelector(`#prospectSystems .chip[data-value="${value}"]`);
-                    if (chip && !chip.classList.contains('selected')) {
-                        chip.click();
-                    }
-                });
-                
-                const apiAccess = document.getElementById('prospectApiAccess');
-                if (apiAccess) apiAccess.value = 'Yes';
-                
-                // Fill Section 4
-                const goLiveTimeline = document.getElementById('prospectGoLiveTimeline');
-                if (goLiveTimeline) goLiveTimeline.value = '3-6 months';
-                
-                const biggestConcern = document.getElementById('prospectBiggestConcern');
-                if (biggestConcern) biggestConcern.value = 'Integration complexity and timeline concerns';
-                
-                // Fill Section 5
-                const internalBottlenecks = document.getElementById('prospectInternalBottlenecks');
-                if (internalBottlenecks) internalBottlenecks.value = 'Limited IT resources and budget constraints';
-                
-                const complianceDeadlines = document.getElementById('prospectComplianceDeadlines');
-                if (complianceDeadlines) complianceDeadlines.value = 'Q2 2024 compliance deadline';
-                
-                const pastCLMExperience = document.getElementById('prospectPastCLMExperience');
-                if (pastCLMExperience) pastCLMExperience.value = 'Previous experience with DocuSign CLM';
-                
-                // Save all sections
-                saveProspectSection(1);
-                saveProspectSection(2);
-                saveProspectSection(3);
-                saveProspectSection(4);
-                saveProspectSection(5);
-                
-                // Save to LocalStorage
-                autoSave();
-                
-                console.log('✅ Test data filled, submitting in 500ms...');
-                
-                // Automatically submit the assessment
-                setTimeout(() => {
-                    submitProspectAssessment();
-                }, 500);
-            } catch (error) {
-                console.error('❌ Error filling prospect test data:', error);
-                alert('Error filling test data: ' + error.message + '\n\nCheck console for details.');
-            }
-        }
-        
-        function fillCustomerTestData() {
-            try {
-                console.log('🧪 fillCustomerTestData called');
-                
-                // Set user type if not set
-                if (!formData.userType) {
-                    formData.userType = 'customer';
-                }
-                
-                // Make all customer sections visible temporarily to fill them
-                for (let i = 1; i <= 7; i++) {
-                    const section = document.getElementById(`customerSection${i}`);
-                    if (section) {
-                        section.style.display = 'block';
-                    }
-                }
-                
-                // Fill Section 1
-                const primaryName = document.getElementById('customerPrimaryContactName');
-                if (primaryName) primaryName.value = 'John Doe';
-                
-                const primaryRole = document.getElementById('customerPrimaryContactRole');
-                if (primaryRole) primaryRole.value = 'Legal Operations Manager';
-                
-                const templateApprover = document.getElementById('customerTemplateApprover');
-                if (templateApprover) templateApprover.value = 'Jane Smith - Legal Director';
-                
-                const migrationApprover = document.getElementById('customerMigrationApprover');
-                if (migrationApprover) migrationApprover.value = 'Mike Johnson - IT Manager';
-                
-                const integrationApprover = document.getElementById('customerIntegrationApprover');
-                if (integrationApprover) integrationApprover.value = 'Sarah Williams - Technical Lead';
-                
-                // Fill Section 2
-                const modules = ['Repository', 'Approvals', 'Assisted Workflows'];
-                modules.forEach(value => {
-                    const chip = document.querySelector(`#customerPurchasedModules .chip[data-value="${value}"]`);
-                    if (chip && !chip.classList.contains('selected')) chip.click();
-                });
-                
-                // Fill Section 3
-                const migrationNeeded = document.getElementById('customerMigrationNeeded');
-                if (migrationNeeded) {
-                    migrationNeeded.value = 'Yes';
-                    toggleCustomerMigrationQuestions();
-                }
-                
-                const migrationCount = document.getElementById('customerMigrationContractCount');
-                if (migrationCount) migrationCount.value = '500-2000';
-                
-                const contractStorage = document.getElementById('customerContractStorage');
-                if (contractStorage) contractStorage.value = 'Drive';
-                
-                const dataCleanliness = document.getElementById('customerDataCleanliness');
-                if (dataCleanliness) dataCleanliness.value = 'Mixed';
-                
-                const formats = ['PDF', 'DOC'];
-                formats.forEach(value => {
-                    const chip = document.querySelector(`#customerDataFormat .chip[data-value="${value}"]`);
-                    if (chip && !chip.classList.contains('selected')) chip.click();
-                });
-                
-                // Fill Section 4
-                const integrations = ['CRM', 'Salesforce'];
-                integrations.forEach(value => {
-                    const chip = document.querySelector(`#customerIntegrationSystems .chip[data-value="${value}"]`);
-                    if (chip && !chip.classList.contains('selected')) chip.click();
-                });
-                
-                const apiAccess = document.getElementById('customerApiAccess');
-                if (apiAccess) apiAccess.value = 'Yes';
-                
-                const webhooks = document.getElementById('customerWebhooksSupport');
-                if (webhooks) webhooks.value = 'Yes';
-                
-                // Fill Section 5
-                const approvalComplexity = document.getElementById('customerApprovalComplexity');
-                if (approvalComplexity) approvalComplexity.value = 'Medium (3-5 steps)';
-                
-                const signers = document.getElementById('customerAgreementSigners');
-                if (signers) signers.value = 'Internal plus external';
-                
-                // Fill Section 6
-                const sso = document.getElementById('customerSSORequired');
-                if (sso) sso.value = 'Yes';
-                
-                const securityNeeds = document.getElementById('customerSecurityNeeds');
-                if (securityNeeds) securityNeeds.value = 'No';
-                
-                const dpaStatus = document.getElementById('customerDPAStatus');
-                if (dpaStatus) dpaStatus.value = 'Signed';
-                
-                // Section 7 - No file uploads for test data
-                
-                // Save all sections
-                saveCustomerSection(1);
-                saveCustomerSection(2);
-                saveCustomerSection(3);
-                saveCustomerSection(4);
-                saveCustomerSection(5);
-                saveCustomerSection(6);
-                saveCustomerSection(7);
-                
-                // Save to LocalStorage
-                autoSave();
-                
-                console.log('✅ Test data filled, submitting in 500ms...');
-                
-                // Automatically submit the assessment
-                setTimeout(() => {
-                    submitCustomerAssessment();
-                }, 500);
-            } catch (error) {
-                console.error('❌ Error filling customer test data:', error);
-                alert('Error filling test data: ' + error.message + '\n\nCheck console for details.');
-            }
-        }
-        
-        function fillIMTestData() {
-            try {
-                console.log('🧪 fillIMTestData called');
-                
-                // Set user type if not set
-                if (!formData.userType) {
-                    formData.userType = 'implementation_manager';
-                }
-                
-                // Make all IM sections visible temporarily to fill them (skip section 5)
-                for (let i = 1; i <= 6; i++) {
-                    if (i === 5) continue; // Skip section 5 (removed)
-                    const section = document.getElementById(`imSection${i}`);
-                    if (section) {
-                        section.style.display = 'block';
-                    }
-                }
-                
-                // Fill Section 1
-                const customerName = document.getElementById('imCustomerName');
-                if (customerName) customerName.value = 'Acme Corporation';
-                
-                const package = document.getElementById('imPackage');
-                if (package) package.value = 'Enterprise';
-                
-                const complexity = document.getElementById('imComplexity');
-                if (complexity) complexity.value = 'High';
-                
-                const risks = ['Low responsiveness', 'Lack of template readiness'];
-                risks.forEach(value => {
-                    const chip = document.querySelector(`#imKnownRisks .chip[data-value="${value}"]`);
-                    if (chip && !chip.classList.contains('selected')) chip.click();
-                });
-                
-                // Fill Section 2
-                const templateCount = document.getElementById('imTemplateCount');
-                if (templateCount) templateCount.value = '15+';
-                
-                const workflowComplexity = document.getElementById('imWorkflowComplexity');
-                if (workflowComplexity) workflowComplexity.value = 'Complex (5+ flows)';
-                
-                const customDev = document.getElementById('imCustomDevelopment');
-                if (customDev) {
-                    customDev.value = 'Yes';
-                    toggleIMCustomDevelopment();
-                }
-                
-                const customDetails = document.getElementById('imCustomDevelopmentDetails');
-                if (customDetails) customDetails.value = 'Custom approval workflows and integration with legacy systems';
-                
-                // Fill Section 3
-                const csvMigration = document.getElementById('imMigrationEngineeringSupport');
-                if (csvMigration) csvMigration.value = 'Yes';
-                
-                const assistedMigration = document.getElementById('imAssistedMigration');
-                if (assistedMigration) assistedMigration.value = 'Yes';
-                
-                const metadataType = document.getElementById('imMetadataType');
-                if (metadataType) metadataType.value = 'Standard';
-                
-                const migrationVolume = document.getElementById('imMigrationVolume');
-                if (migrationVolume) migrationVolume.value = 'Large';
-                
-                // Fill Section 4
-                const integrationTypes = ['CRM (SFDC, HubSpot, Zoho)', 'Custom API'];
-                integrationTypes.forEach(value => {
-                    const chip = document.querySelector(`#imIntegrationTypes .chip[data-value="${value}"]`);
-                    if (chip && !chip.classList.contains('selected')) chip.click();
-                });
-                
-                const integrationEffort = document.getElementById('imIntegrationEngineeringEffort');
-                if (integrationEffort) integrationEffort.value = 'Yes';
-                
-                const uatRounds = document.getElementById('imIntegrationUATRounds');
-                if (uatRounds) uatRounds.value = 'Yes';
-                
-                const preKnownBlockers = document.getElementById('imPreKnownBlockers');
-                if (preKnownBlockers) preKnownBlockers.value = 'API access delays and security review pending';
-                
-                // Section 5 - Removed per user request
-                
-                // Fill Section 6
-                const goLive = document.getElementById('imGoLiveExpectation');
-                if (goLive) goLive.value = '8-12 weeks';
-                
-                const blockers = document.getElementById('imKnownBlockers');
-                if (blockers) blockers.value = 'Pending security review and API access approval';
-                
-                // Save all sections
-                saveIMSection(1);
-                saveIMSection(2);
-                saveIMSection(3);
-                saveIMSection(4);
-                saveIMSection(6);
-                
-                // Save to LocalStorage
-                autoSave();
-                
-                console.log('✅ Test data filled, submitting in 500ms...');
-                
-                // Automatically submit the assessment
-                setTimeout(() => {
-                    submitIMAssessment();
-                }, 500);
-            } catch (error) {
-                console.error('❌ Error filling IM test data:', error);
-                alert('Error filling test data: ' + error.message + '\n\nCheck console for details.');
-            }
         }
         
         // ============================================
