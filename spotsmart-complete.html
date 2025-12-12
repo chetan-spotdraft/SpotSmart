@@ -1955,6 +1955,20 @@
                             </label>
                             <input type="text" class="form-input" id="prospectMigrationDataFormatOther" placeholder="Enter data format">
                         </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Type of Metadata <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="prospectMetadataType" required>
+                                <option value="">Select</option>
+                                <option value="Standard">Standard</option>
+                                <option value="Custom">Custom</option>
+                            </select>
+                            <div class="form-hint" style="margin-top: var(--space-sm);">
+                                <a href="https://docs.google.com/document/d/1QBB6IgfQxKCEkyjfYITrixCuxjtnFQtIxxnO8XUjR_g/edit?pli=1&tab=t.0" target="_blank" style="color: var(--primary); text-decoration: underline;">Standard Metadata List</a>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="btn-group">
@@ -2456,6 +2470,9 @@
                                     <option value="Mixed">Mixed</option>
                                     <option value="Messy">Messy</option>
                                 </select>
+                                <div class="form-hint" style="margin-top: var(--space-sm);">
+                                    Data Cleanliness refers to the quality and organization of your contract data, including completeness, accuracy, consistency, and proper formatting of metadata and fields.
+                                </div>
                             </div>
                             
                             <div class="form-group">
@@ -2468,6 +2485,20 @@
                                     <div class="chip" data-value="Email exports" onclick="toggleChip(this)">Email exports</div>
                                 </div>
                                 <div class="error-message" id="customerDataFormatError">Please select at least one format</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Type of Metadata <span class="required">*</span>
+                                </label>
+                                <select class="form-select" id="customerMetadataType" required>
+                                    <option value="">Select</option>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Custom">Custom</option>
+                                </select>
+                                <div class="form-hint" style="margin-top: var(--space-sm);">
+                                    Note: Refer to the <a href="https://docs.google.com/document/d/1QBB6IgfQxKCEkyjfYITrixCuxjtnFQtIxxnO8XUjR_g/edit?pli=1&tab=t.0" target="_blank" style="color: var(--primary); text-decoration: underline;">Standard Metadata List</a> here.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2605,6 +2636,9 @@
                                 <option value="Medium (3-5 steps)">Medium (3–5 steps)</option>
                                 <option value="Complex (5+ steps)">Complex (5+ steps)</option>
                             </select>
+                            <div class="form-hint" style="margin-top: var(--space-sm);">
+                                Approval Workflows refer to the process of getting contracts reviewed and approved by different stakeholders (e.g., Legal, Finance, Management) before execution. This includes the number of steps, stakeholders involved, and complexity of the review process.
+                            </div>
                         </div>
                         
                         <div class="form-group">
@@ -2813,7 +2847,7 @@
                         <label class="form-label">
                             Known Risks since Day 0
                         </label>
-                        <div class="form-hint" style="margin-bottom: var(--space-md);">Select all that apply</div>
+                        <div class="form-hint" style="margin-bottom: var(--space-md);">Select all that apply. If no risks, leave unselected.</div>
                         <div class="chip-group" id="imKnownRisks">
                             <div class="chip" data-value="Low responsiveness" onclick="toggleChip(this)">Low responsiveness</div>
                             <div class="chip" data-value="Lack of template readiness" onclick="toggleChip(this)">Lack of template readiness</div>
@@ -2822,7 +2856,6 @@
                             <div class="chip" data-value="Custom workflows expected" onclick="toggleChip(this)">Custom workflows expected</div>
                             <div class="chip" data-value="Integration feasibility unclear" onclick="toggleChip(this)">Integration feasibility unclear</div>
                         </div>
-                        <div class="form-hint" style="margin-top: var(--space-sm);">Optional - If no risks, leave unselected</div>
                     </div>
                     
                     <div class="btn-group">
@@ -2967,13 +3000,23 @@
                             <label class="form-label">
                                 Type of Metadata <span class="required">*</span>
                             </label>
-                            <select class="form-select" id="imMetadataType" required>
+                            <select class="form-select" id="imMetadataType" onchange="toggleIMMetadataCustom()" required>
                                 <option value="">Select</option>
                                 <option value="Standard">Standard</option>
                                 <option value="Custom">Custom</option>
                             </select>
                             <div class="form-hint" style="margin-top: var(--space-sm);">
-                                <a href="https://docs.google.com/document/d/1QBB6IgfQxKCEkyjfYITrixCuxjtnFQtIxxnO8XUjR_g/edit?pli=1&tab=t.0" target="_blank" style="color: var(--primary); text-decoration: underline;">Standard Metadata List</a>
+                                Note: Refer to the <a href="https://docs.google.com/document/d/1QBB6IgfQxKCEkyjfYITrixCuxjtnFQtIxxnO8XUjR_g/edit?pli=1&tab=t.0" target="_blank" style="color: var(--primary); text-decoration: underline;">Standard Metadata List</a> here.
+                            </div>
+                        </div>
+                        
+                        <div class="form-group" id="imMetadataCustomGroup" style="display: none; margin-top: var(--space-lg);">
+                            <label class="form-label">
+                                Custom Metadata Fields <span class="required">*</span>
+                            </label>
+                            <textarea class="form-textarea" id="imMetadataCustom" placeholder="Enter custom metadata fields (one per line or comma-separated)"></textarea>
+                            <div class="form-hint" style="margin-top: var(--space-sm);">
+                                Specify the custom metadata fields you need for your contracts.
                             </div>
                         </div>
                         
@@ -3073,7 +3116,7 @@
                             Pre-known Blockers
                         </label>
                         <textarea class="form-textarea" id="imPreKnownBlockers" placeholder="Describe any known blockers or challenges..."></textarea>
-                        <div class="form-hint">Optional - This helps identify potential risks early</div>
+                        <div class="form-hint">This helps identify potential risks early</div>
                     </div>
                     
                     <div class="btn-group">
@@ -3132,7 +3175,7 @@
                             Known Blockers
                         </label>
                         <textarea class="form-textarea" id="imKnownBlockers" placeholder="Describe any known blockers or delays..."></textarea>
-                        <div class="form-hint">Optional - This helps with timeline planning</div>
+                        <div class="form-hint">This helps with timeline planning</div>
                     </div>
                     
                     <div class="btn-group">
@@ -5203,6 +5246,15 @@
                         }
                     }
                 }
+                
+                // Type of Metadata
+                const metadataType = document.getElementById('prospectMetadataType');
+                if (!metadataType || !metadataType.value) {
+                    if (metadataType) metadataType.classList.add('error');
+                    isValid = false;
+                } else {
+                    metadataType.classList.remove('error');
+                }
             }
             
             if (section === 5) {
@@ -5306,7 +5358,8 @@
                     locationOther: location === 'Other' ? document.getElementById('prospectMigrationLocationOther')?.value || '' : '',
                     dataCleanliness: document.getElementById('prospectMigrationDataCleanliness')?.value || '',
                     dataFormat: dataFormats,
-                    dataFormatOther: hasOthersFormat ? document.getElementById('prospectMigrationDataFormatOther')?.value || '' : ''
+                    dataFormatOther: hasOthersFormat ? document.getElementById('prospectMigrationDataFormatOther')?.value || '' : '',
+                    metadataType: document.getElementById('prospectMetadataType')?.value || ''
                 };
             }
             
@@ -5372,7 +5425,8 @@
                     current_location_other: getValue('prospectMigrationLocationOther'),
                     data_cleanliness: getValue('prospectMigrationDataCleanliness'),
                     data_format: getSelectedChips('prospectMigrationDataFormat'),
-                    data_format_other: getValue('prospectMigrationDataFormatOther')
+                    data_format_other: getValue('prospectMigrationDataFormatOther'),
+                    type_of_metadata: getValue('prospectMetadataType')
                 },
                 prospect_section_5_systems_integrations: {
                     systems_used: getSelectedChips('prospectSystems'),
@@ -5793,6 +5847,15 @@
                         } else {
                             cleanliness.classList.remove('error');
                         }
+                        
+                        // Type of Metadata
+                        const metadataType = document.getElementById('customerMetadataType');
+                        if (!metadataType || !metadataType.value) {
+                            if (metadataType) metadataType.classList.add('error');
+                            isValid = false;
+                        } else {
+                            metadataType.classList.remove('error');
+                        }
                     }
                 }
             }
@@ -5937,7 +6000,8 @@
                     migrationContractCount: document.getElementById('customerMigrationContractCount').value,
                     contractStorage: storage,
                     contractStorageOther: storage === 'Other' ? document.getElementById('customerContractStorageOther')?.value || '' : '',
-                    dataCleanliness: document.getElementById('customerDataCleanliness').value
+                    dataCleanliness: document.getElementById('customerDataCleanliness').value,
+                    metadataType: document.getElementById('customerMetadataType')?.value || ''
                 };
             }
             
@@ -6012,7 +6076,8 @@
                     migration_contract_count: getValue('customerMigrationContractCount'),
                     contract_storage: getValue('customerContractStorage'),
                     contract_storage_other: getValue('customerContractStorageOther'),
-                    data_cleanliness: getValue('customerDataCleanliness')
+                    data_cleanliness: getValue('customerDataCleanliness'),
+                    type_of_metadata: getValue('customerMetadataType')
                 },
                 customer_section_5_integrations: {
                     integration_systems: getSelectedChips('customerIntegrationSystems'),
@@ -6356,6 +6421,16 @@
                     isValid = false;
                 } else {
                     metadataType.classList.remove('error');
+                    // If Custom is selected, validate the custom metadata field
+                    if (metadataType.value === 'Custom') {
+                        const customMetadata = document.getElementById('imMetadataCustom');
+                        if (!customMetadata || !customMetadata.value.trim()) {
+                            if (customMetadata) customMetadata.classList.add('error');
+                            isValid = false;
+                        } else {
+                            customMetadata.classList.remove('error');
+                        }
+                    }
                 }
                 
                 // Expected Volume of Migration
@@ -6444,6 +6519,7 @@
                     csvMigrationRequired: document.getElementById('imMigrationEngineeringSupport')?.value || '',
                     assistedMigration: document.getElementById('imAssistedMigration')?.value || '',
                     metadataType: document.getElementById('imMetadataType')?.value || '',
+                    metadataCustom: document.getElementById('imMetadataCustom')?.value || '',
                     migrationVolume: document.getElementById('imMigrationVolume')?.value || ''
                 };
             }
@@ -6489,6 +6565,7 @@
                     csv_migration_required: getValue('imMigrationEngineeringSupport'),
                     assisted_migration: getValue('imAssistedMigration'),
                     metadata_type: getValue('imMetadataType'),
+                    metadata_custom: getValue('imMetadataCustom'),
                     migration_volume: getValue('imMigrationVolume')
                 },
                 im_section_4_integrations: {
@@ -6870,6 +6947,19 @@
                 if (section) section.classList.add('visible');
             } else {
                 if (section) section.classList.remove('visible');
+            }
+        }
+        
+        function toggleIMMetadataCustom() {
+            const metadataType = document.getElementById('imMetadataType');
+            const customGroup = document.getElementById('imMetadataCustomGroup');
+            if (metadataType && customGroup) {
+                if (metadataType.value === 'Custom') {
+                    customGroup.style.display = 'block';
+                } else {
+                    customGroup.style.display = 'none';
+                    document.getElementById('imMetadataCustom').value = '';
+                }
             }
         }
         
