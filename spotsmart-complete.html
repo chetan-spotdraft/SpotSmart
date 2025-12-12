@@ -2372,6 +2372,13 @@
                                     <option value="No">No</option>
                                 </select>
                             </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Number of templates <span class="required">*</span>
+                                </label>
+                                <input type="number" class="form-input" id="customerNumberOfTemplates" placeholder="Enter number of templates" min="1" required>
+                            </div>
                         </div>
                     </div>
                     
@@ -5789,6 +5796,15 @@
                         } else {
                             computations.classList.remove('error');
                         }
+                        
+                        // Number of templates
+                        const numberOfTemplates = document.getElementById('customerNumberOfTemplates');
+                        if (!numberOfTemplates || !numberOfTemplates.value || parseInt(numberOfTemplates.value) < 1) {
+                            if (numberOfTemplates) numberOfTemplates.classList.add('error');
+                            isValid = false;
+                        } else {
+                            numberOfTemplates.classList.remove('error');
+                        }
                     }
                 }
             }
@@ -5989,7 +6005,8 @@
                     complexity: assistedTemplates === 'Yes' ? document.getElementById('customerTemplateComplexity')?.value || '' : '',
                     integrationsRequired: assistedTemplates === 'Yes' ? document.getElementById('customerTemplateIntegrationsRequired')?.value || '' : '',
                     conditionalOutputsRequired: assistedTemplates === 'Yes' ? document.getElementById('customerConditionalOutputsRequired')?.value || '' : '',
-                    computationsRequired: assistedTemplates === 'Yes' ? document.getElementById('customerComputationsRequired')?.value || '' : ''
+                    computationsRequired: assistedTemplates === 'Yes' ? document.getElementById('customerComputationsRequired')?.value || '' : '',
+                    numberOfTemplates: assistedTemplates === 'Yes' ? document.getElementById('customerNumberOfTemplates')?.value || '' : ''
                 };
             }
             
@@ -6067,7 +6084,8 @@
                     complexity: getValue('customerAssistedTemplates') === 'Yes' ? getValue('customerTemplateComplexity') : '',
                     integrations_required: getValue('customerAssistedTemplates') === 'Yes' ? getValue('customerTemplateIntegrationsRequired') : '',
                     conditional_outputs_required: getValue('customerAssistedTemplates') === 'Yes' ? getValue('customerConditionalOutputsRequired') : '',
-                    computations_required: getValue('customerAssistedTemplates') === 'Yes' ? getValue('customerComputationsRequired') : ''
+                    computations_required: getValue('customerAssistedTemplates') === 'Yes' ? getValue('customerComputationsRequired') : '',
+                    number_of_templates: getValue('customerAssistedTemplates') === 'Yes' ? getValue('customerNumberOfTemplates') : ''
                 },
                 customer_section_4_migration: {
                     migration_needed: getValue('customerMigrationNeeded'),
@@ -6856,10 +6874,12 @@
                     const integrations = document.getElementById('customerTemplateIntegrationsRequired');
                     const conditional = document.getElementById('customerConditionalOutputsRequired');
                     const computations = document.getElementById('customerComputationsRequired');
+                    const numberOfTemplates = document.getElementById('customerNumberOfTemplates');
                     if (complexity) complexity.required = true;
                     if (integrations) integrations.required = true;
                     if (conditional) conditional.required = true;
                     if (computations) computations.required = true;
+                    if (numberOfTemplates) numberOfTemplates.required = true;
                 } else {
                     templateSection.style.display = 'none';
                     // Clear required validation and values on template questions
@@ -6867,6 +6887,7 @@
                     const integrations = document.getElementById('customerTemplateIntegrationsRequired');
                     const conditional = document.getElementById('customerConditionalOutputsRequired');
                     const computations = document.getElementById('customerComputationsRequired');
+                    const numberOfTemplates = document.getElementById('customerNumberOfTemplates');
                     if (complexity) {
                         complexity.required = false;
                         complexity.value = '';
@@ -6882,6 +6903,10 @@
                     if (computations) {
                         computations.required = false;
                         computations.value = '';
+                    }
+                    if (numberOfTemplates) {
+                        numberOfTemplates.required = false;
+                        numberOfTemplates.value = '';
                     }
                 }
             }

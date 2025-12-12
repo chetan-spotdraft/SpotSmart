@@ -1546,12 +1546,15 @@ Use ONLY these questions from customer_section_2_purchased_scope:
 
 **Section 3: Templates (Weight: 15%)**
 Use ONLY these questions from customer_section_3_templates:
-- assisted_templates: "Yes" = +30 points, "No" = +20, Missing = +0
-- complexity: "Low" = +30, "Mid" = +20, "High" = +10, Missing = +0
-- integrations_required: "No" = +20, "Yes" = +15, Missing = +0
-- conditional_outputs_required: "No" = +10, "Yes" = +5, Missing = +0
-- computations_required: "No" = +10, "Yes" = +5, Missing = +0
-- Max: 100 points
+- assisted_templates: "Yes" = +25 points, "No" = +15, Missing = +0
+- If assisted_templates is "Yes":
+  - complexity: "Low" = +20, "Mid" = +15, "High" = +10, Missing = +0
+  - integrations_required: "No" = +15, "Yes" = +10, Missing = +0
+  - conditional_outputs_required: "No" = +10, "Yes" = +5, Missing = +0
+  - computations_required: "No" = +10, "Yes" = +5, Missing = +0
+  - number_of_templates: Provided (numeric value >= 1) = +10 points, Missing or invalid = +0
+- If assisted_templates is "No": Skip the conditional questions (they are hidden)
+- Max: 100 points (15 if assisted_templates = "No", 100 if "Yes" and all conditional questions answered)
 
 **Section 4: Migration (Weight: 13%)**
 Use ONLY these questions from customer_section_4_migration:
