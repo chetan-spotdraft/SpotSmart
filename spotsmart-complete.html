@@ -1642,6 +1642,20 @@
                         </div>
                     </div>
                     
+                    <div class="form-group" style="margin-top: var(--space-lg);">
+                        <label class="form-label">
+                            Primary POC <span class="required">*</span>
+                        </label>
+                        <input type="text" class="form-input" id="prospectPrimaryPOC" placeholder="Add name, role and email address" required>
+                    </div>
+                    
+                    <div class="form-group" id="prospectIndustryOtherGroup" style="display: none; margin-top: var(--space-lg);">
+                        <label class="form-label">
+                            Please specify industry <span class="required">*</span>
+                        </label>
+                        <input type="text" class="form-input" id="prospectIndustryOther" placeholder="Enter your industry">
+                    </div>
+                    
                     <div class="btn-group">
                         <button class="btn btn-secondary" onclick="prevSection(1, 'prospect')">
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1903,6 +1917,13 @@
                             </select>
                         </div>
                         
+                        <div class="form-group" id="prospectMigrationLocationOtherGroup" style="display: none; margin-top: var(--space-lg);">
+                            <label class="form-label">
+                                Please specify current location <span class="required">*</span>
+                            </label>
+                            <input type="text" class="form-input" id="prospectMigrationLocationOther" placeholder="Enter current location">
+                        </div>
+                        
                         <div class="form-group">
                             <label class="form-label">
                                 Data Cleanliness <span class="required">*</span>
@@ -1926,6 +1947,13 @@
                                 <div class="chip" data-value="Others" onclick="toggleChip(this)">Others</div>
                             </div>
                             <div class="error-message" id="prospectMigrationDataFormatError">Please select at least one format</div>
+                        </div>
+                        
+                        <div class="form-group" id="prospectMigrationDataFormatOtherGroup" style="display: none; margin-top: var(--space-lg);">
+                            <label class="form-label">
+                                Please specify data format <span class="required">*</span>
+                            </label>
+                            <input type="text" class="form-input" id="prospectMigrationDataFormatOther" placeholder="Enter data format">
                         </div>
                     </div>
                     
@@ -1979,6 +2007,13 @@
                             <div class="chip" data-value="Others" onclick="toggleChip(this)">Others</div>
                         </div>
                         <div class="error-message" id="prospectSystemsError">Please select at least one system</div>
+                    </div>
+                    
+                    <div class="form-group" id="prospectSystemsOtherGroup" style="display: none; margin-top: var(--space-lg);">
+                        <label class="form-label">
+                            Please specify integration systems <span class="required">*</span>
+                        </label>
+                        <input type="text" class="form-input" id="prospectSystemsOther" placeholder="Enter integration systems">
                     </div>
                     
                     <div class="form-group" style="margin-top: var(--space-lg);">
@@ -2165,23 +2200,30 @@
                         
                         <div class="form-group">
                             <label class="form-label">
+                                Primary POC Email <span class="required">*</span>
+                            </label>
+                            <input type="email" class="form-input" id="customerPrimaryPOCEmail" placeholder="email@example.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
                                 Approving Stakeholder for Templates <span class="required">*</span>
                             </label>
-                            <input type="text" class="form-input" id="customerTemplateApprover" placeholder="Name and role" required>
+                            <input type="text" class="form-input" id="customerTemplateApprover" placeholder="Add name, role and email address" required>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">
                                 Approving Stakeholder for Migrations <span class="required">*</span>
                             </label>
-                            <input type="text" class="form-input" id="customerMigrationApprover" placeholder="Name and role" required>
+                            <input type="text" class="form-input" id="customerMigrationApprover" placeholder="Add name, role and email address" required>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">
                                 Approving Stakeholder for Integrations <span class="required">*</span>
                             </label>
-                            <input type="text" class="form-input" id="customerIntegrationApprover" placeholder="Name and role" required>
+                            <input type="text" class="form-input" id="customerIntegrationApprover" placeholder="Add name, role and email address" required>
                         </div>
                     </div>
                     
@@ -2397,6 +2439,13 @@
                                 </select>
                             </div>
                             
+                            <div class="form-group" id="customerContractStorageOtherGroup" style="display: none;">
+                                <label class="form-label">
+                                    Please specify current location <span class="required">*</span>
+                                </label>
+                                <input type="text" class="form-input" id="customerContractStorageOther" placeholder="Enter current location">
+                            </div>
+                            
                             <div class="form-group">
                                 <label class="form-label">
                                     Data Cleanliness <span class="required">*</span>
@@ -2477,6 +2526,13 @@
                             <div class="chip" data-value="Others" onclick="toggleChip(this)">Others</div>
                         </div>
                         <div class="error-message" id="customerIntegrationSystemsError">Please select at least one system</div>
+                    </div>
+                    
+                    <div class="form-group" id="customerIntegrationSystemsOtherGroup" style="display: none; margin-top: var(--space-lg);">
+                        <label class="form-label">
+                            Please specify integration systems <span class="required">*</span>
+                        </label>
+                        <input type="text" class="form-input" id="customerIntegrationSystemsOther" placeholder="Enter integration systems">
                     </div>
                     
                     <div class="form-grid" style="margin-top: var(--space-lg);">
@@ -3589,7 +3645,7 @@
                         <div class="form-group"><label class="form-label">Data residency requirements? <span class="required">*</span></label><select class="form-select" id="s7DataResidency" onchange="toggleSection('s7DataResidencySection')"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option><option value="Not sure">Not sure</option></select></div>
                         <div class="form-group"><label class="form-label">Custom SSO? <span class="required">*</span></label><select class="form-select" id="s7CustomSSO" onchange="toggleSection('s7SSOSection')"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
                     </div>
-                    <div class="conditional-section" id="s7SecurityReviewSection"><div class="form-group"><label class="form-label">Reviews needed</label><div class="chip-group" id="s7SecurityReviews"><div class="chip" data-value="DPA" onclick="toggleChip(this)">DPA</div><div class="chip" data-value="SOC-2" onclick="toggleChip(this)">SOC-2</div><div class="chip" data-value="Security" onclick="toggleChip(this)">Security Review</div><div class="chip" data-value="Other" onclick="toggleChip(this)">Other</div></div></div></div>
+                    <div class="conditional-section" id="s7SecurityReviewSection"><div class="form-group"><label class="form-label">Reviews needed</label><div class="chip-group" id="s7SecurityReviews"><div class="chip" data-value="DPA" onclick="toggleChip(this)">DPA</div><div class="chip" data-value="SOC-2" onclick="toggleChip(this)">SOC-2</div><div class="chip" data-value="Security" onclick="toggleChip(this)">Security Review</div><div class="chip" data-value="Other" onclick="toggleChip(this)">Other</div></div></div><div class="form-group" id="s7SecurityReviewsOtherGroup" style="display: none; margin-top: var(--space-lg);"><label class="form-label">Please specify reviews needed <span class="required">*</span></label><input type="text" class="form-input" id="s7SecurityReviewsOther" placeholder="Enter reviews needed"></div></div>
                     <div class="conditional-section" id="s7InfosecSection"><div class="form-group"><label class="form-label">Pending approvals</label><textarea class="form-textarea" id="s7InfosecDetails" placeholder="Details..."></textarea></div></div>
                     <div class="conditional-section" id="s7DataResidencySection"><div class="form-group"><label class="form-label">Data residency</label><input type="text" class="form-input" id="s7DataResidencyDetails" placeholder="e.g., EU-only, US"></div></div>
                     <div class="conditional-section" id="s7SSOSection"><div class="form-group"><label class="form-label">SSO provider</label><input type="text" class="form-input" id="s7SSODetails" placeholder="e.g., Okta, Azure AD"></div></div>
@@ -4954,6 +5010,16 @@
                     isValid = false;
                 } else {
                     industry.classList.remove('error');
+                    // If "Other" is selected, validate the Other field
+                    if (industry.value === 'Other') {
+                        const industryOther = document.getElementById('prospectIndustryOther');
+                        if (!industryOther || !industryOther.value.trim()) {
+                            if (industryOther) industryOther.classList.add('error');
+                            isValid = false;
+                        } else {
+                            industryOther.classList.remove('error');
+                        }
+                    }
                 }
                 
                 // User count
@@ -4963,6 +5029,15 @@
                     isValid = false;
                 } else {
                     userCount.classList.remove('error');
+                }
+                
+                // Primary POC
+                const primaryPOC = document.getElementById('prospectPrimaryPOC');
+                if (!primaryPOC || !primaryPOC.value.trim()) {
+                    if (primaryPOC) primaryPOC.classList.add('error');
+                    isValid = false;
+                } else {
+                    primaryPOC.classList.remove('error');
                 }
             }
             
@@ -5087,6 +5162,16 @@
                     isValid = false;
                 } else {
                     location.classList.remove('error');
+                    // If "Other" is selected, validate the Other field
+                    if (location.value === 'Other') {
+                        const locationOther = document.getElementById('prospectMigrationLocationOther');
+                        if (!locationOther || !locationOther.value.trim()) {
+                            if (locationOther) locationOther.classList.add('error');
+                            isValid = false;
+                        } else {
+                            locationOther.classList.remove('error');
+                        }
+                    }
                 }
                 
                 // Data Cleanliness
@@ -5106,6 +5191,17 @@
                     isValid = false;
                 } else {
                     if (formatError) formatError.classList.remove('visible');
+                    // Check if "Others" is selected and validate
+                    const hasOthers = Array.from(selectedFormats).some(chip => chip.dataset.value === 'Others');
+                    if (hasOthers) {
+                        const formatOther = document.getElementById('prospectMigrationDataFormatOther');
+                        if (!formatOther || !formatOther.value.trim()) {
+                            if (formatOther) formatOther.classList.add('error');
+                            isValid = false;
+                        } else {
+                            formatOther.classList.remove('error');
+                        }
+                    }
                 }
             }
             
@@ -5118,6 +5214,17 @@
                     isValid = false;
                 } else {
                     if (systemsError) systemsError.classList.remove('visible');
+                    // Check if "Others" is selected and validate
+                    const hasOthers = Array.from(selectedSystems).some(chip => chip.dataset.value === 'Others');
+                    if (hasOthers) {
+                        const systemsOther = document.getElementById('prospectSystemsOther');
+                        if (!systemsOther || !systemsOther.value.trim()) {
+                            if (systemsOther) systemsOther.classList.add('error');
+                            isValid = false;
+                        } else {
+                            systemsOther.classList.remove('error');
+                        }
+                    }
                 }
                 
                 // API access
@@ -5158,10 +5265,13 @@
             }
             
             if (section === 1) {
+                const industry = document.getElementById('prospectIndustry').value;
                 formData.prospect.section1 = {
                     companyName: document.getElementById('prospectCompanyName').value,
-                    industry: document.getElementById('prospectIndustry').value,
-                    userCount: document.getElementById('prospectUserCount').value
+                    industry: industry,
+                    industryOther: industry === 'Other' ? document.getElementById('prospectIndustryOther')?.value || '' : '',
+                    userCount: document.getElementById('prospectUserCount').value,
+                    primaryPOC: document.getElementById('prospectPrimaryPOC')?.value || ''
                 };
             }
             
@@ -5186,18 +5296,26 @@
             }
             
             if (section === 4) {
+                const location = document.getElementById('prospectMigrationLocation')?.value || '';
+                const dataFormats = getSelectedChips('prospectMigrationDataFormat');
+                const hasOthersFormat = dataFormats.includes('Others');
                 formData.prospect.section4 = {
                     assistedMigration: document.getElementById('prospectAssistedMigrationSection')?.value || '',
                     volume: document.getElementById('prospectMigrationVolume')?.value || '',
-                    location: document.getElementById('prospectMigrationLocation')?.value || '',
+                    location: location,
+                    locationOther: location === 'Other' ? document.getElementById('prospectMigrationLocationOther')?.value || '' : '',
                     dataCleanliness: document.getElementById('prospectMigrationDataCleanliness')?.value || '',
-                    dataFormat: getSelectedChips('prospectMigrationDataFormat')
+                    dataFormat: dataFormats,
+                    dataFormatOther: hasOthersFormat ? document.getElementById('prospectMigrationDataFormatOther')?.value || '' : ''
                 };
             }
             
             if (section === 5) {
+                const systems = getSelectedChips('prospectSystems');
+                const hasOthers = systems.includes('Others');
                 formData.prospect.section5 = {
-                    systemsUsed: getSelectedChips('prospectSystems'),
+                    systemsUsed: systems,
+                    systemsOther: hasOthers ? document.getElementById('prospectSystemsOther')?.value || '' : '',
                     apiAccess: document.getElementById('prospectApiAccess').value
                 };
             }
@@ -5229,7 +5347,9 @@
                 prospect_section_1_basics: {
                     company_name: getValue('prospectCompanyName'),
                     industry: getValue('prospectIndustry'),
-                    user_count: getValue('prospectUserCount')
+                    industry_other: getValue('prospectIndustryOther'),
+                    user_count: getValue('prospectUserCount'),
+                    primary_poc: getValue('prospectPrimaryPOC')
                 },
                 prospect_section_2_scope_clarity: {
                     modules_interested: getSelectedChips('prospectModules'),
@@ -5249,11 +5369,14 @@
                     assisted_migration: getValue('prospectAssistedMigrationSection'),
                     volume_of_contracts: getValue('prospectMigrationVolume'),
                     current_location: getValue('prospectMigrationLocation'),
+                    current_location_other: getValue('prospectMigrationLocationOther'),
                     data_cleanliness: getValue('prospectMigrationDataCleanliness'),
-                    data_format: getSelectedChips('prospectMigrationDataFormat')
+                    data_format: getSelectedChips('prospectMigrationDataFormat'),
+                    data_format_other: getValue('prospectMigrationDataFormatOther')
                 },
                 prospect_section_5_systems_integrations: {
                     systems_used: getSelectedChips('prospectSystems'),
+                    systems_other: getValue('prospectSystemsOther'),
                     api_access: getValue('prospectApiAccess')
                 },
                 prospect_section_6_timeline_readiness: {
@@ -5523,6 +5646,20 @@
                     primaryRole.classList.remove('error');
                 }
                 
+                // Primary POC Email
+                const primaryEmail = document.getElementById('customerPrimaryPOCEmail');
+                if (!primaryEmail || !primaryEmail.value.trim()) {
+                    if (primaryEmail) primaryEmail.classList.add('error');
+                    isValid = false;
+                } else {
+                    primaryEmail.classList.remove('error');
+                    // Validate email format
+                    if (!validateEmail(primaryEmail.value.trim())) {
+                        primaryEmail.classList.add('error');
+                        isValid = false;
+                    }
+                }
+                
                 // Approving Stakeholder for Templates
                 const templateApprover = document.getElementById('customerTemplateApprover');
                 if (!templateApprover || !templateApprover.value.trim()) {
@@ -5638,6 +5775,16 @@
                             isValid = false;
                         } else {
                             storage.classList.remove('error');
+                            // If "Other" is selected, validate the Other field
+                            if (storage.value === 'Other') {
+                                const storageOther = document.getElementById('customerContractStorageOther');
+                                if (!storageOther || !storageOther.value.trim()) {
+                                    if (storageOther) storageOther.classList.add('error');
+                                    isValid = false;
+                                } else {
+                                    storageOther.classList.remove('error');
+                                }
+                            }
                         }
                         
                         if (!cleanliness || !cleanliness.value) {
@@ -5659,6 +5806,17 @@
                     isValid = false;
                 } else {
                     if (systemsError) systemsError.classList.remove('visible');
+                    // Check if "Others" is selected and validate
+                    const hasOthers = Array.from(selectedSystems).some(chip => chip.dataset.value === 'Others');
+                    if (hasOthers) {
+                        const systemsOther = document.getElementById('customerIntegrationSystemsOther');
+                        if (!systemsOther || !systemsOther.value.trim()) {
+                            if (systemsOther) systemsOther.classList.add('error');
+                            isValid = false;
+                        } else {
+                            systemsOther.classList.remove('error');
+                        }
+                    }
                 }
                 
                 // API access
@@ -5773,17 +5931,22 @@
             }
             
             if (section === 4) {
+                const storage = document.getElementById('customerContractStorage').value;
                 formData.customer.section4 = {
                     migrationNeeded: document.getElementById('customerMigrationNeeded').value,
                     migrationContractCount: document.getElementById('customerMigrationContractCount').value,
-                    contractStorage: document.getElementById('customerContractStorage').value,
+                    contractStorage: storage,
+                    contractStorageOther: storage === 'Other' ? document.getElementById('customerContractStorageOther')?.value || '' : '',
                     dataCleanliness: document.getElementById('customerDataCleanliness').value
                 };
             }
             
             if (section === 5) {
+                const systems = getSelectedChips('customerIntegrationSystems');
+                const hasOthers = systems.includes('Others');
                 formData.customer.section5 = {
-                    integrationSystems: getSelectedChips('customerIntegrationSystems'),
+                    integrationSystems: systems,
+                    integrationSystemsOther: hasOthers ? document.getElementById('customerIntegrationSystemsOther')?.value || '' : '',
                     apiAccess: document.getElementById('customerApiAccess').value,
                     webhooksSupport: document.getElementById('customerWebhooksSupport').value
                 };
@@ -5823,10 +5986,14 @@
                 customer_section_1_stakeholders: {
                     primary_contact_name: getValue('customerPrimaryContactName'),
                     primary_contact_role: getValue('customerPrimaryContactRole'),
+                    primary_poc_email: getValue('customerPrimaryPOCEmail'),
                     technical_contact_name: getValue('customerTechnicalContactName'),
                     technical_contact_role: getValue('customerTechnicalContactRole'),
                     team_distribution: getSelectedChips('customerTeamDistribution'),
-                    decision_approver: getValue('customerDecisionApprover')
+                    decision_approver: getValue('customerDecisionApprover'),
+                    template_approver: getValue('customerTemplateApprover'),
+                    migration_approver: getValue('customerMigrationApprover'),
+                    integration_approver: getValue('customerIntegrationApprover')
                 },
                 customer_section_2_purchased_scope: {
                     purchased_modules: getSelectedChips('customerPurchasedModules'),
@@ -5844,10 +6011,12 @@
                     migration_needed: getValue('customerMigrationNeeded'),
                     migration_contract_count: getValue('customerMigrationContractCount'),
                     contract_storage: getValue('customerContractStorage'),
+                    contract_storage_other: getValue('customerContractStorageOther'),
                     data_cleanliness: getValue('customerDataCleanliness')
                 },
                 customer_section_5_integrations: {
                     integration_systems: getSelectedChips('customerIntegrationSystems'),
+                    integration_systems_other: getValue('customerIntegrationSystemsOther'),
                     api_access: getValue('customerApiAccess'),
                     webhooks_support: getValue('customerWebhooksSupport')
                 },
@@ -6706,6 +6875,66 @@
         
         function toggleChip(chip) {
             chip.classList.toggle('selected');
+            
+            // Handle "Other"/"Others" follow-up questions
+            const value = chip.dataset.value;
+            const containerId = chip.closest('.chip-group')?.id;
+            
+            if (value === 'Other' || value === 'Others') {
+                // Find the corresponding "Other" group
+                let otherGroupId = '';
+                if (containerId === 'prospectMigrationDataFormat') {
+                    otherGroupId = 'prospectMigrationDataFormatOtherGroup';
+                } else if (containerId === 'prospectSystems') {
+                    otherGroupId = 'prospectSystemsOtherGroup';
+                } else if (containerId === 'customerIntegrationSystems') {
+                    otherGroupId = 'customerIntegrationSystemsOtherGroup';
+                } else if (containerId === 's7SecurityReviews') {
+                    otherGroupId = 's7SecurityReviewsOtherGroup';
+                }
+                
+                if (otherGroupId) {
+                    const otherGroup = document.getElementById(otherGroupId);
+                    if (otherGroup) {
+                        if (chip.classList.contains('selected')) {
+                            otherGroup.style.display = 'block';
+                        } else {
+                            otherGroup.style.display = 'none';
+                            // Clear the input when hidden
+                            const input = otherGroup.querySelector('input');
+                            if (input) input.value = '';
+                        }
+                    }
+                }
+            } else {
+                // If a non-Other option is selected, check if "Other" is still selected
+                // If not, hide the Other group
+                const container = chip.closest('.chip-group');
+                if (container) {
+                    const otherChip = container.querySelector('.chip[data-value="Other"], .chip[data-value="Others"]');
+                    if (otherChip && !otherChip.classList.contains('selected')) {
+                        let otherGroupId = '';
+                        if (container.id === 'prospectMigrationDataFormat') {
+                            otherGroupId = 'prospectMigrationDataFormatOtherGroup';
+                        } else if (container.id === 'prospectSystems') {
+                            otherGroupId = 'prospectSystemsOtherGroup';
+                        } else if (container.id === 'customerIntegrationSystems') {
+                            otherGroupId = 'customerIntegrationSystemsOtherGroup';
+                        } else if (container.id === 's7SecurityReviews') {
+                            otherGroupId = 's7SecurityReviewsOtherGroup';
+                        }
+                        
+                        if (otherGroupId) {
+                            const otherGroup = document.getElementById(otherGroupId);
+                            if (otherGroup) {
+                                otherGroup.style.display = 'none';
+                                const input = otherGroup.querySelector('input');
+                                if (input) input.value = '';
+                            }
+                        }
+                    }
+                }
+            }
         }
         
         function getSelectedChips(containerId) {
@@ -6903,6 +7132,7 @@
                 section_7_security_compliance: {
                     security_review: getValue('s7SecurityReview'),
                     security_reviews_needed: getSelectedChips('s7SecurityReviews'),
+                    security_reviews_other: getValue('s7SecurityReviewsOther'),
                     infosec_approvals: getValue('s7InfosecApprovals'),
                     infosec_details: getValue('s7InfosecDetails'),
                     data_residency: getValue('s7DataResidency'),
@@ -7279,6 +7509,52 @@
             }
             
             // Initialize IM custom development section - hidden by default (already hidden via CSS)
+            
+            // Add event listeners for "Other" select options
+            const prospectIndustry = document.getElementById('prospectIndustry');
+            if (prospectIndustry) {
+                prospectIndustry.addEventListener('change', function() {
+                    const otherGroup = document.getElementById('prospectIndustryOtherGroup');
+                    if (otherGroup) {
+                        if (this.value === 'Other') {
+                            otherGroup.style.display = 'block';
+                        } else {
+                            otherGroup.style.display = 'none';
+                            document.getElementById('prospectIndustryOther').value = '';
+                        }
+                    }
+                });
+            }
+            
+            const prospectMigrationLocation = document.getElementById('prospectMigrationLocation');
+            if (prospectMigrationLocation) {
+                prospectMigrationLocation.addEventListener('change', function() {
+                    const otherGroup = document.getElementById('prospectMigrationLocationOtherGroup');
+                    if (otherGroup) {
+                        if (this.value === 'Other') {
+                            otherGroup.style.display = 'block';
+                        } else {
+                            otherGroup.style.display = 'none';
+                            document.getElementById('prospectMigrationLocationOther').value = '';
+                        }
+                    }
+                });
+            }
+            
+            const customerContractStorage = document.getElementById('customerContractStorage');
+            if (customerContractStorage) {
+                customerContractStorage.addEventListener('change', function() {
+                    const otherGroup = document.getElementById('customerContractStorageOtherGroup');
+                    if (otherGroup) {
+                        if (this.value === 'Other') {
+                            otherGroup.style.display = 'block';
+                        } else {
+                            otherGroup.style.display = 'none';
+                            document.getElementById('customerContractStorageOther').value = '';
+                        }
+                    }
+                });
+            }
         });
     </script>
     
