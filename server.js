@@ -1389,7 +1389,16 @@ CRITICAL REQUIREMENTS FOR ACTION ITEMS:
 Generate 8-12 high-priority action items that directly address readiness gaps. These should be items the prospect can complete BEFORE purchasing to improve their readiness score. Order them by potential impact on overall score improvement (highest impact first). Focus on items that can improve scores by 5+ points overall.
 
 **Implementation Plan:**
-Generate a high-level timeline and estimated effort band (Small, Medium, Large).
+Generate a WEEK-WISE DETAILED implementation plan with specific activities for each week. Break down the timeline into weekly phases with detailed activities.
+
+REQUIREMENTS:
+- Break down the timeline into WEEK-BY-WEEK phases (e.g., "Week 1", "Week 2-3", "Week 4-5")
+- Each phase should specify the exact week(s) it covers
+- Include detailed, specific activities for each week
+- Show dependencies between phases
+- Include milestones and deliverables for each week
+- Specify who is responsible for activities (Customer team, SpotDraft team, or both)
+- Provide estimated effort band (Small, Medium, Large)
 
 Return ONLY valid JSON in this structure:
 {
@@ -1433,8 +1442,11 @@ Return ONLY valid JSON in this structure:
             {
                 "phase": <integer>,
                 "name": "<string>",
-                "duration": "<string>",
-                "activities": ["<string>"]
+                "duration": "<string - must specify weeks, e.g., 'Week 1', 'Week 2-3', 'Week 4-5'>",
+                "activities": ["<string - specific activities for this week>"],
+                "milestones": ["<string - key deliverables for this week>"],
+                "dependencies": "<string - what must be completed before this phase>",
+                "responsible": "<string - Customer, SpotDraft, or Both>"
             }
         ]
     },
@@ -1591,7 +1603,16 @@ CRITICAL REQUIREMENTS FOR ACTION ITEMS:
 Generate 8-12 high-priority action items for customer team and 4-6 for SpotDraft team. Prioritize items that address the lowest-scoring sections first, as these will have the biggest impact on improving readiness. Order them by potential impact on overall score improvement (highest impact first). Focus on items that can improve scores by 5+ points overall.
 
 **Implementation Plan:**
-Generate a high-level timeline and implementation plan preview.
+Generate a WEEK-WISE DETAILED implementation plan with specific activities for each week. Break down the timeline into weekly phases with detailed activities.
+
+REQUIREMENTS:
+- Break down the timeline into WEEK-BY-WEEK phases (e.g., "Week 1", "Week 2-3", "Week 4-5")
+- Each phase should specify the exact week(s) it covers
+- Include detailed, specific activities for each week
+- Show dependencies between phases
+- Include milestones and deliverables for each week
+- Specify who is responsible for activities (Customer team, SpotDraft team, or both)
+- Activities should be specific and actionable (e.g., "Week 1: Upload all contract templates to SpotDraft portal" not "Week 1: Template preparation")
 
 Return ONLY valid JSON in this structure:
 {
@@ -1625,7 +1646,18 @@ Return ONLY valid JSON in this structure:
     "implementation_plan": {
         "recommended_go_live": "<YYYY-MM-DD>",
         "high_level_timeline": "<string>",
-        "phases": [...]
+        "phases": [
+            {
+                "phase": <integer>,
+                "name": "<string>",
+                "duration": "<string - must specify weeks, e.g., 'Week 1', 'Week 2-3', 'Week 4-5'>",
+                "activities": ["<string - specific activities for this week>"],
+                "milestones": ["<string - key deliverables for this week>"],
+                "dependencies": "<string - what must be completed before this phase>",
+                "responsible": "<string - Customer, SpotDraft, or Both>",
+                "status": "<Ready|Partially ready|Blocked|Scheduled>"
+            }
+        ]
     },
     "ai_insights": {
         "key_strengths": ["<string>"],
@@ -2058,17 +2090,21 @@ Create actionable tasks for both customer and SpotDraft teams. For each item:
 - owner: Who should handle it
 
 ### 5. IMPLEMENTATION PLAN
-Create a phased implementation plan with:
+Create a WEEK-WISE DETAILED phased implementation plan with:
 - recommended_go_live: Target date (YYYY-MM-DD, typically 8-12 weeks from today)
 - timeline_adjusted: true/false based on blockers
 - adjustment_reason: Why timeline was adjusted (if applicable)
 - phases: Array of implementation phases, each with:
   - phase: Phase number (1, 2, 3, etc.)
   - name: Phase name
-  - duration: Time estimate (e.g., "Week 1-2")
-  - activities: Array of specific activities
-  - dependencies: What must be completed first
+  - duration: MUST specify exact weeks (e.g., "Week 1", "Week 2-3", "Week 4-5", "Week 6-8")
+  - activities: Array of SPECIFIC activities for each week (e.g., "Week 1: Upload all contract templates to SpotDraft portal")
+  - milestones: Key deliverables for this phase/week
+  - dependencies: What must be completed before this phase
+  - responsible: Who handles activities (Customer, SpotDraft, or Both)
   - status: "Ready", "Partially ready", "Blocked", or "Scheduled"
+  
+CRITICAL: Break down activities WEEK-BY-WEEK. Each phase should clearly indicate which week(s) it covers, and activities should be specific to those weeks.
 
 ### 6. AI INSIGHTS
 Provide strategic insights:
@@ -2134,9 +2170,11 @@ Return ONLY valid JSON in this exact structure (no markdown, no explanations):
             {
                 "phase": <integer>,
                 "name": "<string>",
-                "duration": "<string>",
-                "activities": ["<string>"],
+                "duration": "<string - must specify weeks, e.g., 'Week 1', 'Week 2-3', 'Week 4-5'>",
+                "activities": ["<string - specific activities for this week>"],
+                "milestones": ["<string - key deliverables for this week>"],
                 "dependencies": "<string or null>",
+                "responsible": "<string - Customer, SpotDraft, or Both>",
                 "status": "<Ready|Partially ready|Blocked|Scheduled>"
             }
         ]

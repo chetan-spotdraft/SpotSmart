@@ -5171,16 +5171,14 @@
             // Check if action_items exist (new format) or use preparation_list (legacy)
             const actionItems = data.action_items?.customer || [];
             if (actionItems.length > 0) {
-                // Use action items with score impact display
+                // Use action items display
                 const renderAction = item => {
                     const sectionName = item.section || 'General';
-                    const scoreImpact = item.score_impact ? `<div style="margin-top: var(--space-xs); padding: var(--space-sm); background: var(--info-light); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--info);"><strong>📈 Score Impact:</strong> ${item.score_impact}</div>` : '';
                     return `
                     <div class="action-item" style="margin-bottom: var(--space-md);">
                         <div class="action-item-priority ${item.priority || 'medium'}"></div>
                         <div class="action-item-content">
                             <div class="action-item-task">${item.task || item}</div>
-                            ${scoreImpact}
                             <div class="action-item-meta"><span>📁 ${sectionName}</span><span>📅 ${item.deadline || 'TBD'}</span><span>👤 ${item.owner || 'TBD'}</span></div>
                         </div>
                     </div>`;
@@ -5203,8 +5201,15 @@
                 <strong>Estimated Effort Band:</strong> ${data.implementation_plan?.estimated_effort_band || 'TBD'}
             `;
             
-            // Display simplified implementation phases (Prospect-specific - high-level only)
+            // Display week-wise detailed implementation phases (Prospect-specific)
             const phasesHtml = (data.implementation_plan?.phases || []).map(phase => {
+                const milestones = phase.milestones && phase.milestones.length > 0 ? `
+                    <div style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--gray-200);">
+                        <div style="font-weight: 600; color: var(--primary); margin-bottom: var(--space-xs); font-size: 0.875rem;">🎯 Milestones:</div>
+                        ${phase.milestones.map(m => `<div style="padding: var(--space-xs) 0; color: var(--gray-700);">• ${m}</div>`).join('')}
+                    </div>
+                ` : '';
+                const responsible = phase.responsible ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-600);"><strong>👥 Responsible:</strong> ${phase.responsible}</div>` : '';
                 return `
                 <div class="timeline-phase">
                     <div class="timeline-phase-header">
@@ -5214,8 +5219,11 @@
                         </div>
                     </div>
                     <div class="timeline-phase-content">
-                        ${(phase.activities || []).slice(0, 3).map(a => `<div class="timeline-activity">${a}</div>`).join('')}
-                        ${(phase.activities || []).length > 3 ? '<div class="timeline-activity" style="color: var(--gray-500); font-style: italic;">... and more</div>' : ''}
+                        <div style="font-weight: 600; color: var(--gray-800); margin-bottom: var(--space-sm); font-size: 0.875rem;">📋 Activities:</div>
+                        ${(phase.activities || []).map(a => `<div class="timeline-activity">${a}</div>`).join('')}
+                        ${milestones}
+                        ${responsible}
+                        ${phase.dependencies ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-500);"><strong>🔗 Dependencies:</strong> ${phase.dependencies}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -5708,13 +5716,11 @@
             const actionItems = data.action_items || { customer: [], spotdraft: [] };
             const renderAction = item => {
                 const sectionName = item.section || 'General';
-                const scoreImpact = item.score_impact ? `<div class="action-item-score-impact" style="margin-top: var(--space-xs); padding: var(--space-sm); background: var(--info-light); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--info);"><strong>📈 Score Impact:</strong> ${item.score_impact}</div>` : '';
                 return `
                 <div class="action-item">
                     <div class="action-item-priority ${item.priority || 'medium'}"></div>
                     <div class="action-item-content">
                         <div class="action-item-task">${item.task || item}</div>
-                        ${scoreImpact}
                         <div class="action-item-meta"><span>📁 ${sectionName}</span><span>📅 ${item.deadline || 'TBD'}</span><span>👤 ${item.owner || 'TBD'}</span></div>
                     </div>
                 </div>`;
@@ -5727,11 +5733,18 @@
                 <strong>High-level Timeline:</strong> ${data.implementation_plan?.high_level_timeline || data.implementation_plan?.recommended_go_live || 'TBD'}
             `;
             
-            // Display implementation plan preview (Customer-specific)
+            // Display implementation plan preview (Customer-specific - Week-wise detailed)
             const phasesHtml = (data.implementation_plan?.phases || []).map(phase => {
                 const status = phase.status || 'Unknown';
                 const statusLower = status.toLowerCase();
                 const statusClass = statusLower.includes('ready') ? 'ready' : statusLower.includes('block') ? 'blocked' : 'partial';
+                const milestones = phase.milestones && phase.milestones.length > 0 ? `
+                    <div style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--gray-200);">
+                        <div style="font-weight: 600; color: var(--primary); margin-bottom: var(--space-xs); font-size: 0.875rem;">🎯 Milestones:</div>
+                        ${phase.milestones.map(m => `<div style="padding: var(--space-xs) 0; color: var(--gray-700);">• ${m}</div>`).join('')}
+                    </div>
+                ` : '';
+                const responsible = phase.responsible ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-600);"><strong>👥 Responsible:</strong> ${phase.responsible}</div>` : '';
                 return `
                 <div class="timeline-phase">
                     <div class="timeline-phase-header">
@@ -5742,8 +5755,11 @@
                         <span class="timeline-phase-status ${statusClass}">${status}</span>
                     </div>
                     <div class="timeline-phase-content">
+                        <div style="font-weight: 600; color: var(--gray-800); margin-bottom: var(--space-sm); font-size: 0.875rem;">📋 Activities:</div>
                         ${(phase.activities || []).map(a => `<div class="timeline-activity">${a}</div>`).join('')}
-                        ${phase.dependencies ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-500);"><strong>Dependencies:</strong> ${phase.dependencies}</div>` : ''}
+                        ${milestones}
+                        ${responsible}
+                        ${phase.dependencies ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-500);"><strong>🔗 Dependencies:</strong> ${phase.dependencies}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -6182,13 +6198,11 @@
             // Display Rocketlane-ready action items (IM-specific: customer, spotdraft, internal)
             const actionItems = data.action_items || { customer: [], spotdraft: [], internal: [] };
             const renderAction = item => {
-                const scoreImpact = item.score_impact ? `<div class="action-item-score-impact" style="margin-top: var(--space-xs); padding: var(--space-sm); background: var(--info-light); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--info);"><strong>📈 Score Impact:</strong> ${item.score_impact}</div>` : '';
                 return `
                 <div class="action-item">
                     <div class="action-item-priority ${item.priority || 'medium'}"></div>
                     <div class="action-item-content">
                         <div class="action-item-task">${item.task || item}</div>
-                        ${scoreImpact}
                         <div class="action-item-meta"><span>📅 ${item.deadline || 'TBD'}</span><span>👤 ${item.owner || 'TBD'}</span></div>
                     </div>
                 </div>`;
@@ -6207,24 +6221,34 @@
                 ${data.implementation_plan?.internal_notes ? `<strong>Engineering Dependency:</strong> ${data.implementation_plan.internal_notes}` : ''}
             `;
             
-            // Display Rocketlane-ready implementation plan (IM-specific with internal notes)
+            // Display Rocketlane-ready implementation plan (IM-specific - Week-wise detailed with internal notes)
             const phasesHtml = (data.implementation_plan?.phases || []).map(phase => {
                 const status = phase.status || 'Planned';
                 const statusLower = status.toLowerCase();
                 const statusClass = statusLower.includes('ready') ? 'ready' : statusLower.includes('block') ? 'blocked' : 'partial';
+                const milestones = phase.milestones && phase.milestones.length > 0 ? `
+                    <div style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--gray-200);">
+                        <div style="font-weight: 600; color: var(--primary); margin-bottom: var(--space-xs); font-size: 0.875rem;">🎯 Milestones:</div>
+                        ${phase.milestones.map(m => `<div style="padding: var(--space-xs) 0; color: var(--gray-700);">• ${m}</div>`).join('')}
+                    </div>
+                ` : '';
+                const responsible = phase.responsible ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-600);"><strong>👥 Responsible:</strong> ${phase.responsible}</div>` : '';
                 return `
                 <div class="timeline-phase">
                     <div class="timeline-phase-header">
                         <div>
                             <div class="timeline-phase-title">Phase ${phase.phase || 'N/A'}: ${phase.name || 'Unnamed'}</div>
                             <div class="timeline-phase-duration">${phase.duration || 'TBD'}</div>
-                </div>
+                        </div>
                         <span class="timeline-phase-status ${statusClass}">${status}</span>
-                </div>
+                    </div>
                     <div class="timeline-phase-content">
+                        <div style="font-weight: 600; color: var(--gray-800); margin-bottom: var(--space-sm); font-size: 0.875rem;">📋 Activities:</div>
                         ${(phase.activities || []).map(a => `<div class="timeline-activity">${a}</div>`).join('')}
-                        ${phase.dependencies ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-500);"><strong>Dependencies:</strong> ${phase.dependencies}</div>` : ''}
-                        ${phase.internal_notes ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--primary);"><strong>Internal Notes:</strong> ${phase.internal_notes}</div>` : ''}
+                        ${milestones}
+                        ${responsible}
+                        ${phase.dependencies ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-500);"><strong>🔗 Dependencies:</strong> ${phase.dependencies}</div>` : ''}
+                        ${phase.internal_notes ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--primary);"><strong>📝 Internal Notes:</strong> ${phase.internal_notes}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -6780,13 +6804,11 @@
             
             const renderAction = item => {
                 const sectionName = getSectionName(item.section);
-                const scoreImpact = item.score_impact ? `<div class="action-item-score-impact" style="margin-top: var(--space-xs); padding: var(--space-sm); background: var(--info-light); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--info);"><strong>📈 Score Impact:</strong> ${item.score_impact}</div>` : '';
                 return `
                 <div class="action-item">
                     <div class="action-item-priority ${item.priority}"></div>
                     <div class="action-item-content">
                         <div class="action-item-task">${item.task}</div>
-                        ${scoreImpact}
                         <div class="action-item-meta"><span>📁 ${sectionName}</span><span>📅 ${item.deadline || 'TBD'}</span><span>👤 ${item.owner || 'TBD'}</span></div>
                     </div>
                 </div>`;
@@ -6800,10 +6822,29 @@
                 const status = phase.status || 'Unknown';
                 const statusLower = status.toLowerCase();
                 const statusClass = statusLower.includes('ready') ? 'ready' : statusLower.includes('block') ? 'blocked' : 'partial';
+                const milestones = phase.milestones && phase.milestones.length > 0 ? `
+                    <div style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--gray-200);">
+                        <div style="font-weight: 600; color: var(--primary); margin-bottom: var(--space-xs); font-size: 0.875rem;">🎯 Milestones:</div>
+                        ${phase.milestones.map(m => `<div style="padding: var(--space-xs) 0; color: var(--gray-700);">• ${m}</div>`).join('')}
+                    </div>
+                ` : '';
+                const responsible = phase.responsible ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-600);"><strong>👥 Responsible:</strong> ${phase.responsible}</div>` : '';
                 return `
                 <div class="timeline-phase">
-                    <div class="timeline-phase-header"><div><div class="timeline-phase-title">Phase ${phase.phase || 'N/A'}: ${phase.name || 'Unnamed'}</div><div class="timeline-phase-duration">${phase.duration || 'TBD'}</div></div><span class="timeline-phase-status ${statusClass}">${status}</span></div>
-                    <div class="timeline-phase-content">${(phase.activities || []).map(a => `<div class="timeline-activity">${a}</div>`).join('')}${phase.dependencies ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-500);"><strong>Dependencies:</strong> ${phase.dependencies}</div>` : ''}</div>
+                    <div class="timeline-phase-header">
+                        <div>
+                            <div class="timeline-phase-title">Phase ${phase.phase || 'N/A'}: ${phase.name || 'Unnamed'}</div>
+                            <div class="timeline-phase-duration">${phase.duration || 'TBD'}</div>
+                        </div>
+                        <span class="timeline-phase-status ${statusClass}">${status}</span>
+                    </div>
+                    <div class="timeline-phase-content">
+                        <div style="font-weight: 600; color: var(--gray-800); margin-bottom: var(--space-sm); font-size: 0.875rem;">📋 Activities:</div>
+                        ${(phase.activities || []).map(a => `<div class="timeline-activity">${a}</div>`).join('')}
+                        ${milestones}
+                        ${responsible}
+                        ${phase.dependencies ? `<div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--gray-500);"><strong>🔗 Dependencies:</strong> ${phase.dependencies}</div>` : ''}
+                    </div>
                 </div>
             `;
             }).join('');
