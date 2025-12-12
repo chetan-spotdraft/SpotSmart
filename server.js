@@ -1110,8 +1110,8 @@ function createIMImplementationPlan(responses) {
     const scope = responses.im_section_2_scope_deliverables || {};
     const migration = responses.im_section_3_migration_details || {};
     const integrations = responses.im_section_4_integrations || {};
-    const dependencies = responses.im_section_5_internal_dependencies || {};
-    const timeline = responses.im_section_6_timeline_expectations || {};
+    // Section 5 (Internal Dependencies) was removed - timeline is now section 5
+    const timeline = responses.im_section_5_timeline_expectations || {};
 
     // Base phases structure - create standard phases first
     const phaseOrder = [
@@ -1226,7 +1226,7 @@ function createIMImplementationPlan(responses) {
         migrationConfig.extra_tasks.forEach(t => {
             addTaskToPhase(t.phase, t.task, t.duration_hours, t.assignee);
         });
-        if (migration.migration_engineering_support === "Yes") {
+        if (migration.csv_migration_required === "Yes") {
             planLogic.migration_engineering_needed.yes.tasks.forEach(t => {
                 addTaskToPhase(t.phase, t.task, t.duration_hours, t.assignee);
             });
@@ -1252,17 +1252,8 @@ function createIMImplementationPlan(responses) {
         });
     }
 
-    // 8. Internal dependencies
-    const internalTeams = dependencies.internal_teams || [];
-    internalTeams.forEach(team => {
-        const teamKey = team.toLowerCase().replace(/\s+/g, '_');
-        const teamTasks = planLogic.internal_dependencies[teamKey];
-        if (teamTasks) {
-            teamTasks.forEach(t => {
-                addTaskToPhase(t.phase, t.task, t.duration_hours, t.assignee);
-            });
-        }
-    });
+    // 8. Internal dependencies (Section 5 was removed - skip this logic)
+    // Note: Internal dependencies section was removed from the form
 
     // 9. Go-live expectation adjustments
     const goLiveKey = (timeline.go_live_expectation || "6-8 weeks").toLowerCase().replace(/\s+/g, '_');
@@ -1281,9 +1272,8 @@ function createIMImplementationPlan(responses) {
     const goLiveDate = new Date();
     goLiveDate.setDate(goLiveDate.getDate() + (estimatedWeeks * 7));
 
-    // Engineering effort note
-    const engEffortKey = (dependencies.engineering_effort || "none").toLowerCase().replace(/\s+/g, '_');
-    const engEffortNote = planLogic.engineering_effort[engEffortKey] || planLogic.engineering_effort.none;
+    // Engineering effort note (Section 5 was removed - use default)
+    const engEffortNote = "No engineering dependency";
 
     // Re-number phases after filtering
     filteredPhases.forEach((phase, index) => {
@@ -1314,23 +1304,25 @@ async function calculateProspectReadinessWithGemini(intake_responses) {
 ${JSON.stringify(intake_responses, null, 2)}
 
 ## YOUR TASK:
-Calculate readiness scores for 4 sections (each out of 100 points), then calculate an overall weighted score:
+Calculate readiness scores for 5 sections (each out of 100 points), then calculate an overall weighted score:
 
-**Section 1: Basics (Weight: 25%)**
+**Section 1: Basics (Weight: 20%)**
 Use ONLY these questions from prospect_section_1_basics:
 - company_name: Provided = +33 points, Missing = +0
 - industry: Selected = +33 points, Missing = +0
 - user_count: Selected = +34 points, Missing = +0
 - Max: 100 points
 
-**Section 2: Scope Clarity (Weight: 30%)**
+**Section 2: Scope Clarity (Weight: 25%)**
 Use ONLY these questions from prospect_section_2_scope_clarity:
 - modules_interested: At least 1 selected = +40 points (bonus +5 per additional module, max +40)
-- templates_ready: Yes = +30, Partially = +20, No = +0, Missing = +0
-- migration_expected: No = +30, Some = +20, "Yes, a lot" = +10, Missing = +0
+- assisted_workflows: Yes = +20, No = +10, Missing = +0
+- contract_templates: "Yes, all available" = +20, "Yes, some available" = +15, "No, need help" = +5, Missing = +0
+- assisted_migration: Yes = +10, No = +5, Missing = +0
+- legacy_contracts: "Yes, all available" = +10, "Yes, some available" = +5, "No, need help" = +0, Missing = +0
 - Max: 100 points
 
-**Section 3: Systems and Integrations (Weight: 25%)**
+**Section 3: Systems and Integrations (Weight: 20%)**
 Use ONLY these questions from prospect_section_3_systems_integrations:
 - systems_used: At least 1 selected = +50 points (bonus +5 per additional system, max +50)
 - api_access: Yes = +50, "Not sure" = +25, No = +0, Missing = +0
@@ -1342,8 +1334,15 @@ Use ONLY these questions from prospect_section_4_timeline_readiness:
 - biggest_concern: Provided (optional) = +30 points bonus, Missing = +0
 - Max: 100 points (70 if concern not provided, 100 if provided)
 
+**Section 5: Additional Context (Weight: 15%)**
+Use ONLY these questions from prospect_section_5_additional_context (all optional):
+- internal_bottlenecks: Provided = +33 points, Missing = +0
+- compliance_deadlines: Provided = +33 points, Missing = +0
+- past_clm_experience: Provided = +34 points, Missing = +0
+- Max: 100 points
+
 **Overall Score Calculation:**
-Overall = (Section1 × 0.25) + (Section2 × 0.30) + (Section3 × 0.25) + (Section4 × 0.20)
+Overall = (Section1 × 0.20) + (Section2 × 0.25) + (Section3 × 0.20) + (Section4 × 0.20) + (Section5 × 0.15)
 Round to nearest integer.
 
 **Status Label & Description:**
@@ -1503,9 +1502,8 @@ Use ONLY these questions from customer_section_4_integrations:
 
 **Section 5: Business Processes (Weight: 15%)**
 Use ONLY these questions from customer_section_5_business_processes:
-- approval_complexity: Selected = +35 points, Missing = +0
-- conditional_routing: Selected = +35 points, Missing = +0
-- agreement_signers: Selected = +30 points, Missing = +0
+- approval_complexity: Selected = +50 points, Missing = +0
+- agreement_signers: Selected = +50 points, Missing = +0
 - Max: 100 points
 
 **Section 6: Security and Access (Weight: 10%)**
@@ -1631,7 +1629,7 @@ ${JSON.stringify(intake_responses, null, 2)}
 ${JSON.stringify(implementationPlan, null, 2)}
 
 ## YOUR TASK:
-Calculate readiness scores for 6 sections (each out of 100 points), then calculate an overall weighted score:
+Calculate readiness scores for 5 sections (each out of 100 points), then calculate an overall weighted score:
 
 **Section 1: Customer Context (Weight: 20%)**
 Use ONLY these questions from im_section_1_customer_context:
@@ -1649,10 +1647,12 @@ Use ONLY these questions from im_section_2_scope_deliverables:
 - custom_development_details: If custom_development is "Yes" and details provided = +20 points, Otherwise = +0
 - Max: 100 points (80 if custom_development = "No", 100 if "Yes" with details)
 
-**Section 3: Migration Details (Weight: 15%)**
+**Section 3: Migration Details (Weight: 20%)**
 Use ONLY these questions from im_section_3_migration_details:
-- migration_engineering_support: Selected = +50 points, Missing = +0
-- migration_volume: Selected = +50 points, Missing = +0
+- csv_migration_required: Selected = +33 points, Missing = +0
+- assisted_migration: Selected = +33 points, Missing = +0
+- metadata_type: Selected = +34 points, Missing = +0
+- migration_volume: Selected = +0 points (already counted in other fields), Missing = +0
 - Max: 100 points
 
 **Section 4: Integrations (Weight: 20%)**
@@ -1660,22 +1660,17 @@ Use ONLY these questions from im_section_4_integrations:
 - integration_types: At least 1 selected = +40 points (bonus +5 per additional type, max +40)
 - integration_engineering_effort: Selected = +30 points, Missing = +0
 - integration_uat_rounds: Selected = +30 points, Missing = +0
+- pre_known_blockers: Provided (optional) = +0 points (informational only, not scored)
 - Max: 100 points
 
-**Section 5: Internal Dependencies (Weight: 15%)**
-Use ONLY these questions from im_section_5_internal_dependencies:
-- internal_teams: At least 1 selected = +50 points (bonus +5 per additional team, max +50)
-- engineering_effort: Selected = +50 points, Missing = +0
-- Max: 100 points
-
-**Section 6: Timeline Expectations (Weight: 10%)**
-Use ONLY these questions from im_section_6_timeline_expectations:
+**Section 5: Timeline Expectations (Weight: 20%)**
+Use ONLY these questions from im_section_5_timeline_expectations:
 - go_live_expectation: Selected = +70 points, Missing = +0
 - known_blockers: Provided (optional) = +30 points bonus, Missing or empty = +0
 - Max: 100 points (70 if blockers not provided, 100 if provided)
 
 **Overall Score Calculation:**
-Overall = (Section1 × 0.20) + (Section2 × 0.20) + (Section3 × 0.15) + (Section4 × 0.20) + (Section5 × 0.15) + (Section6 × 0.10)
+Overall = (Section1 × 0.20) + (Section2 × 0.20) + (Section3 × 0.20) + (Section4 × 0.20) + (Section5 × 0.20)
 Round to nearest integer.
 
 **Status Label & Description:**

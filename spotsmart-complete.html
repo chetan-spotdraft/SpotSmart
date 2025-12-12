@@ -5241,12 +5241,16 @@
             
             try {
                 const prospectData = collectProspectFormData();
+                console.log('📤 Sending Prospect data:', prospectData);
+                console.log('📤 API URL:', `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ASSESS}`);
                 
                 const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ASSESS}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ intake_responses: prospectData })
                 });
+                
+                console.log('📥 Response status:', response.status, response.statusText);
                 
                 // Update progress to 98% when response arrives
                 clearInterval(progressInterval);
@@ -5255,6 +5259,11 @@
                 // Check for timeout or other errors
                 if (!response.ok) {
                     const errorText = await response.text();
+                    console.error('❌ Prospect API error response:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        body: errorText
+                    });
                     let errorData;
                     try {
                         errorData = JSON.parse(errorText);
@@ -5265,6 +5274,7 @@
                 }
                 
                 const result = await response.json();
+                console.log('📥 Prospect response:', result);
                 if (result.success) {
                     // Complete the progress bar
                     updateLoadingProgress(100, 'Assessment complete!');
@@ -5276,7 +5286,12 @@
                 }
             } catch (error) {
                 clearInterval(progressInterval);
-                console.error('Error:', error);
+                console.error('❌ Prospect submission error:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
                 
                 // Hide loading screen
                 const loadingScreen = document.getElementById('loadingScreen');
@@ -5289,10 +5304,13 @@
                 // Show error message and allow user to retry
                 updateLoadingProgress(0, 'Error occurred');
                 setTimeout(() => {
-                    alert('Failed to submit assessment: ' + error.message + '\n\nPlease check your connection and try again.');
-                    // Return to form (show prospect section 4)
-                    const prospectSection4 = document.getElementById('prospectSection4');
-                    if (prospectSection4) prospectSection4.classList.add('active');
+                    alert('Failed to submit assessment: ' + error.message + '\n\nPlease check your connection and try again.\n\nCheck browser console (F12) for more details.');
+                    // Return to form (show prospect section 5)
+                    const prospectSection5 = document.getElementById('prospectSection5');
+                    if (prospectSection5) {
+                        prospectSection5.style.display = 'block';
+                        prospectSection5.classList.add('active');
+                    }
                 }, 500);
             }
         }
@@ -5730,12 +5748,16 @@
             
             try {
                 const customerData = collectCustomerFormData();
+                console.log('📤 Sending Customer data:', customerData);
+                console.log('📤 API URL:', `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ASSESS}`);
                 
                 const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ASSESS}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ intake_responses: customerData })
                 });
+                
+                console.log('📥 Response status:', response.status, response.statusText);
                 
                 // Update progress to 98% when response arrives
                 clearInterval(progressInterval);
@@ -5744,6 +5766,11 @@
                 // Check for timeout or other errors
                 if (!response.ok) {
                     const errorText = await response.text();
+                    console.error('❌ Customer API error response:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        body: errorText
+                    });
                     let errorData;
                     try {
                         errorData = JSON.parse(errorText);
@@ -5754,6 +5781,7 @@
                 }
                 
                 const result = await response.json();
+                console.log('📥 Customer response:', result);
                 if (result.success) {
                     // Complete the progress bar
                     updateLoadingProgress(100, 'Assessment complete!');
@@ -5765,7 +5793,12 @@
                 }
             } catch (error) {
                 clearInterval(progressInterval);
-                console.error('Error:', error);
+                console.error('❌ Customer submission error:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
                 
                 // Hide loading screen
                 const loadingScreen = document.getElementById('loadingScreen');
@@ -5778,10 +5811,13 @@
                 // Show error message and allow user to retry
                 updateLoadingProgress(0, 'Error occurred');
             setTimeout(() => {
-                    alert('Failed to submit assessment: ' + error.message + '\n\nPlease check your connection and try again.');
+                    alert('Failed to submit assessment: ' + error.message + '\n\nPlease check your connection and try again.\n\nCheck browser console (F12) for more details.');
                     // Return to form (show customer section 7)
                     const customerSection7 = document.getElementById('customerSection7');
-                    if (customerSection7) customerSection7.classList.add('active');
+                    if (customerSection7) {
+                        customerSection7.style.display = 'block';
+                        customerSection7.classList.add('active');
+                    }
                 }, 500);
             }
         }
@@ -6166,12 +6202,16 @@
             
             try {
                 const imData = collectIMFormData();
+                console.log('📤 Sending IM data:', imData);
+                console.log('📤 API URL:', `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ASSESS}`);
                 
                 const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ASSESS}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ intake_responses: imData })
                 });
+                
+                console.log('📥 Response status:', response.status, response.statusText);
                 
                 // Update progress to 98% when response arrives
                 clearInterval(progressInterval);
@@ -6180,6 +6220,11 @@
                 // Check for timeout or other errors
                 if (!response.ok) {
                     const errorText = await response.text();
+                    console.error('❌ IM API error response:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        body: errorText
+                    });
                     let errorData;
                     try {
                         errorData = JSON.parse(errorText);
@@ -6190,6 +6235,7 @@
                 }
                 
                 const result = await response.json();
+                console.log('📥 IM response:', result);
                 if (result.success) {
                     // Complete the progress bar
                     updateLoadingProgress(100, 'Plan generated!');
@@ -6201,7 +6247,12 @@
                 }
             } catch (error) {
                 clearInterval(progressInterval);
-                console.error('Error:', error);
+                console.error('❌ IM submission error:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
                 
                 // Hide loading screen
                 const loadingScreen = document.getElementById('loadingScreen');
@@ -6214,10 +6265,13 @@
                 // Show error message and allow user to retry
                 updateLoadingProgress(0, 'Error occurred');
                 setTimeout(() => {
-                    alert('Failed to submit assessment: ' + error.message + '\n\nPlease check your connection and try again.');
+                    alert('Failed to submit assessment: ' + error.message + '\n\nPlease check your connection and try again.\n\nCheck browser console (F12) for more details.');
                     // Return to form (show IM section 6)
                     const imSection6 = document.getElementById('imSection6');
-                    if (imSection6) imSection6.classList.add('active');
+                    if (imSection6) {
+                        imSection6.style.display = 'block';
+                        imSection6.classList.add('active');
+                    }
                 }, 500);
             }
         }
