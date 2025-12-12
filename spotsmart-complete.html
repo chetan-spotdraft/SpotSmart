@@ -2318,56 +2318,60 @@
                             <label class="form-label">
                                 Assisted Templates <span class="required">*</span>
                             </label>
-                            <select class="form-select" id="customerAssistedTemplates" required>
+                            <select class="form-select" id="customerAssistedTemplates" onchange="toggleCustomerTemplateQuestions()" required>
                                 <option value="">Select</option>
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </select>
                         </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                Complexity <span class="required">*</span>
-                            </label>
-                            <select class="form-select" id="customerTemplateComplexity" required>
-                                <option value="">Select</option>
-                                <option value="High">High</option>
-                                <option value="Mid">Mid</option>
-                                <option value="Low">Low</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                Integrations Required <span class="required">*</span>
-                            </label>
-                            <select class="form-select" id="customerTemplateIntegrationsRequired" required>
-                                <option value="">Select</option>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                Conditional Outputs Required <span class="required">*</span>
-                            </label>
-                            <select class="form-select" id="customerConditionalOutputsRequired" required>
-                                <option value="">Select</option>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                Computations Required <span class="required">*</span>
-                            </label>
-                            <select class="form-select" id="customerComputationsRequired" required>
-                                <option value="">Select</option>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
-                            </select>
+                    </div>
+                    
+                    <div class="conditional-section" id="customerTemplateQuestionsSection" style="display: none;">
+                        <div class="form-grid" style="margin-top: var(--space-lg);">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Complexity <span class="required">*</span>
+                                </label>
+                                <select class="form-select" id="customerTemplateComplexity" required>
+                                    <option value="">Select</option>
+                                    <option value="High">High</option>
+                                    <option value="Mid">Mid</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Integrations Required <span class="required">*</span>
+                                </label>
+                                <select class="form-select" id="customerTemplateIntegrationsRequired" required>
+                                    <option value="">Select</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Conditional Outputs Required <span class="required">*</span>
+                                </label>
+                                <select class="form-select" id="customerConditionalOutputsRequired" required>
+                                    <option value="">Select</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Computations Required <span class="required">*</span>
+                                </label>
+                                <select class="form-select" id="customerComputationsRequired" required>
+                                    <option value="">Select</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     
@@ -5747,42 +5751,45 @@
                     isValid = false;
                 } else {
                     assistedTemplates.classList.remove('error');
-                }
-                
-                // Complexity
-                const complexity = document.getElementById('customerTemplateComplexity');
-                if (!complexity || !complexity.value) {
-                    if (complexity) complexity.classList.add('error');
-                    isValid = false;
-                } else {
-                    complexity.classList.remove('error');
-                }
-                
-                // Integrations Required
-                const integrationsRequired = document.getElementById('customerTemplateIntegrationsRequired');
-                if (!integrationsRequired || !integrationsRequired.value) {
-                    if (integrationsRequired) integrationsRequired.classList.add('error');
-                    isValid = false;
-                } else {
-                    integrationsRequired.classList.remove('error');
-                }
-                
-                // Conditional Outputs Required
-                const conditionalOutputs = document.getElementById('customerConditionalOutputsRequired');
-                if (!conditionalOutputs || !conditionalOutputs.value) {
-                    if (conditionalOutputs) conditionalOutputs.classList.add('error');
-                    isValid = false;
-                } else {
-                    conditionalOutputs.classList.remove('error');
-                }
-                
-                // Computations Required
-                const computations = document.getElementById('customerComputationsRequired');
-                if (!computations || !computations.value) {
-                    if (computations) computations.classList.add('error');
-                    isValid = false;
-                } else {
-                    computations.classList.remove('error');
+                    
+                    // Only validate other fields if "Yes" is selected
+                    if (assistedTemplates.value === 'Yes') {
+                        // Complexity
+                        const complexity = document.getElementById('customerTemplateComplexity');
+                        if (!complexity || !complexity.value) {
+                            if (complexity) complexity.classList.add('error');
+                            isValid = false;
+                        } else {
+                            complexity.classList.remove('error');
+                        }
+                        
+                        // Integrations Required
+                        const integrationsRequired = document.getElementById('customerTemplateIntegrationsRequired');
+                        if (!integrationsRequired || !integrationsRequired.value) {
+                            if (integrationsRequired) integrationsRequired.classList.add('error');
+                            isValid = false;
+                        } else {
+                            integrationsRequired.classList.remove('error');
+                        }
+                        
+                        // Conditional Outputs Required
+                        const conditionalOutputs = document.getElementById('customerConditionalOutputsRequired');
+                        if (!conditionalOutputs || !conditionalOutputs.value) {
+                            if (conditionalOutputs) conditionalOutputs.classList.add('error');
+                            isValid = false;
+                        } else {
+                            conditionalOutputs.classList.remove('error');
+                        }
+                        
+                        // Computations Required
+                        const computations = document.getElementById('customerComputationsRequired');
+                        if (!computations || !computations.value) {
+                            if (computations) computations.classList.add('error');
+                            isValid = false;
+                        } else {
+                            computations.classList.remove('error');
+                        }
+                    }
                 }
             }
             
@@ -5976,12 +5983,13 @@
             }
             
             if (section === 3) {
+                const assistedTemplates = document.getElementById('customerAssistedTemplates')?.value || '';
                 formData.customer.section3 = {
-                    assistedTemplates: document.getElementById('customerAssistedTemplates')?.value || '',
-                    complexity: document.getElementById('customerTemplateComplexity')?.value || '',
-                    integrationsRequired: document.getElementById('customerTemplateIntegrationsRequired')?.value || '',
-                    conditionalOutputsRequired: document.getElementById('customerConditionalOutputsRequired')?.value || '',
-                    computationsRequired: document.getElementById('customerComputationsRequired')?.value || ''
+                    assistedTemplates: assistedTemplates,
+                    complexity: assistedTemplates === 'Yes' ? document.getElementById('customerTemplateComplexity')?.value || '' : '',
+                    integrationsRequired: assistedTemplates === 'Yes' ? document.getElementById('customerTemplateIntegrationsRequired')?.value || '' : '',
+                    conditionalOutputsRequired: assistedTemplates === 'Yes' ? document.getElementById('customerConditionalOutputsRequired')?.value || '' : '',
+                    computationsRequired: assistedTemplates === 'Yes' ? document.getElementById('customerComputationsRequired')?.value || '' : ''
                 };
             }
             
@@ -6056,10 +6064,10 @@
                 },
                 customer_section_3_templates: {
                     assisted_templates: getValue('customerAssistedTemplates'),
-                    complexity: getValue('customerTemplateComplexity'),
-                    integrations_required: getValue('customerTemplateIntegrationsRequired'),
-                    conditional_outputs_required: getValue('customerConditionalOutputsRequired'),
-                    computations_required: getValue('customerComputationsRequired')
+                    complexity: getValue('customerAssistedTemplates') === 'Yes' ? getValue('customerTemplateComplexity') : '',
+                    integrations_required: getValue('customerAssistedTemplates') === 'Yes' ? getValue('customerTemplateIntegrationsRequired') : '',
+                    conditional_outputs_required: getValue('customerAssistedTemplates') === 'Yes' ? getValue('customerConditionalOutputsRequired') : '',
+                    computations_required: getValue('customerAssistedTemplates') === 'Yes' ? getValue('customerComputationsRequired') : ''
                 },
                 customer_section_4_migration: {
                     migration_needed: getValue('customerMigrationNeeded'),
@@ -6836,6 +6844,49 @@
         // ============================================
         // CUSTOMER TOGGLE FUNCTIONS
         // ============================================
+        function toggleCustomerTemplateQuestions() {
+            const assistedTemplates = document.getElementById('customerAssistedTemplates');
+            const templateSection = document.getElementById('customerTemplateQuestionsSection');
+            
+            if (assistedTemplates && templateSection) {
+                if (assistedTemplates.value === 'Yes') {
+                    templateSection.style.display = 'block';
+                    // Make template questions required
+                    const complexity = document.getElementById('customerTemplateComplexity');
+                    const integrations = document.getElementById('customerTemplateIntegrationsRequired');
+                    const conditional = document.getElementById('customerConditionalOutputsRequired');
+                    const computations = document.getElementById('customerComputationsRequired');
+                    if (complexity) complexity.required = true;
+                    if (integrations) integrations.required = true;
+                    if (conditional) conditional.required = true;
+                    if (computations) computations.required = true;
+                } else {
+                    templateSection.style.display = 'none';
+                    // Clear required validation and values on template questions
+                    const complexity = document.getElementById('customerTemplateComplexity');
+                    const integrations = document.getElementById('customerTemplateIntegrationsRequired');
+                    const conditional = document.getElementById('customerConditionalOutputsRequired');
+                    const computations = document.getElementById('customerComputationsRequired');
+                    if (complexity) {
+                        complexity.required = false;
+                        complexity.value = '';
+                    }
+                    if (integrations) {
+                        integrations.required = false;
+                        integrations.value = '';
+                    }
+                    if (conditional) {
+                        conditional.required = false;
+                        conditional.value = '';
+                    }
+                    if (computations) {
+                        computations.required = false;
+                        computations.value = '';
+                    }
+                }
+            }
+        }
+        
         function toggleCustomerMigrationQuestions() {
             const migrationNeeded = document.getElementById('customerMigrationNeeded');
             const migrationSection = document.getElementById('customerMigrationQuestionsSection');
