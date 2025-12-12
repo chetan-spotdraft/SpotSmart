@@ -1304,16 +1304,16 @@ async function calculateProspectReadinessWithGemini(intake_responses) {
 ${JSON.stringify(intake_responses, null, 2)}
 
 ## YOUR TASK:
-Calculate readiness scores for 5 sections (each out of 100 points), then calculate an overall weighted score:
+Calculate readiness scores for 7 sections (each out of 100 points), then calculate an overall weighted score:
 
-**Section 1: Basics (Weight: 20%)**
+**Section 1: Basics (Weight: 12%)**
 Use ONLY these questions from prospect_section_1_basics:
 - company_name: Provided = +33 points, Missing = +0
 - industry: Selected = +33 points, Missing = +0
 - user_count: Selected = +34 points, Missing = +0
 - Max: 100 points
 
-**Section 2: Scope Clarity (Weight: 25%)**
+**Section 2: Scope Clarity (Weight: 15%)**
 Use ONLY these questions from prospect_section_2_scope_clarity:
 - modules_interested: At least 1 selected = +40 points (bonus +5 per additional module, max +40)
 - assisted_workflows: Yes = +20, No = +10, Missing = +0
@@ -1322,27 +1322,45 @@ Use ONLY these questions from prospect_section_2_scope_clarity:
 - legacy_contracts: "Yes, all available" = +10, "Yes, some available" = +5, "No, need help" = +0, Missing = +0
 - Max: 100 points
 
-**Section 3: Systems and Integrations (Weight: 20%)**
-Use ONLY these questions from prospect_section_3_systems_integrations:
+**Section 3: Templates (Weight: 15%)**
+Use ONLY these questions from prospect_section_3_templates:
+- assisted_templates: "Yes" = +30 points, "No" = +20, Missing = +0
+- complexity: "Low" = +30, "Mid" = +20, "High" = +10, Missing = +0
+- integrations_required: "No" = +20, "Yes" = +15, Missing = +0
+- conditional_outputs_required: "No" = +10, "Yes" = +5, Missing = +0
+- computations_required: "No" = +10, "Yes" = +5, Missing = +0
+- Max: 100 points
+
+**Section 4: Assisted Migration (Weight: 15%)**
+Use ONLY these questions from prospect_section_4_assisted_migration:
+- assisted_migration: "Yes" = +30 points, "No" = +20, Missing = +0
+- volume_of_contracts: Selected = +25 points, Missing = +0
+- current_location: Selected = +25 points, Missing = +0
+- data_cleanliness: "Clean" = +20, "Mixed" = +15, "Messy" = +10, Missing = +0
+- data_format: At least 1 selected = +20 points, Missing = +0
+- Max: 100 points
+
+**Section 5: Systems and Integrations (Weight: 15%)**
+Use ONLY these questions from prospect_section_5_systems_integrations:
 - systems_used: At least 1 selected = +50 points (bonus +5 per additional system, max +50)
 - api_access: Yes = +50, "Not sure" = +25, No = +0, Missing = +0
 - Max: 100 points
 
-**Section 4: Timeline Readiness (Weight: 20%)**
-Use ONLY these questions from prospect_section_4_timeline_readiness:
+**Section 6: Timeline Readiness (Weight: 13%)**
+Use ONLY these questions from prospect_section_6_timeline_readiness:
 - go_live_timeline: Selected = +70 points, Missing = +0
 - biggest_concern: Provided (optional) = +30 points bonus, Missing = +0
 - Max: 100 points (70 if concern not provided, 100 if provided)
 
-**Section 5: Additional Context (Weight: 15%)**
-Use ONLY these questions from prospect_section_5_additional_context (all optional):
+**Section 7: Additional Context (Weight: 15%)**
+Use ONLY these questions from prospect_section_7_additional_context (all optional):
 - internal_bottlenecks: Provided = +33 points, Missing = +0
 - compliance_deadlines: Provided = +33 points, Missing = +0
 - past_clm_experience: Provided = +34 points, Missing = +0
 - Max: 100 points
 
 **Overall Score Calculation:**
-Overall = (Section1 × 0.20) + (Section2 × 0.25) + (Section3 × 0.20) + (Section4 × 0.20) + (Section5 × 0.15)
+Overall = (Section1 × 0.12) + (Section2 × 0.15) + (Section3 × 0.15) + (Section4 × 0.15) + (Section5 × 0.15) + (Section6 × 0.13) + (Section7 × 0.15)
 Round to nearest integer.
 
 **Status Label & Description:**
@@ -1366,7 +1384,7 @@ CRITICAL REQUIREMENTS FOR ACTION ITEMS:
    - Current section score (e.g., "Your scope_clarity score is currently 60/100")
    - Target score after completion (e.g., "Completing this will increase it to 85/100")
    - Overall score improvement (e.g., "This will improve your overall readiness score by approximately 6 points (from 72 to 78)")
-   - Use the section weights: basics (20%), scope_clarity (25%), systems_integrations (20%), timeline_readiness (20%), additional_context (15%)
+   - Use the section weights: basics (12%), scope_clarity (15%), templates (15%), assisted_migration (15%), systems_integrations (15%), timeline_readiness (13%), additional_context (15%)
 
 2. **Prioritization**: Order items by:
    - Highest potential overall score improvement first
@@ -1407,8 +1425,11 @@ Return ONLY valid JSON in this structure:
         "breakdown": {
             "basics": <integer 0-100>,
             "scope_clarity": <integer 0-100>,
+            "templates": <integer 0-100>,
+            "assisted_migration": <integer 0-100>,
             "systems_integrations": <integer 0-100>,
-            "timeline_readiness": <integer 0-100>
+            "timeline_readiness": <integer 0-100>,
+            "additional_context": <integer 0-100>
         }
     },
     "status_label": "<string>",
@@ -1506,9 +1527,9 @@ async function calculateCustomerReadinessWithGemini(intake_responses) {
 ${JSON.stringify(intake_responses, null, 2)}
 
 ## YOUR TASK:
-Calculate readiness scores for 7 sections (each out of 100 points), then calculate an overall weighted score:
+Calculate readiness scores for 8 sections (each out of 100 points), then calculate an overall weighted score:
 
-**Section 1: Stakeholders (Weight: 15%)**
+**Section 1: Stakeholders (Weight: 13%)**
 Use ONLY these questions from customer_section_1_stakeholders:
 - primary_contact_name + primary_contact_role: Both provided = +40 points, Missing either = +0
 - technical_contact_name + technical_contact_role: Both provided = +40 points, Missing either = +0
@@ -1516,15 +1537,24 @@ Use ONLY these questions from customer_section_1_stakeholders:
 - decision_approver: Selected = +10 points, Missing = +0
 - Max: 100 points
 
-**Section 2: Purchased Scope (Weight: 20%)**
+**Section 2: Purchased Scope (Weight: 15%)**
 Use ONLY these questions from customer_section_2_purchased_scope:
 - purchased_modules: At least 1 selected = +40 points (bonus +5 per additional module, max +40)
 - template_count: Selected = +30 points, Missing = +0
 - template_readiness: "Ready" = +30, "Partially ready" = +20, "Not ready" = +0, Missing = +0
 - Max: 100 points
 
-**Section 3: Migration (Weight: 15%)**
-Use ONLY these questions from customer_section_3_migration:
+**Section 3: Templates (Weight: 15%)**
+Use ONLY these questions from customer_section_3_templates:
+- assisted_templates: "Yes" = +30 points, "No" = +20, Missing = +0
+- complexity: "Low" = +30, "Mid" = +20, "High" = +10, Missing = +0
+- integrations_required: "No" = +20, "Yes" = +15, Missing = +0
+- conditional_outputs_required: "No" = +10, "Yes" = +5, Missing = +0
+- computations_required: "No" = +10, "Yes" = +5, Missing = +0
+- Max: 100 points
+
+**Section 4: Migration (Weight: 13%)**
+Use ONLY these questions from customer_section_4_migration:
 - migration_needed: Selected = +30 points, Missing = +0
 - If migration_needed is NOT "No": 
   - migration_contract_count: Selected = +25 points, Missing = +0
@@ -1533,34 +1563,34 @@ Use ONLY these questions from customer_section_3_migration:
 - If migration_needed is "No": Skip the 3 conditional questions (they are hidden)
 - Max: 100 points (30 if migration = "No", 100 if migration needed and all 3 answered)
 
-**Section 4: Integrations (Weight: 15%)**
-Use ONLY these questions from customer_section_4_integrations:
+**Section 5: Integrations (Weight: 13%)**
+Use ONLY these questions from customer_section_5_integrations:
 - integration_systems: At least 1 selected = +40 points (bonus +5 per additional system, max +40)
 - api_access: "Yes" = +30, "Not sure" = +15, "No" = +0, Missing = +0
 - webhooks_support: "Yes" = +30, "Not sure" = +15, "No" = +0, Missing = +0
 - Max: 100 points
 
-**Section 5: Business Processes (Weight: 15%)**
-Use ONLY these questions from customer_section_5_business_processes:
+**Section 6: Business Processes (Weight: 13%)**
+Use ONLY these questions from customer_section_6_business_processes:
 - approval_complexity: Selected = +50 points, Missing = +0
 - agreement_signers: Selected = +50 points, Missing = +0
 - Max: 100 points
 
-**Section 6: Security and Access (Weight: 10%)**
-Use ONLY these questions from customer_section_6_security_access:
+**Section 7: Security and Access (Weight: 10%)**
+Use ONLY these questions from customer_section_7_security_access:
 - sso_required: Selected = +35 points, Missing = +0
 - security_needs: "Yes" = +35, "No" = +30, Missing = +0
 - dpa_status: "Signed" = +30, "In progress" = +20, "Not started" = +0, Missing = +0
 - Max: 100 points
 
-**Section 7: Optional Uploads (Weight: 10%)**
-Use ONLY these questions from customer_section_7_uploads:
+**Section 8: Optional Uploads (Weight: 8%)**
+Use ONLY these questions from customer_section_8_uploads:
 - templates: Array has files = +50 points, Empty array = +0
 - sample_contracts: Array has files = +50 points, Empty array = +0
 - Max: 100 points (0 if nothing uploaded, 50 if one uploaded, 100 if both uploaded)
 
 **Overall Score Calculation:**
-Overall = (Section1 × 0.15) + (Section2 × 0.20) + (Section3 × 0.15) + (Section4 × 0.15) + (Section5 × 0.15) + (Section6 × 0.10) + (Section7 × 0.10)
+Overall = (Section1 × 0.13) + (Section2 × 0.15) + (Section3 × 0.15) + (Section4 × 0.13) + (Section5 × 0.13) + (Section6 × 0.13) + (Section7 × 0.10) + (Section8 × 0.08)
 Round to nearest integer.
 
 **Status Label & Description:**
@@ -1580,7 +1610,7 @@ CRITICAL REQUIREMENTS FOR ACTION ITEMS:
    - Current section score (e.g., "Your uploads score is currently 0/100")
    - Target score after completion (e.g., "Completing this will increase it to 100/100")
    - Overall score improvement (e.g., "This will improve your overall readiness score by approximately 10 points (from 75 to 85)")
-   - Use the section weights: stakeholders (15%), purchased_scope (20%), migration (15%), integrations (15%), business_processes (15%), security_access (10%), uploads (10%)
+   - Use the section weights: stakeholders (13%), purchased_scope (15%), templates (15%), migration (13%), integrations (13%), business_processes (13%), security_access (10%), uploads (8%)
 
 2. **Prioritization**: Order items by:
    - Highest potential overall score improvement first
@@ -1621,6 +1651,7 @@ Return ONLY valid JSON in this structure:
         "breakdown": {
             "stakeholders": <integer 0-100>,
             "purchased_scope": <integer 0-100>,
+            "templates": <integer 0-100>,
             "migration": <integer 0-100>,
             "integrations": <integer 0-100>,
             "business_processes": <integer 0-100>,

@@ -1593,7 +1593,7 @@
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                             <circle cx="12" cy="7" r="4"/>
                         </svg>
-                        Section 1 of 6
+                        Section 1 of 7
                     </div>
                     <h2 class="section-title">Basics</h2>
                     <p class="section-description">Let's start with some basic information about your organization.</p>
@@ -1669,7 +1669,7 @@
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/>
                         </svg>
-                        Section 2 of 6
+                        Section 2 of 7
                     </div>
                     <h2 class="section-title">Scope Clarity</h2>
                     <p class="section-description">Help us understand what you're looking for from SpotDraft.</p>
@@ -1767,7 +1767,7 @@
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/>
                         </svg>
-                        Section 3 of 6
+                        Section 3 of 7
                     </div>
                     <h2 class="section-title">Templates</h2>
                     <p class="section-description">Tell us about your template requirements.</p>
@@ -1851,8 +1851,105 @@
                 </div>
             </div>
             
-            <!-- Prospect Section 4: Systems and Integrations -->
+            <!-- Prospect Section 4: Assisted Migration -->
             <div class="form-section" id="prospectSection4" data-persona="prospect">
+                <div class="section-header">
+                    <div class="section-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                        Section 4 of 7
+                    </div>
+                    <h2 class="section-title">Assisted Migration</h2>
+                    <p class="section-description">Help us understand your migration needs.</p>
+                </div>
+                
+                <div class="form-card">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Assisted Migration <span class="required">*</span>
+                        </label>
+                        <select class="form-select" id="prospectAssistedMigrationSection" required>
+                            <option value="">Select</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-grid" style="margin-top: var(--space-lg);">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Volume of Contracts <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="prospectMigrationVolume" required>
+                                <option value="">Select</option>
+                                <option value="0-500">0-500</option>
+                                <option value="500-2000">500-2000</option>
+                                <option value="2000-5000">2000-5000</option>
+                                <option value="5000+">5000+</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Current Location <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="prospectMigrationLocation" required>
+                                <option value="">Select</option>
+                                <option value="Drive">Drive</option>
+                                <option value="Shared mailbox">Shared mailbox</option>
+                                <option value="Legacy CLM">Legacy CLM</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Data Cleanliness <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="prospectMigrationDataCleanliness" required>
+                                <option value="">Select</option>
+                                <option value="Clean">Clean</option>
+                                <option value="Messy">Messy</option>
+                                <option value="Mixed">Mixed</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Data Format <span class="required">*</span>
+                            </label>
+                            <div class="chip-group" id="prospectMigrationDataFormat">
+                                <div class="chip" data-value="PDF" onclick="toggleChip(this)">PDF</div>
+                                <div class="chip" data-value="DOC" onclick="toggleChip(this)">DOC</div>
+                                <div class="chip" data-value="Email Exports" onclick="toggleChip(this)">Email Exports</div>
+                                <div class="chip" data-value="Others" onclick="toggleChip(this)">Others</div>
+                            </div>
+                            <div class="error-message" id="prospectMigrationDataFormatError">Please select at least one format</div>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="prevSection(4, 'prospect')">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12"/>
+                                <polyline points="12 19 5 12 12 5"/>
+                            </svg>
+                            Back
+                        </button>
+                        <button class="btn btn-primary" onclick="nextSection(4, 'prospect')">
+                            Continue
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Prospect Section 5: Systems and Integrations -->
+            <div class="form-section" id="prospectSection5" data-persona="prospect">
                 <div class="section-header">
                     <div class="section-badge">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1861,7 +1958,7 @@
                             <rect x="2" y="14" width="8" height="8" rx="1"/>
                             <rect x="14" y="14" width="8" height="8" rx="1"/>
                         </svg>
-                        Section 4 of 6
+                        Section 5 of 7
                     </div>
                     <h2 class="section-title">Systems and Integrations</h2>
                     <p class="section-description">Tell us about your existing systems and integration needs.</p>
@@ -1897,14 +1994,14 @@
                     </div>
                     
                     <div class="btn-group">
-                        <button class="btn btn-secondary" onclick="prevSection(4, 'prospect')">
+                        <button class="btn btn-secondary" onclick="prevSection(5, 'prospect')">
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="19" y1="12" x2="5" y2="12"/>
                                 <polyline points="12 19 5 12 12 5"/>
                             </svg>
                             Back
                         </button>
-                        <button class="btn btn-primary" onclick="nextSection(4, 'prospect')">
+                        <button class="btn btn-primary" onclick="nextSection(5, 'prospect')">
                             Continue
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12"/>
@@ -1915,8 +2012,8 @@
                 </div>
             </div>
             
-            <!-- Prospect Section 5: Timeline Readiness -->
-            <div class="form-section" id="prospectSection5" data-persona="prospect">
+            <!-- Prospect Section 6: Timeline Readiness -->
+            <div class="form-section" id="prospectSection6" data-persona="prospect">
                 <div class="section-header">
                     <div class="section-badge">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1925,7 +2022,7 @@
                             <line x1="8" y1="2" x2="8" y2="6"/>
                             <line x1="3" y1="10" x2="21" y2="10"/>
                         </svg>
-                        Section 5 of 6
+                        Section 6 of 7
                     </div>
                     <h2 class="section-title">Timeline Readiness</h2>
                     <p class="section-description">Help us understand your timeline and concerns.</p>
@@ -1957,14 +2054,14 @@
                     </div>
                     
                     <div class="btn-group">
-                        <button class="btn btn-secondary" onclick="prevSection(5, 'prospect')">
+                        <button class="btn btn-secondary" onclick="prevSection(6, 'prospect')">
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="19" y1="12" x2="5" y2="12"/>
                                 <polyline points="12 19 5 12 12 5"/>
                             </svg>
                             Back
                         </button>
-                        <button class="btn btn-primary" onclick="nextSection(5, 'prospect')">
+                        <button class="btn btn-primary" onclick="nextSection(6, 'prospect')">
                             Continue
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12"/>
@@ -1975,15 +2072,15 @@
                 </div>
             </div>
             
-            <!-- Prospect Section 6: Additional Context -->
-            <div class="form-section" id="prospectSection6" data-persona="prospect">
+            <!-- Prospect Section 7: Additional Context -->
+            <div class="form-section" id="prospectSection7" data-persona="prospect">
                 <div class="section-header">
                     <div class="section-badge">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                             <circle cx="12" cy="10" r="3"/>
                         </svg>
-                        Section 6 of 6
+                        Section 7 of 7
                     </div>
                     <h2 class="section-title">Additional Context</h2>
                     <p class="section-description">Help us understand any additional factors that may impact your implementation.</p>
@@ -2015,7 +2112,7 @@
                     </div>
                     
                     <div class="btn-group">
-                        <button class="btn btn-secondary" onclick="prevSection(6, 'prospect')">
+                        <button class="btn btn-secondary" onclick="prevSection(7, 'prospect')">
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="19" y1="12" x2="5" y2="12"/>
                                 <polyline points="12 19 5 12 12 5"/>
@@ -2044,7 +2141,7 @@
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                             <circle cx="12" cy="7" r="4"/>
                         </svg>
-                        Section 1 of 7
+                        Section 1 of 8
                     </div>
                     <h2 class="section-title">Stakeholders</h2>
                     <p class="section-description">Let's identify the key people involved in your implementation.</p>
@@ -2115,7 +2212,7 @@
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/>
                         </svg>
-                        Section 2 of 7
+                        Section 2 of 8
                     </div>
                     <h2 class="section-title">Purchased Scope</h2>
                     <p class="section-description">Tell us about what you've purchased and your template plans.</p>
@@ -2156,14 +2253,106 @@
                 </div>
             </div>
             
-            <!-- Customer Section 3: Migration -->
+            <!-- Customer Section 3: Templates -->
             <div class="form-section" id="customerSection3" data-persona="customer">
+                <div class="section-header">
+                    <div class="section-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        Section 3 of 8
+                    </div>
+                    <h2 class="section-title">Templates</h2>
+                    <p class="section-description">Tell us about your template requirements.</p>
+                </div>
+                
+                <div class="form-card">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Assisted Templates <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="customerAssistedTemplates" required>
+                                <option value="">Select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Complexity <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="customerTemplateComplexity" required>
+                                <option value="">Select</option>
+                                <option value="High">High</option>
+                                <option value="Mid">Mid</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Integrations Required <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="customerTemplateIntegrationsRequired" required>
+                                <option value="">Select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Conditional Outputs Required <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="customerConditionalOutputsRequired" required>
+                                <option value="">Select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Computations Required <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="customerComputationsRequired" required>
+                                <option value="">Select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="prevSection(3, 'customer')">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12"/>
+                                <polyline points="12 19 5 12 12 5"/>
+                            </svg>
+                            Back
+                        </button>
+                        <button class="btn btn-primary" onclick="nextSection(3, 'customer')">
+                            Continue
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Section 4: Migration -->
+            <div class="form-section" id="customerSection4" data-persona="customer">
                 <div class="section-header">
                     <div class="section-badge">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"/>
                         </svg>
-                        Section 3 of 7
+                        Section 4 of 8
                     </div>
                     <h2 class="section-title">Migration</h2>
                     <p class="section-description">Help us understand your migration needs.</p>
@@ -2235,14 +2424,14 @@
                     </div>
                     
                     <div class="btn-group">
-                        <button class="btn btn-secondary" onclick="prevSection(3, 'customer')">
+                        <button class="btn btn-secondary" onclick="prevSection(4, 'customer')">
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="19" y1="12" x2="5" y2="12"/>
                                 <polyline points="12 19 5 12 12 5"/>
                             </svg>
                             Back
                         </button>
-                        <button class="btn btn-primary" onclick="nextSection(3, 'customer')">
+                        <button class="btn btn-primary" onclick="nextSection(4, 'customer')">
                             Continue
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12"/>
@@ -2253,8 +2442,8 @@
                 </div>
             </div>
             
-            <!-- Customer Section 4: Integrations -->
-            <div class="form-section" id="customerSection4" data-persona="customer">
+            <!-- Customer Section 5: Integrations -->
+            <div class="form-section" id="customerSection5" data-persona="customer">
                 <div class="section-header">
                     <div class="section-badge">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2263,7 +2452,7 @@
                             <rect x="2" y="14" width="8" height="8" rx="1"/>
                             <rect x="14" y="14" width="8" height="8" rx="1"/>
                         </svg>
-                        Section 4 of 7
+                        Section 5 of 8
                     </div>
                     <h2 class="section-title">Integrations</h2>
                     <p class="section-description">Tell us about your integration requirements.</p>
@@ -2317,14 +2506,14 @@
                     </div>
                     
                     <div class="btn-group">
-                        <button class="btn btn-secondary" onclick="prevSection(4, 'customer')">
+                        <button class="btn btn-secondary" onclick="prevSection(5, 'customer')">
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="19" y1="12" x2="5" y2="12"/>
                                 <polyline points="12 19 5 12 12 5"/>
                             </svg>
                             Back
                         </button>
-                        <button class="btn btn-primary" onclick="nextSection(4, 'customer')">
+                        <button class="btn btn-primary" onclick="nextSection(5, 'customer')">
                             Continue
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12"/>
@@ -2335,14 +2524,14 @@
                 </div>
             </div>
             
-            <!-- Customer Section 5: Business Processes -->
-            <div class="form-section" id="customerSection5" data-persona="customer">
+            <!-- Customer Section 6: Business Processes -->
+            <div class="form-section" id="customerSection6" data-persona="customer">
                 <div class="section-header">
                     <div class="section-badge">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                         </svg>
-                        Section 5 of 7
+                        Section 6 of 8
                     </div>
                     <h2 class="section-title">Business Processes</h2>
                     <p class="section-description">Help us understand your workflow requirements.</p>
@@ -2376,14 +2565,14 @@
                     </div>
                     
                     <div class="btn-group">
-                        <button class="btn btn-secondary" onclick="prevSection(5, 'customer')">
+                        <button class="btn btn-secondary" onclick="prevSection(6, 'customer')">
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="19" y1="12" x2="5" y2="12"/>
                                 <polyline points="12 19 5 12 12 5"/>
                             </svg>
                             Back
                         </button>
-                        <button class="btn btn-primary" onclick="nextSection(5, 'customer')">
+                        <button class="btn btn-primary" onclick="nextSection(6, 'customer')">
                             Continue
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12"/>
@@ -2394,14 +2583,14 @@
                 </div>
             </div>
             
-            <!-- Customer Section 6: Security and Access -->
-            <div class="form-section" id="customerSection6" data-persona="customer">
+            <!-- Customer Section 7: Security and Access -->
+            <div class="form-section" id="customerSection7" data-persona="customer">
                 <div class="section-header">
                     <div class="section-badge">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                         </svg>
-                        Section 6 of 7
+                        Section 7 of 8
                     </div>
                     <h2 class="section-title">Security and Access</h2>
                     <p class="section-description">Tell us about your security and compliance requirements.</p>
@@ -2446,14 +2635,14 @@
                     </div>
                     
                     <div class="btn-group">
-                        <button class="btn btn-secondary" onclick="prevSection(6, 'customer')">
+                        <button class="btn btn-secondary" onclick="prevSection(7, 'customer')">
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="19" y1="12" x2="5" y2="12"/>
                                 <polyline points="12 19 5 12 12 5"/>
                             </svg>
                             Back
                         </button>
-                        <button class="btn btn-primary" onclick="nextSection(6, 'customer')">
+                        <button class="btn btn-primary" onclick="nextSection(7, 'customer')">
                             Continue
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12"/>
@@ -2464,8 +2653,8 @@
                 </div>
             </div>
             
-            <!-- Customer Section 7: Optional Uploads -->
-            <div class="form-section" id="customerSection7" data-persona="customer">
+            <!-- Customer Section 8: Optional Uploads -->
+            <div class="form-section" id="customerSection8" data-persona="customer">
                 <div class="section-header">
                     <div class="section-badge">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2473,7 +2662,7 @@
                             <polyline points="17 8 12 3 7 8"/>
                             <line x1="12" y1="3" x2="12" y2="15"/>
                         </svg>
-                        Section 7 of 7
+                        Section 8 of 8
                     </div>
                     <h2 class="section-title">Optional Uploads</h2>
                     <p class="section-description">Upload documents to help us better understand your requirements.</p>
@@ -2495,7 +2684,7 @@
                     </div>
                     
                     <div class="btn-group">
-                        <button class="btn btn-secondary" onclick="prevSection(7, 'customer')">
+                        <button class="btn btn-secondary" onclick="prevSection(8, 'customer')">
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="19" y1="12" x2="5" y2="12"/>
                                 <polyline points="12 19 5 12 12 5"/>
@@ -4432,9 +4621,9 @@
                 return;
             }
             
-            // Handle Prospect flow (6 sections)
+            // Handle Prospect flow (7 sections)
             if (formData.userType === 'prospect') {
-                const prospectTotalSections = 6;
+                const prospectTotalSections = 7;
                 const percent = Math.round((currentSection / prospectTotalSections) * 100);
                 document.getElementById('progressFill').style.width = `${percent}%`;
                 document.getElementById('progressText').textContent = `Section ${currentSection} of ${prospectTotalSections}`;
@@ -4444,7 +4633,7 @@
             
             // Handle Customer flow (7 sections)
             if (formData.userType === 'customer') {
-                const customerTotalSections = 7;
+                const customerTotalSections = 8;
                 const percent = Math.round((currentSection / customerTotalSections) * 100);
                 document.getElementById('progressFill').style.width = `${percent}%`;
                 document.getElementById('progressText').textContent = `Section ${currentSection} of ${customerTotalSections}`;
@@ -4873,6 +5062,54 @@
             }
             
             if (section === 4) {
+                // Assisted Migration
+                const assistedMigration = document.getElementById('prospectAssistedMigrationSection');
+                if (!assistedMigration || !assistedMigration.value) {
+                    if (assistedMigration) assistedMigration.classList.add('error');
+                    isValid = false;
+                } else {
+                    assistedMigration.classList.remove('error');
+                }
+                
+                // Volume of Contracts
+                const volume = document.getElementById('prospectMigrationVolume');
+                if (!volume || !volume.value) {
+                    if (volume) volume.classList.add('error');
+                    isValid = false;
+                } else {
+                    volume.classList.remove('error');
+                }
+                
+                // Current Location
+                const location = document.getElementById('prospectMigrationLocation');
+                if (!location || !location.value) {
+                    if (location) location.classList.add('error');
+                    isValid = false;
+                } else {
+                    location.classList.remove('error');
+                }
+                
+                // Data Cleanliness
+                const cleanliness = document.getElementById('prospectMigrationDataCleanliness');
+                if (!cleanliness || !cleanliness.value) {
+                    if (cleanliness) cleanliness.classList.add('error');
+                    isValid = false;
+                } else {
+                    cleanliness.classList.remove('error');
+                }
+                
+                // Data Format
+                const selectedFormats = document.querySelectorAll('#prospectMigrationDataFormat .chip.selected');
+                const formatError = document.getElementById('prospectMigrationDataFormatError');
+                if (selectedFormats.length === 0) {
+                    if (formatError) formatError.classList.add('visible');
+                    isValid = false;
+                } else {
+                    if (formatError) formatError.classList.remove('visible');
+                }
+            }
+            
+            if (section === 5) {
                 // Systems used
                 const selectedSystems = document.querySelectorAll('#prospectSystems .chip.selected');
                 const systemsError = document.getElementById('prospectSystemsError');
@@ -4893,7 +5130,7 @@
                 }
             }
             
-            if (section === 5) {
+            if (section === 6) {
                 // Go-live timeline
                 const goLiveTimeline = document.getElementById('prospectGoLiveTimeline');
                 if (!goLiveTimeline || !goLiveTimeline.value) {
@@ -4905,8 +5142,8 @@
                 // Biggest concern is optional, no validation needed
             }
             
-            if (section === 6) {
-                // All fields in section 6 are optional, no validation needed
+            if (section === 7) {
+                // All fields in section 7 are optional, no validation needed
             }
             
             return isValid;
@@ -4950,20 +5187,30 @@
             
             if (section === 4) {
                 formData.prospect.section4 = {
-                    systemsUsed: getSelectedChips('prospectSystems'),
-                    apiAccess: document.getElementById('prospectApiAccess').value
+                    assistedMigration: document.getElementById('prospectAssistedMigrationSection')?.value || '',
+                    volume: document.getElementById('prospectMigrationVolume')?.value || '',
+                    location: document.getElementById('prospectMigrationLocation')?.value || '',
+                    dataCleanliness: document.getElementById('prospectMigrationDataCleanliness')?.value || '',
+                    dataFormat: getSelectedChips('prospectMigrationDataFormat')
                 };
             }
             
             if (section === 5) {
                 formData.prospect.section5 = {
-                    goLiveTimeline: document.getElementById('prospectGoLiveTimeline').value,
-                    biggestConcern: document.getElementById('prospectBiggestConcern').value
+                    systemsUsed: getSelectedChips('prospectSystems'),
+                    apiAccess: document.getElementById('prospectApiAccess').value
                 };
             }
             
             if (section === 6) {
                 formData.prospect.section6 = {
+                    goLiveTimeline: document.getElementById('prospectGoLiveTimeline').value,
+                    biggestConcern: document.getElementById('prospectBiggestConcern').value
+                };
+            }
+            
+            if (section === 7) {
+                formData.prospect.section7 = {
                     internalBottlenecks: document.getElementById('prospectInternalBottlenecks')?.value || '',
                     complianceDeadlines: document.getElementById('prospectComplianceDeadlines')?.value || '',
                     pastCLMExperience: document.getElementById('prospectPastCLMExperience')?.value || ''
@@ -4998,15 +5245,22 @@
                     conditional_outputs_required: getValue('prospectConditionalOutputsRequired'),
                     computations_required: getValue('prospectComputationsRequired')
                 },
-                prospect_section_4_systems_integrations: {
+                prospect_section_4_assisted_migration: {
+                    assisted_migration: getValue('prospectAssistedMigrationSection'),
+                    volume_of_contracts: getValue('prospectMigrationVolume'),
+                    current_location: getValue('prospectMigrationLocation'),
+                    data_cleanliness: getValue('prospectMigrationDataCleanliness'),
+                    data_format: getSelectedChips('prospectMigrationDataFormat')
+                },
+                prospect_section_5_systems_integrations: {
                     systems_used: getSelectedChips('prospectSystems'),
                     api_access: getValue('prospectApiAccess')
                 },
-                prospect_section_5_timeline_readiness: {
+                prospect_section_6_timeline_readiness: {
                     go_live_timeline: getValue('prospectGoLiveTimeline'),
                     biggest_concern: getValue('prospectBiggestConcern')
                 },
-                prospect_section_6_additional_context: {
+                prospect_section_7_additional_context: {
                     internal_bottlenecks: getValue('prospectInternalBottlenecks'),
                     compliance_deadlines: getValue('prospectComplianceDeadlines'),
                     past_clm_experience: getValue('prospectPastCLMExperience')
@@ -5019,12 +5273,12 @@
         // ============================================
         async function submitProspectAssessment() {
             // Validate last section
-            if (!validateProspectSection(6)) return;
+            if (!validateProspectSection(7)) return;
             
             // Save last section
-            saveProspectSection(6);
+            saveProspectSection(7);
             
-            const prospectSection6 = document.getElementById('prospectSection6');
+            const prospectSection7 = document.getElementById('prospectSection7');
             const progressContainer = document.getElementById('progressContainer');
             const loadingScreen = document.getElementById('loadingScreen');
             if (prospectSection6) prospectSection6.classList.remove('active');
@@ -5101,11 +5355,11 @@
                 updateLoadingProgress(0, 'Error occurred');
                 setTimeout(() => {
                     alert('Failed to submit assessment: ' + error.message + '\n\nPlease check your connection and try again.\n\nCheck browser console (F12) for more details.');
-                    // Return to form (show prospect section 6)
-                    const prospectSection6 = document.getElementById('prospectSection6');
-                    if (prospectSection6) {
-                        prospectSection6.style.display = 'block';
-                        prospectSection6.classList.add('active');
+                    // Return to form (show prospect section 7)
+                    const prospectSection7 = document.getElementById('prospectSection7');
+                    if (prospectSection7) {
+                        prospectSection7.style.display = 'block';
+                        prospectSection7.classList.add('active');
                     }
                 }, 500);
             }
@@ -5138,12 +5392,15 @@
             document.getElementById('scoreStatus').textContent = data.status_label || 'Calculating...';
             document.getElementById('scoreDescription').textContent = data.status_description || '';
             
-            // Display score breakdown (only Prospect sections: basics, scope_clarity, systems_integrations, timeline_readiness)
+            // Display score breakdown (all 7 Prospect sections)
             const prospectSectionMap = {
                 'basics': 'Basics',
                 'scope_clarity': 'Scope Clarity',
+                'templates': 'Templates',
+                'assisted_migration': 'Assisted Migration',
                 'systems_integrations': 'Systems & Integrations',
-                'timeline_readiness': 'Timeline Readiness'
+                'timeline_readiness': 'Timeline Readiness',
+                'additional_context': 'Additional Context'
             };
             const breakdownHtml = Object.entries(data.readiness_score?.breakdown || {})
                 .filter(([key]) => prospectSectionMap[key])
@@ -5308,6 +5565,53 @@
             }
             
             if (section === 3) {
+                // Assisted Templates
+                const assistedTemplates = document.getElementById('customerAssistedTemplates');
+                if (!assistedTemplates || !assistedTemplates.value) {
+                    if (assistedTemplates) assistedTemplates.classList.add('error');
+                    isValid = false;
+                } else {
+                    assistedTemplates.classList.remove('error');
+                }
+                
+                // Complexity
+                const complexity = document.getElementById('customerTemplateComplexity');
+                if (!complexity || !complexity.value) {
+                    if (complexity) complexity.classList.add('error');
+                    isValid = false;
+                } else {
+                    complexity.classList.remove('error');
+                }
+                
+                // Integrations Required
+                const integrationsRequired = document.getElementById('customerTemplateIntegrationsRequired');
+                if (!integrationsRequired || !integrationsRequired.value) {
+                    if (integrationsRequired) integrationsRequired.classList.add('error');
+                    isValid = false;
+                } else {
+                    integrationsRequired.classList.remove('error');
+                }
+                
+                // Conditional Outputs Required
+                const conditionalOutputs = document.getElementById('customerConditionalOutputsRequired');
+                if (!conditionalOutputs || !conditionalOutputs.value) {
+                    if (conditionalOutputs) conditionalOutputs.classList.add('error');
+                    isValid = false;
+                } else {
+                    conditionalOutputs.classList.remove('error');
+                }
+                
+                // Computations Required
+                const computations = document.getElementById('customerComputationsRequired');
+                if (!computations || !computations.value) {
+                    if (computations) computations.classList.add('error');
+                    isValid = false;
+                } else {
+                    computations.classList.remove('error');
+                }
+            }
+            
+            if (section === 4) {
                 // Migration needed
                 const migrationNeeded = document.getElementById('customerMigrationNeeded');
                 if (!migrationNeeded || !migrationNeeded.value) {
@@ -5346,7 +5650,7 @@
                 }
             }
             
-            if (section === 4) {
+            if (section === 5) {
                 // Integration systems
                 const selectedSystems = document.querySelectorAll('#customerIntegrationSystems .chip.selected');
                 const systemsError = document.getElementById('customerIntegrationSystemsError');
@@ -5376,7 +5680,7 @@
                 }
             }
             
-            if (section === 5) {
+            if (section === 6) {
                 // Approval complexity
                 const complexity = document.getElementById('customerApprovalComplexity');
                 if (!complexity || !complexity.value) {
@@ -5385,8 +5689,6 @@
                 } else {
                     complexity.classList.remove('error');
                 }
-                
-                // Conditional routing was removed - no validation needed
                 
                 // Agreement signers
                 const signers = document.getElementById('customerAgreementSigners');
@@ -5398,7 +5700,7 @@
                 }
             }
             
-            if (section === 6) {
+            if (section === 7) {
                 // SSO required
                 const sso = document.getElementById('customerSSORequired');
                 if (!sso || !sso.value) {
@@ -5427,8 +5729,8 @@
                 }
             }
             
-            // Section 7 (uploads) has no required fields, always valid
-            if (section === 7) {
+            // Section 8 (uploads) has no required fields, always valid
+            if (section === 8) {
                 return true;
             }
             
@@ -5462,6 +5764,16 @@
             
             if (section === 3) {
                 formData.customer.section3 = {
+                    assistedTemplates: document.getElementById('customerAssistedTemplates')?.value || '',
+                    complexity: document.getElementById('customerTemplateComplexity')?.value || '',
+                    integrationsRequired: document.getElementById('customerTemplateIntegrationsRequired')?.value || '',
+                    conditionalOutputsRequired: document.getElementById('customerConditionalOutputsRequired')?.value || '',
+                    computationsRequired: document.getElementById('customerComputationsRequired')?.value || ''
+                };
+            }
+            
+            if (section === 4) {
+                formData.customer.section4 = {
                     migrationNeeded: document.getElementById('customerMigrationNeeded').value,
                     migrationContractCount: document.getElementById('customerMigrationContractCount').value,
                     contractStorage: document.getElementById('customerContractStorage').value,
@@ -5469,32 +5781,31 @@
                 };
             }
             
-            if (section === 4) {
-                formData.customer.section4 = {
+            if (section === 5) {
+                formData.customer.section5 = {
                     integrationSystems: getSelectedChips('customerIntegrationSystems'),
                     apiAccess: document.getElementById('customerApiAccess').value,
                     webhooksSupport: document.getElementById('customerWebhooksSupport').value
                 };
             }
             
-            if (section === 5) {
-                formData.customer.section5 = {
+            if (section === 6) {
+                formData.customer.section6 = {
                     approvalComplexity: document.getElementById('customerApprovalComplexity')?.value || '',
                     agreementSigners: document.getElementById('customerAgreementSigners')?.value || ''
-                    // Conditional routing was removed
                 };
             }
             
-            if (section === 6) {
-                formData.customer.section6 = {
+            if (section === 7) {
+                formData.customer.section7 = {
                     ssoRequired: document.getElementById('customerSSORequired').value,
                     securityNeeds: document.getElementById('customerSecurityNeeds').value,
                     dpaStatus: document.getElementById('customerDPAStatus').value
                 };
             }
             
-            if (section === 7) {
-                formData.customer.section7 = {
+            if (section === 8) {
+                formData.customer.section8 = {
                     templates: getFileList('customerTemplates'),
                     sampleContracts: getFileList('customerSampleContracts')
                 };
@@ -5522,28 +5833,34 @@
                     template_count: getValue('customerTemplateCount'),
                     template_readiness: getValue('customerTemplateReadiness')
                 },
-                customer_section_3_migration: {
+                customer_section_3_templates: {
+                    assisted_templates: getValue('customerAssistedTemplates'),
+                    complexity: getValue('customerTemplateComplexity'),
+                    integrations_required: getValue('customerTemplateIntegrationsRequired'),
+                    conditional_outputs_required: getValue('customerConditionalOutputsRequired'),
+                    computations_required: getValue('customerComputationsRequired')
+                },
+                customer_section_4_migration: {
                     migration_needed: getValue('customerMigrationNeeded'),
                     migration_contract_count: getValue('customerMigrationContractCount'),
                     contract_storage: getValue('customerContractStorage'),
                     data_cleanliness: getValue('customerDataCleanliness')
                 },
-                customer_section_4_integrations: {
+                customer_section_5_integrations: {
                     integration_systems: getSelectedChips('customerIntegrationSystems'),
                     api_access: getValue('customerApiAccess'),
                     webhooks_support: getValue('customerWebhooksSupport')
                 },
-                customer_section_5_business_processes: {
+                customer_section_6_business_processes: {
                     approval_complexity: getValue('customerApprovalComplexity'),
                     agreement_signers: getValue('customerAgreementSigners')
-                    // conditional_routing was removed
                 },
-                customer_section_6_security_access: {
+                customer_section_7_security_access: {
                     sso_required: getValue('customerSSORequired'),
                     security_needs: getValue('customerSecurityNeeds'),
                     dpa_status: getValue('customerDPAStatus')
                 },
-                customer_section_7_uploads: {
+                customer_section_8_uploads: {
                     templates: getFileList('customerTemplates'),
                     sample_contracts: getFileList('customerSampleContracts')
                 }
@@ -5555,12 +5872,12 @@
         // ============================================
         async function submitCustomerAssessment() {
             // Validate last section
-            if (!validateCustomerSection(7)) return;
+            if (!validateCustomerSection(8)) return;
             
             // Save last section
-            saveCustomerSection(7);
+            saveCustomerSection(8);
             
-            const customerSection7 = document.getElementById('customerSection7');
+            const customerSection8 = document.getElementById('customerSection8');
             const progressContainer = document.getElementById('progressContainer');
             const loadingScreen = document.getElementById('loadingScreen');
             if (customerSection7) customerSection7.classList.remove('active');
@@ -5637,11 +5954,11 @@
                 updateLoadingProgress(0, 'Error occurred');
             setTimeout(() => {
                     alert('Failed to submit assessment: ' + error.message + '\n\nPlease check your connection and try again.\n\nCheck browser console (F12) for more details.');
-                    // Return to form (show customer section 7)
-                    const customerSection7 = document.getElementById('customerSection7');
-                    if (customerSection7) {
-                        customerSection7.style.display = 'block';
-                        customerSection7.classList.add('active');
+                    // Return to form (show customer section 8)
+                    const customerSection8 = document.getElementById('customerSection8');
+                    if (customerSection8) {
+                        customerSection8.style.display = 'block';
+                        customerSection8.classList.add('active');
                     }
                 }, 500);
             }
@@ -5674,10 +5991,11 @@
             document.getElementById('scoreStatus').textContent = data.status_label || 'Calculating...';
             document.getElementById('scoreDescription').textContent = data.status_description || '';
             
-            // Display score breakdown (only Customer sections: stakeholders, purchased_scope, migration, integrations, business_processes, security_access, uploads)
+            // Display score breakdown (all 8 Customer sections: stakeholders, purchased_scope, templates, migration, integrations, business_processes, security_access, uploads)
             const customerSectionMap = {
                 'stakeholders': 'Stakeholders',
                 'purchased_scope': 'Purchased Scope',
+                'templates': 'Templates',
                 'migration': 'Migration',
                 'integrations': 'Integrations',
                 'business_processes': 'Business Processes',
@@ -6937,7 +7255,7 @@
             }
             
             // Initialize all Prospect sections - hidden by default
-            for (let i = 1; i <= 5; i++) {
+            for (let i = 1; i <= 7; i++) {
                 const prospectSection = document.getElementById(`prospectSection${i}`);
                 if (prospectSection) {
                     prospectSection.style.display = 'none';
@@ -6945,7 +7263,7 @@
             }
             
             // Initialize all Customer sections - hidden by default
-            for (let i = 1; i <= 7; i++) {
+            for (let i = 1; i <= 8; i++) {
                 const customerSection = document.getElementById(`customerSection${i}`);
                 if (customerSection) {
                     customerSection.style.display = 'none';
