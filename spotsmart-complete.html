@@ -1960,13 +1960,23 @@
                             <label class="form-label">
                                 Type of Metadata <span class="required">*</span>
                             </label>
-                            <select class="form-select" id="prospectMetadataType" required>
+                            <select class="form-select" id="prospectMetadataType" onchange="toggleProspectMetadataCustom()" required>
                                 <option value="">Select</option>
                                 <option value="Standard">Standard</option>
                                 <option value="Custom">Custom</option>
                             </select>
                             <div class="form-hint" style="margin-top: var(--space-sm);">
                                 <a href="https://docs.google.com/document/d/1QBB6IgfQxKCEkyjfYITrixCuxjtnFQtIxxnO8XUjR_g/edit?pli=1&tab=t.0" target="_blank" style="color: var(--primary); text-decoration: underline;">Standard Metadata List</a>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group" id="prospectMetadataCustomGroup" style="display: none; margin-top: var(--space-lg);">
+                            <label class="form-label">
+                                Custom Metadata Fields <span class="required">*</span>
+                            </label>
+                            <textarea class="form-textarea" id="prospectMetadataCustom" placeholder="Enter custom metadata fields (one per line or comma-separated)"></textarea>
+                            <div class="form-hint" style="margin-top: var(--space-sm);">
+                                Specify the custom metadata fields you need for your contracts.
                             </div>
                         </div>
                     </div>
@@ -2491,13 +2501,23 @@
                                 <label class="form-label">
                                     Type of Metadata <span class="required">*</span>
                                 </label>
-                                <select class="form-select" id="customerMetadataType" required>
+                                <select class="form-select" id="customerMetadataType" onchange="toggleCustomerMetadataCustom()" required>
                                     <option value="">Select</option>
                                     <option value="Standard">Standard</option>
                                     <option value="Custom">Custom</option>
                                 </select>
                                 <div class="form-hint" style="margin-top: var(--space-sm);">
                                     Note: Refer to the <a href="https://docs.google.com/document/d/1QBB6IgfQxKCEkyjfYITrixCuxjtnFQtIxxnO8XUjR_g/edit?pli=1&tab=t.0" target="_blank" style="color: var(--primary); text-decoration: underline;">Standard Metadata List</a> here.
+                                </div>
+                            </div>
+                            
+                            <div class="form-group" id="customerMetadataCustomGroup" style="display: none; margin-top: var(--space-lg);">
+                                <label class="form-label">
+                                    Custom Metadata Fields <span class="required">*</span>
+                                </label>
+                                <textarea class="form-textarea" id="customerMetadataCustom" placeholder="Enter custom metadata fields (one per line or comma-separated)"></textarea>
+                                <div class="form-hint" style="margin-top: var(--space-sm);">
+                                    Specify the custom metadata fields you need for your contracts.
                                 </div>
                             </div>
                         </div>
@@ -5254,6 +5274,16 @@
                     isValid = false;
                 } else {
                     metadataType.classList.remove('error');
+                    // If Custom is selected, validate the custom metadata field
+                    if (metadataType.value === 'Custom') {
+                        const customMetadata = document.getElementById('prospectMetadataCustom');
+                        if (!customMetadata || !customMetadata.value.trim()) {
+                            if (customMetadata) customMetadata.classList.add('error');
+                            isValid = false;
+                        } else {
+                            customMetadata.classList.remove('error');
+                        }
+                    }
                 }
             }
             
@@ -5359,7 +5389,8 @@
                     dataCleanliness: document.getElementById('prospectMigrationDataCleanliness')?.value || '',
                     dataFormat: dataFormats,
                     dataFormatOther: hasOthersFormat ? document.getElementById('prospectMigrationDataFormatOther')?.value || '' : '',
-                    metadataType: document.getElementById('prospectMetadataType')?.value || ''
+                    metadataType: document.getElementById('prospectMetadataType')?.value || '',
+                    metadataCustom: document.getElementById('prospectMetadataCustom')?.value || ''
                 };
             }
             
@@ -5426,7 +5457,8 @@
                     data_cleanliness: getValue('prospectMigrationDataCleanliness'),
                     data_format: getSelectedChips('prospectMigrationDataFormat'),
                     data_format_other: getValue('prospectMigrationDataFormatOther'),
-                    type_of_metadata: getValue('prospectMetadataType')
+                    type_of_metadata: getValue('prospectMetadataType'),
+                    metadata_custom: getValue('prospectMetadataCustom')
                 },
                 prospect_section_5_systems_integrations: {
                     systems_used: getSelectedChips('prospectSystems'),
@@ -5855,6 +5887,16 @@
                             isValid = false;
                         } else {
                             metadataType.classList.remove('error');
+                            // If Custom is selected, validate the custom metadata field
+                            if (metadataType.value === 'Custom') {
+                                const customMetadata = document.getElementById('customerMetadataCustom');
+                                if (!customMetadata || !customMetadata.value.trim()) {
+                                    if (customMetadata) customMetadata.classList.add('error');
+                                    isValid = false;
+                                } else {
+                                    customMetadata.classList.remove('error');
+                                }
+                            }
                         }
                     }
                 }
@@ -6001,7 +6043,8 @@
                     contractStorage: storage,
                     contractStorageOther: storage === 'Other' ? document.getElementById('customerContractStorageOther')?.value || '' : '',
                     dataCleanliness: document.getElementById('customerDataCleanliness').value,
-                    metadataType: document.getElementById('customerMetadataType')?.value || ''
+                    metadataType: document.getElementById('customerMetadataType')?.value || '',
+                    metadataCustom: document.getElementById('customerMetadataCustom')?.value || ''
                 };
             }
             
@@ -6077,7 +6120,8 @@
                     contract_storage: getValue('customerContractStorage'),
                     contract_storage_other: getValue('customerContractStorageOther'),
                     data_cleanliness: getValue('customerDataCleanliness'),
-                    type_of_metadata: getValue('customerMetadataType')
+                    type_of_metadata: getValue('customerMetadataType'),
+                    metadata_custom: getValue('customerMetadataCustom')
                 },
                 customer_section_5_integrations: {
                     integration_systems: getSelectedChips('customerIntegrationSystems'),
@@ -6959,6 +7003,32 @@
                 } else {
                     customGroup.style.display = 'none';
                     document.getElementById('imMetadataCustom').value = '';
+                }
+            }
+        }
+        
+        function toggleProspectMetadataCustom() {
+            const metadataType = document.getElementById('prospectMetadataType');
+            const customGroup = document.getElementById('prospectMetadataCustomGroup');
+            if (metadataType && customGroup) {
+                if (metadataType.value === 'Custom') {
+                    customGroup.style.display = 'block';
+                } else {
+                    customGroup.style.display = 'none';
+                    document.getElementById('prospectMetadataCustom').value = '';
+                }
+            }
+        }
+        
+        function toggleCustomerMetadataCustom() {
+            const metadataType = document.getElementById('customerMetadataType');
+            const customGroup = document.getElementById('customerMetadataCustomGroup');
+            if (metadataType && customGroup) {
+                if (metadataType.value === 'Custom') {
+                    customGroup.style.display = 'block';
+                } else {
+                    customGroup.style.display = 'none';
+                    document.getElementById('customerMetadataCustom').value = '';
                 }
             }
         }
