@@ -1359,7 +1359,34 @@ Identify critical issues that could block or delay implementation. Focus on:
 - Migration challenges
 
 **Action Items:**
-Create "What to prepare before purchasing SpotDraft" list with specific, actionable items.
+Create clear, prioritized action items focused on IMPROVING READINESS SCORES. Analyze the readiness score breakdown and identify the LOWEST-SCORING sections - these should be prioritized first as they offer the biggest opportunity for score improvement.
+
+CRITICAL REQUIREMENTS FOR ACTION ITEMS:
+1. **Score Impact Analysis**: For each action item, calculate and state the EXACT score improvement:
+   - Current section score (e.g., "Your scope_clarity score is currently 60/100")
+   - Target score after completion (e.g., "Completing this will increase it to 85/100")
+   - Overall score improvement (e.g., "This will improve your overall readiness score by approximately 6 points (from 72 to 78)")
+   - Use the section weights: basics (20%), scope_clarity (25%), systems_integrations (20%), timeline_readiness (20%), additional_context (15%)
+
+2. **Prioritization**: Order items by:
+   - Highest potential overall score improvement first
+   - Lowest-scoring sections first (biggest opportunity)
+   - Quick wins that can be completed in 1-2 weeks before slower items
+
+3. **Specificity**: Each action item must be:
+   - SPECIFIC: "Upload all 10 contract templates to the SpotDraft portal" not "Prepare templates"
+   - ACTIONABLE: Include clear steps (e.g., "1. Gather all templates, 2. Review for completeness, 3. Upload via portal")
+   - MEASURABLE: State what "done" looks like (e.g., "All templates uploaded and confirmed")
+
+4. **Format**: Each action item must include:
+   - task: Clear, specific action with steps
+   - section: Which section it addresses
+   - priority: "high", "medium", or "low" based on score impact
+   - deadline: Realistic date (1-4 weeks from today, format: YYYY-MM-DD)
+   - owner: Who should complete it (e.g., "Legal Team", "IT Manager", "Project Lead")
+   - score_impact: String explaining current score, target score, and overall improvement (e.g., "Will improve scope_clarity from 60 to 85 (+25 points), increasing overall score by ~6 points")
+
+Generate 8-12 high-priority action items that directly address readiness gaps. These should be items the prospect can complete BEFORE purchasing to improve their readiness score. Order them by potential impact on overall score improvement (highest impact first). Focus on items that can improve scores by 5+ points overall.
 
 **Implementation Plan:**
 Generate a high-level timeline and estimated effort band (Small, Medium, Large).
@@ -1392,7 +1419,8 @@ Return ONLY valid JSON in this structure:
                 "section": "<string>",
                 "priority": "<high|medium|low>",
                 "deadline": "<YYYY-MM-DD>",
-                "owner": "<string>"
+                "owner": "<string>",
+                "score_impact": "<string explaining current score, target score, and overall improvement>"
             }
         ],
         "spotdraft": []
@@ -1533,7 +1561,34 @@ Round to nearest integer.
 Identify blockers by category: template, migration, integration, security.
 
 **Action Items:**
-Create actionable tasks to fix readiness gaps for both customer and SpotDraft teams.
+Create clear, prioritized action items focused on IMPROVING READINESS SCORES. Analyze the readiness score breakdown and identify the LOWEST-SCORING sections - these should be prioritized first as they offer the biggest opportunity for score improvement.
+
+CRITICAL REQUIREMENTS FOR ACTION ITEMS:
+1. **Score Impact Analysis**: For each action item, calculate and state the EXACT score improvement:
+   - Current section score (e.g., "Your uploads score is currently 0/100")
+   - Target score after completion (e.g., "Completing this will increase it to 100/100")
+   - Overall score improvement (e.g., "This will improve your overall readiness score by approximately 10 points (from 75 to 85)")
+   - Use the section weights: stakeholders (15%), purchased_scope (20%), migration (15%), integrations (15%), business_processes (15%), security_access (10%), uploads (10%)
+
+2. **Prioritization**: Order items by:
+   - Highest potential overall score improvement first
+   - Lowest-scoring sections first (biggest opportunity)
+   - Quick wins that can be completed in 1-2 weeks before slower items
+
+3. **Specificity**: Each action item must be:
+   - SPECIFIC: "Upload all 10 contract templates and 5 sample contracts to the SpotDraft portal" not "Upload templates"
+   - ACTIONABLE: Include clear steps (e.g., "1. Gather all templates from legal team, 2. Review for completeness, 3. Upload via portal, 4. Confirm receipt")
+   - MEASURABLE: State what "done" looks like (e.g., "All templates uploaded and confirmed by SpotDraft team")
+
+4. **Format**: Each action item must include:
+   - task: Clear, specific action with steps
+   - section: Which section it addresses
+   - priority: "high", "medium", or "low" based on score impact
+   - deadline: Realistic date (1-4 weeks from today, format: YYYY-MM-DD)
+   - owner: Who should complete it (e.g., "Legal Operations Manager", "IT Team", "SpotDraft Implementation Team")
+   - score_impact: String explaining current score, target score, and overall improvement (e.g., "Will improve uploads from 0 to 100 (+100 points), increasing overall score by ~10 points")
+
+Generate 8-12 high-priority action items for customer team and 4-6 for SpotDraft team. Prioritize items that address the lowest-scoring sections first, as these will have the biggest impact on improving readiness. Order them by potential impact on overall score improvement (highest impact first). Focus on items that can improve scores by 5+ points overall.
 
 **Implementation Plan:**
 Generate a high-level timeline and implementation plan preview.
@@ -1683,7 +1738,35 @@ Round to nearest integer.
 Based on known risks and blockers identified. Include internal notes for SpotDraft team.
 
 **Action Items:**
-Create action items for customer, SpotDraft, and internal teams.
+Create clear, prioritized action items focused on IMPROVING READINESS SCORES and addressing blockers. Analyze the readiness score breakdown and identify the LOWEST-SCORING sections - these should be prioritized first as they offer the biggest opportunity for score improvement.
+
+CRITICAL REQUIREMENTS FOR ACTION ITEMS:
+1. **Score Impact Analysis**: For each action item, calculate and state the EXACT score improvement:
+   - Current section score (e.g., "Your integrations score is currently 50/100")
+   - Target score after completion (e.g., "Completing this will increase it to 90/100")
+   - Overall score improvement (e.g., "This will improve your overall readiness score by approximately 8 points (from 70 to 78)")
+   - Use the section weights: customer_context (20%), scope_deliverables (20%), migration_details (20%), integrations (20%), timeline_expectations (20%)
+
+2. **Prioritization**: Order items by:
+   - Highest potential overall score improvement first
+   - Lowest-scoring sections first (biggest opportunity)
+   - Blockers that prevent plan generation before other items
+   - Quick wins that can be completed in 1-2 weeks before slower items
+
+3. **Specificity**: Each action item must be:
+   - SPECIFIC: "Complete security review questionnaire, gather required documentation, and submit to InfoSec team by [date]" not "Handle security review"
+   - ACTIONABLE: Include clear steps (e.g., "1. Download questionnaire, 2. Gather required docs, 3. Schedule review meeting, 4. Submit completed form")
+   - MEASURABLE: State what "done" looks like (e.g., "Security review approved and documented in system")
+
+4. **Format**: Each action item must include:
+   - task: Clear, specific action with steps
+   - section: Which section it addresses
+   - priority: "high", "medium", or "low" based on score impact and blocker status
+   - deadline: Realistic date (1-4 weeks from today, format: YYYY-MM-DD)
+   - owner: Who should complete it (e.g., "Customer IT Team", "SpotDraft Security Team", "Internal PM")
+   - score_impact: String explaining current score, target score, and overall improvement (e.g., "Will improve integrations from 50 to 90 (+40 points), increasing overall score by ~8 points")
+
+Generate 6-10 high-priority action items for customer team, 4-6 for SpotDraft team, and 3-5 for internal team. Prioritize items that address blockers and lowest-scoring sections first, as these will have the biggest impact on improving readiness and plan quality. Order them by potential impact on overall score improvement (highest impact first). Focus on items that can improve scores by 5+ points overall.
 
 **AI Insights:**
 Provide strategic insights for the implementation plan.
@@ -1712,9 +1795,36 @@ Return ONLY valid JSON in this structure:
         }
     ],
     "action_items": {
-        "customer": [...],
-        "spotdraft": [...],
-        "internal": [...]
+        "customer": [
+            {
+                "task": "<string>",
+                "section": "<string>",
+                "priority": "<high|medium|low>",
+                "deadline": "<YYYY-MM-DD>",
+                "owner": "<string>",
+                "score_impact": "<string explaining current score, target score, and overall improvement>"
+            }
+        ],
+        "spotdraft": [
+            {
+                "task": "<string>",
+                "section": "<string>",
+                "priority": "<high|medium|low>",
+                "deadline": "<YYYY-MM-DD>",
+                "owner": "<string>",
+                "score_impact": "<string explaining current score, target score, and overall improvement>"
+            }
+        ],
+        "internal": [
+            {
+                "task": "<string>",
+                "section": "<string>",
+                "priority": "<high|medium|low>",
+                "deadline": "<YYYY-MM-DD>",
+                "owner": "<string>",
+                "score_impact": "<string explaining current score, target score, and overall improvement>"
+            }
+        ]
     },
     "ai_insights": {
         "key_strengths": [...],
@@ -2001,7 +2111,8 @@ Return ONLY valid JSON in this exact structure (no markdown, no explanations):
                 "section": "<string>",
                 "priority": "<high|medium|low>",
                 "deadline": "<YYYY-MM-DD>",
-                "owner": "<string>"
+                "owner": "<string>",
+                "score_impact": "<string explaining current score, target score, and overall improvement>"
             }
         ],
         "spotdraft": [
@@ -2010,7 +2121,8 @@ Return ONLY valid JSON in this exact structure (no markdown, no explanations):
                 "section": "<string>",
                 "priority": "<high|medium|low>",
                 "deadline": "<YYYY-MM-DD>",
-                "owner": "<string>"
+                "owner": "<string>",
+                "score_impact": "<string explaining current score, target score, and overall improvement>"
             }
         ]
     },
